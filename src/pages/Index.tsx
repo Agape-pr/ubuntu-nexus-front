@@ -1,4 +1,7 @@
 import heroImage from "@/assets/hero-kigali.jpg";
+import kigaliSkyline from "@/assets/kigali-skyline.jpg";
+import kigaliMarket from "@/assets/kigali-market.jpg";
+import kigaliSeller from "@/assets/kigali-seller.jpg";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
@@ -173,6 +176,67 @@ const Index = () => {
                 <div className="text-sm text-accent-foreground/70 mt-1">{stat.label}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* KIGALI PHOTO MOSAIC */}
+      <section className="py-20 bg-background overflow-hidden">
+        <div className="container">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-sm font-medium text-muted-foreground mb-4">
+              <MapPin size={13} className="text-accent" />
+              Kigali, Rwanda 🇷🇼
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+              Born from the City of a Thousand Hills
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+              UbuntuNow grows from Kigali's spirit — vibrant entrepreneurs, lush hills, and a city moving fast into the future.
+            </p>
+          </div>
+
+          {/* Photo mosaic grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-auto md:h-[480px]">
+            {/* Large left image */}
+            <div className="md:col-span-2 rounded-3xl overflow-hidden shadow-lift relative group">
+              <img
+                src={kigaliSkyline}
+                alt="Kigali skyline at golden hour"
+                className="w-full h-64 md:h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
+              <div className="absolute bottom-6 left-6 text-primary-foreground">
+                <p className="text-xs font-medium text-primary-foreground/70 uppercase tracking-widest mb-1">Kigali CBD</p>
+                <p className="text-lg font-bold">The city that never stops building</p>
+              </div>
+            </div>
+
+            {/* Right column — two stacked images */}
+            <div className="flex flex-col gap-4">
+              <div className="rounded-3xl overflow-hidden shadow-lift flex-1 relative group">
+                <img
+                  src={kigaliMarket}
+                  alt="Kigali open market with local sellers"
+                  className="w-full h-48 md:h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 text-primary-foreground">
+                  <p className="text-sm font-bold">Local markets, real connections</p>
+                </div>
+              </div>
+              <div className="rounded-3xl overflow-hidden shadow-lift flex-1 relative group">
+                <img
+                  src={kigaliSeller}
+                  alt="Young Kigali entrepreneur using mobile commerce"
+                  className="w-full h-48 md:h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 text-primary-foreground">
+                  <p className="text-sm font-bold">Entrepreneurs on the move</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
