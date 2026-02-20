@@ -75,42 +75,66 @@ class ApiClient {
   }
 
   /**
-   * Handle API errors
+   * Handle API errors - supports Django REST Framework formats
    */
   private async handleError(response: Response): Promise<ApiError> {
     let error: ApiError;
+    const status = response.status;
 
     try {
-      const errorData = await response.json();
-      // Django REST uses "detail", some APIs use "message"
-      const message = errorData.detail || errorData.message || 'An error occurred';
-      // Handle detail as string or array (DRF can return {"detail": ["error1", "error2"]})
-      const messageStr = Array.isArray(message) ? message.join(' ') : String(message);
+      const text = await response.text();
+      let errorData: Record<string, unknown> = {};
+
+      try {
+        errorData = text ? JSON.parse(text) : {};
+      } catch {
+        // Response wasn't JSON (e.g. HTML error page)
+        error = {
+          message: `${response.statusText || 'Request failed'} (${status})`,
+          status,
+        };
+        return this.maybeClearTokensAndReturn(error, status);
+      }
+
+      // DRF validation: {"field": ["error1"], "other": ["error2"]}
+      const fieldErrors = errorData as Record<string, string[]>;
+      if (typeof fieldErrors === 'object' && !Array.isArray(fieldErrors)) {
+        const msgs = Object.entries(fieldErrors)
+          .flatMap(([k, v]) => (Array.isArray(v) ? v : [String(v)]))
+          .filter(Boolean);
+        if (msgs.length > 0) {
+          error = {
+            message: msgs.join('. '),
+            status,
+            errors: fieldErrors as Record<string, string[]>,
+          };
+          return this.maybeClearTokensAndReturn(error, status);
+        }
+      }
+
+      // DRF standard: {"detail": "..."} or {"detail": ["..."]}
+      const detail = errorData.detail ?? errorData.message;
+      const messageStr = Array.isArray(detail) ? detail.join('. ') : String(detail || `Request failed (${status})`);
       error = {
         message: messageStr,
-        status: response.status,
-        errors: errorData.errors || (typeof errorData.detail === 'object' && !Array.isArray(errorData.detail) ? errorData.detail : undefined),
+        status,
+        errors: errorData.errors as Record<string, string[]> | undefined,
       };
     } catch {
       error = {
-        message: response.statusText || 'An error occurred',
-        status: response.status,
+        message: response.statusText || `Request failed (${status})`,
+        status,
       };
     }
 
-    // Handle specific error cases
-    if (response.status === 401) {
-      // Unauthorized - try to refresh token if refresh token exists
-      const refreshToken = this.getRefreshToken();
-      if (refreshToken) {
-        // Attempt token refresh (you might want to implement automatic refresh)
-        // For now, just clear tokens
-        this.removeTokens();
-      } else {
-        this.removeTokens();
-      }
-    }
+    return this.maybeClearTokensAndReturn(error, status);
+  }
 
+  private maybeClearTokensAndReturn(error: ApiError, status: number): ApiError {
+
+    if (status === 401) {
+      this.removeTokens();
+    }
     return error;
   }
 

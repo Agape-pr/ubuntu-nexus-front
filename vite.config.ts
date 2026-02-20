@@ -11,15 +11,13 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
-    // Proxy API requests to backend (optional - helps with CORS in development)
-    // Uncomment and configure if your backend runs on a different port/domain
-    // proxy: {
-    //   '/api': {
-    //     target: 'http://localhost:3000',
-    //     changeOrigin: true,
-    //     secure: false,
-    //   },
-    // },
+    // Proxy API requests to backend - avoids CORS when using VITE_API_BASE_URL=/api/v1 locally
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
