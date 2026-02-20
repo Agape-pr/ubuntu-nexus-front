@@ -49,12 +49,15 @@ export const useResendOTP = () => {
 
 /**
  * Hook for verifying OTP
+ * Note: This hook doesn't navigate - navigation should be handled by the caller
+ * after OTP verification succeeds and registration completes
  */
 export const useVerifyOTP = () => {
   return useMutation({
     mutationFn: (data: VerifyOTPRequest) => authService.verifyOTP(data),
     onSuccess: () => {
-      toast.success('OTP verified successfully!');
+      // Don't show success toast here - let registration handle it
+      // toast.success('OTP verified successfully!');
     },
     onError: (error: { message?: string }) => {
       toast.error(error.message || 'Invalid OTP. Please try again.');

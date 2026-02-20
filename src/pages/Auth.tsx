@@ -3,11 +3,22 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag } from "lucide-react";
-import { useLogin, useRegister } from "@/lib/api/hooks/useAuth";
+import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, ArrowRight } from "lucide-react";
+import { useLogin, useRegister, useSendOTP, useVerifyOTP, useResendOTP } from "@/lib/api/hooks/useAuth";
 
 type Role = "buyer" | "seller";
 type Tab = "login" | "register";
+type RegistrationStep = "form" | "otp";
+
+/**
+ * Registration Flow (following API structure):
+ * 1. User fills registration form → Submit
+ * 2. POST /api/v1/auth/otp/email/send/ → Send OTP to email
+ * 3. User enters OTP code → Submit
+ * 4. POST /api/v1/auth/otp/verify/ → Verify OTP
+ * 5. POST /api/v1/users/register → Complete registration (after OTP verified)
+ * 6. Navigate to dashboard/marketplace
+ */
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -17,36 +28,112 @@ const Auth = () => {
   const [tab, setTab] = useState<Tab>(defaultTab);
   const [role, setRole] = useState<Role>(defaultRole);
   const [showPassword, setShowPassword] = useState(false);
+  const [registrationStep, setRegistrationStep] = useState<RegistrationStep>("form");
   const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
+  const [otp, setOtp] = useState("");
+  const [registrationData, setRegistrationData] = useState<{
+    email: string;
+    password: string;
+    account_type: Role;
+    phone_number?: string;
+    store?: { store_name: string; store_description: string };
+  } | null>(null);
 
   const loginMutation = useLogin();
   const registerMutation = useRegister();
+  const sendOTPMutation = useSendOTP();
+  const verifyOTPMutation = useVerifyOTP();
+  const resendOTPMutation = useResendOTP();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    loginMutation.mutate({
+      username: form.email,
+      password: form.password,
+    });
+  };
+
+  const handleRegisterFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (tab === "login") {
-      // Login uses username (can be email) and password
-      loginMutation.mutate({
-        username: form.email, // API accepts email as username
-        password: form.password,
-      });
-    } else {
-      // Register uses account_type, and optionally store info for sellers
-      registerMutation.mutate({
+    // Prepare registration data
+    const regData = {
+      email: form.email,
+      password: form.password,
+      account_type: role,
+      phone_number: form.phone || undefined,
+      ...(role === 'seller' && form.name ? {
+        store: {
+          store_name: form.name,
+          store_description: '',
+        }
+      } : {}),
+    };
+
+    // Store registration data for later use
+    setRegistrationData(regData);
+
+    // API Flow: Send OTP first, then user verifies, then register
+    // Step 1: Send OTP to email
+    sendOTPMutation.mutate(
+      {
         email: form.email,
-        password: form.password,
-        account_type: role, // 'buyer' or 'seller'
-        phone_number: form.phone || undefined,
-        // Include store info if seller (optional - you can add store form fields later)
-        ...(role === 'seller' && form.name ? {
-          store: {
-            store_name: form.name, // Using name as store name for now
-            store_description: '',
-          }
-        } : {}),
-      });
+        purpose: "register",
+      },
+      {
+        onSuccess: () => {
+          // Move to OTP verification step
+          setRegistrationStep("otp");
+        },
+        onError: () => {
+          // If sending OTP fails, stay on form
+        },
+      }
+    );
+  };
+
+  const handleOTPVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!registrationData) return;
+
+    if (otp.length !== 6) {
+      return;
     }
+
+    // API Flow Step 2: Verify OTP
+    verifyOTPMutation.mutate(
+      {
+        email: registrationData.email,
+        purpose: "register",
+        otp: otp,
+      },
+      {
+        onSuccess: () => {
+          // API Flow Step 3: After OTP verification succeeds, complete registration
+          // Registration will automatically navigate on success (handled in useRegister hook)
+          registerMutation.mutate(registrationData);
+        },
+        onError: () => {
+          // OTP verification failed - clear OTP input and stay on OTP screen
+          setOtp("");
+        },
+      }
+    );
+  };
+
+  const handleResendOTP = () => {
+    if (!registrationData) return;
+    
+    resendOTPMutation.mutate({
+      email: registrationData.email,
+      purpose: "register",
+    });
+  };
+
+  const handleBackToForm = () => {
+    setRegistrationStep("form");
+    setOtp("");
   };
 
   return (
@@ -93,152 +180,275 @@ const Auth = () => {
           </Link>
 
           {/* Tabs */}
-          <div className="flex bg-secondary rounded-xl p-1 mb-8 w-fit">
-            {(["login", "register"] as Tab[]).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${
-                  tab === t
-                    ? "bg-card shadow-card text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t === "login" ? "Sign in" : "Create account"}
-              </button>
-            ))}
-          </div>
+          {registrationStep === "form" && (
+            <div className="flex bg-secondary rounded-xl p-1 mb-8 w-fit">
+              {(["login", "register"] as Tab[]).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => {
+                    setTab(t);
+                    setRegistrationStep("form");
+                    setOtp("");
+                  }}
+                  className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${
+                    tab === t
+                      ? "bg-card shadow-card text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t === "login" ? "Sign in" : "Create account"}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              {tab === "login" ? "Welcome back" : "Join UbuntuNow"}
+              {registrationStep === "otp"
+                ? "Verify your email"
+                : tab === "login"
+                ? "Welcome back"
+                : "Join UbuntuNow"}
             </h1>
             <p className="text-muted-foreground">
-              {tab === "login"
+              {registrationStep === "otp"
+                ? `We've sent a verification code to ${form.email}. Please check your inbox.`
+                : tab === "login"
                 ? "Sign in to access your store and orders."
                 : "Create your account and start in minutes."}
             </p>
           </div>
 
-          {/* Role selector (register only) */}
-          {tab === "register" && (
-            <div className="mb-6">
-              <Label className="text-sm font-medium text-foreground mb-3 block">I want to</Label>
-              <div className="grid grid-cols-2 gap-3">
-                {(
-                  [
-                    { value: "buyer", label: "Shop & buy", icon: ShoppingBag, desc: "Browse and purchase from local sellers" },
-                    { value: "seller", label: "Sell products", icon: Store, desc: "Create my store and reach customers" },
-                  ] as { value: Role; label: string; icon: typeof Store; desc: string }[]
-                ).map(({ value, label, icon: Icon, desc }) => (
-                  <button
-                    key={value}
-                    onClick={() => setRole(value)}
-                    className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
-                      role === value
-                        ? "border-primary bg-secondary"
-                        : "border-border bg-card hover:border-border/80"
-                    }`}
-                  >
-                    <Icon size={20} className={role === value ? "text-primary mb-2" : "text-muted-foreground mb-2"} />
-                    <div className="font-semibold text-sm text-foreground">{label}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">{desc}</div>
-                  </button>
-                ))}
+          {/* OTP Verification Step */}
+          {registrationStep === "otp" && (
+            <form onSubmit={handleOTPVerify} className="space-y-4">
+              <div className="flex items-center justify-center mb-6">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                  <Mail className="h-8 w-8 text-primary" />
+                </div>
               </div>
-            </div>
+
+              <div>
+                <Label htmlFor="otp">Enter verification code</Label>
+                <Input
+                  id="otp"
+                  type="text"
+                  placeholder="000000"
+                  className="mt-1.5 h-11 rounded-xl text-center text-2xl tracking-widest font-mono"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  maxLength={6}
+                  autoFocus
+                />
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Enter the 6-digit code sent to your email
+                </p>
+              </div>
+
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full h-12 rounded-xl text-base font-semibold mt-2"
+                disabled={otp.length !== 6 || verifyOTPMutation.isPending || registerMutation.isPending}
+              >
+                {verifyOTPMutation.isPending
+                  ? "Verifying code..."
+                  : registerMutation.isPending
+                  ? "Creating account..."
+                  : "Verify & Create Account"}
+              </Button>
+
+              <div className="flex items-center justify-between mt-4">
+                <button
+                  type="button"
+                  onClick={handleBackToForm}
+                  className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+                >
+                  <ArrowLeft size={14} />
+                  Back to form
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResendOTP}
+                  disabled={resendOTPMutation.isPending}
+                  className="text-sm text-accent hover:underline"
+                >
+                  {resendOTPMutation.isPending ? "Sending..." : "Resend code"}
+                </button>
+              </div>
+            </form>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {tab === "register" && (
+          {/* Registration Form Step */}
+          {registrationStep === "form" && tab === "register" && (
+            <>
+              {/* Role selector */}
+              <div className="mb-6">
+                <Label className="text-sm font-medium text-foreground mb-3 block">I want to</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  {(
+                    [
+                      { value: "buyer", label: "Shop & buy", icon: ShoppingBag, desc: "Browse and purchase from local sellers" },
+                      { value: "seller", label: "Sell products", icon: Store, desc: "Create my store and reach customers" },
+                    ] as { value: Role; label: string; icon: typeof Store; desc: string }[]
+                  ).map(({ value, label, icon: Icon, desc }) => (
+                    <button
+                      key={value}
+                      onClick={() => setRole(value)}
+                      className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
+                        role === value
+                          ? "border-primary bg-secondary"
+                          : "border-border bg-card hover:border-border/80"
+                      }`}
+                    >
+                      <Icon size={20} className={role === value ? "text-primary mb-2" : "text-muted-foreground mb-2"} />
+                      <div className="font-semibold text-sm text-foreground">{label}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <form onSubmit={handleRegisterFormSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Full name</Label>
+                  <Input
+                    id="name"
+                    placeholder="Amina Uwase"
+                    className="mt-1.5 h-11 rounded-xl"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="email">Email address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="amina@example.com"
+                    className="mt-1.5 h-11 rounded-xl"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="phone">Phone number (optional)</Label>
+                  <Input
+                    id="phone"
+                    placeholder="+250 7XX XXX XXX"
+                    className="mt-1.5 h-11 rounded-xl"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative mt-1.5">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      className="h-11 rounded-xl pr-11"
+                      value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full h-12 rounded-xl text-base font-semibold mt-2"
+                  disabled={sendOTPMutation.isPending}
+                >
+                  {sendOTPMutation.isPending ? "Sending code..." : `Continue`}
+                </Button>
+              </form>
+            </>
+          )}
+
+          {/* Login Form */}
+          {registrationStep === "form" && tab === "login" && (
+            <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <Label htmlFor="name">Full name</Label>
+                <Label htmlFor="email">Email address</Label>
                 <Input
-                  id="name"
-                  placeholder="Amina Uwase"
+                  id="email"
+                  type="email"
+                  placeholder="amina@example.com"
                   className="mt-1.5 h-11 rounded-xl"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
                 />
               </div>
-            )}
 
-            <div>
-              <Label htmlFor="email">Email address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="amina@example.com"
-                className="mt-1.5 h-11 rounded-xl"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-            </div>
-
-            {tab === "register" && (
               <div>
-                <Label htmlFor="phone">Phone number (optional)</Label>
-                <Input
-                  id="phone"
-                  placeholder="+250 7XX XXX XXX"
-                  className="mt-1.5 h-11 rounded-xl"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
-              </div>
-            )}
-
-            <div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                {tab === "login" && (
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
                   <button type="button" className="text-xs text-accent hover:underline">
                     Forgot password?
                   </button>
-                )}
+                </div>
+                <div className="relative mt-1.5">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="h-11 rounded-xl pr-11"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
-              <div className="relative mt-1.5">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  className="h-11 rounded-xl pr-11"
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
 
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full h-12 rounded-xl text-base font-semibold mt-2"
-              disabled={loginMutation.isPending || registerMutation.isPending}
-            >
-              {loginMutation.isPending || registerMutation.isPending
-                ? "Please wait..."
-                : tab === "login"
-                ? "Sign in"
-                : `Create ${role} account`}
-            </Button>
-          </form>
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full h-12 rounded-xl text-base font-semibold mt-2"
+                disabled={loginMutation.isPending}
+              >
+                {loginMutation.isPending ? "Please wait..." : "Sign in"}
+              </Button>
+            </form>
+          )}
 
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            {tab === "login" ? "Don't have an account? " : "Already have an account? "}
-            <button
-              onClick={() => setTab(tab === "login" ? "register" : "login")}
-              className="text-accent font-medium hover:underline"
-            >
-              {tab === "login" ? "Create one" : "Sign in"}
-            </button>
-          </p>
+          {registrationStep === "form" && (
+            <p className="text-center text-sm text-muted-foreground mt-6">
+              {tab === "login" ? "Don't have an account? " : "Already have an account? "}
+              <button
+                onClick={() => {
+                  setTab(tab === "login" ? "register" : "login");
+                  setRegistrationStep("form");
+                  setOtp("");
+                }}
+                className="text-accent font-medium hover:underline"
+              >
+                {tab === "login" ? "Create one" : "Sign in"}
+              </button>
+            </p>
+          )}
 
           <p className="text-center text-xs text-muted-foreground mt-4">
             By continuing, you agree to UbuntuNow's{" "}
