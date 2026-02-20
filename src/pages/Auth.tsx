@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag } from "lucide-react";
+import { useLogin, useRegister } from "@/lib/api/hooks/useAuth";
 
 type Role = "buyer" | "seller";
 type Tab = "login" | "register";
@@ -18,10 +19,34 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
 
+  const loginMutation = useLogin();
+  const registerMutation = useRegister();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Auth logic will connect to backend
-    console.log("Form submitted:", { tab, role, form });
+    
+    if (tab === "login") {
+      // Login uses username (can be email) and password
+      loginMutation.mutate({
+        username: form.email, // API accepts email as username
+        password: form.password,
+      });
+    } else {
+      // Register uses account_type, and optionally store info for sellers
+      registerMutation.mutate({
+        email: form.email,
+        password: form.password,
+        account_type: role, // 'buyer' or 'seller'
+        phone_number: form.phone || undefined,
+        // Include store info if seller (optional - you can add store form fields later)
+        ...(role === 'seller' && form.name ? {
+          store: {
+            store_name: form.name, // Using name as store name for now
+            store_description: '',
+          }
+        } : {}),
+      });
+    }
   };
 
   return (
@@ -195,8 +220,13 @@ const Auth = () => {
               type="submit"
               size="lg"
               className="w-full h-12 rounded-xl text-base font-semibold mt-2"
+              disabled={loginMutation.isPending || registerMutation.isPending}
             >
-              {tab === "login" ? "Sign in" : `Create ${role} account`}
+              {loginMutation.isPending || registerMutation.isPending
+                ? "Please wait..."
+                : tab === "login"
+                ? "Sign in"
+                : `Create ${role} account`}
             </Button>
           </form>
 

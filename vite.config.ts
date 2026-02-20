@@ -11,6 +11,15 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    // Proxy API requests to backend (optional - helps with CORS in development)
+    // Uncomment and configure if your backend runs on a different port/domain
+    // proxy: {
+    //   '/api': {
+    //     target: 'http://localhost:3000',
+    //     changeOrigin: true,
+    //     secure: false,
+    //   },
+    // },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
