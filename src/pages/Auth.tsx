@@ -5,19 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, ArrowRight } from "lucide-react";
 import { useLogin, useRegister, useSendOTP, useVerifyOTP, useResendOTP } from "@/lib/api/hooks/useAuth";
+import { toast } from "sonner";
 
 type Role = "buyer" | "seller";
 type Tab = "login" | "register";
 type RegistrationStep = "form" | "otp";
 
 /**
- * Registration Flow (following API structure):
- * 1. User fills registration form → Submit
- * 2. POST /api/v1/auth/otp/email/send/ → Send OTP to email
- * 3. User enters OTP code → Submit
- * 4. POST /api/v1/auth/otp/verify/ → Verify OTP
- * 5. POST /api/v1/users/register → Complete registration (after OTP verified)
- * 6. Navigate to dashboard/marketplace
+ * Registration Flow (matches backend API):
+ * 1. User fills form → POST /api/v1/users/register (creates inactive user)
+ * 2. On success → POST /api/v1/auth/otp/email/send/ (sends OTP)
+ * 3. User enters OTP → POST /api/v1/auth/otp/verify/ (activates user, returns tokens)
+ * 4. Tokens stored → Navigate to dashboard/marketplace
+ *
+ * Backend requires: Register FIRST (user must exist), then Send OTP, then Verify
  */
 
 const Auth = () => {
@@ -56,52 +57,51 @@ const Auth = () => {
   const handleRegisterFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Prepare registration data
+    // Sellers require store with store_name
+    if (role === 'seller' && !form.name?.trim()) {
+      toast.error('Store name is required for sellers');
+      return;
+    }
+
+    // Prepare registration data - backend: sellers MUST have store, buyers must NOT
     const regData = {
       email: form.email,
       password: form.password,
       account_type: role,
-      phone_number: form.phone || undefined,
-      ...(role === 'seller' && form.name ? {
+      phone_number: form.phone?.trim() || undefined,
+      ...(role === 'seller' && form.name?.trim() ? {
         store: {
-          store_name: form.name,
+          store_name: form.name.trim(),
           store_description: '',
         }
       } : {}),
     };
 
-    // Store registration data for later use
     setRegistrationData(regData);
 
-    // API Flow: Send OTP first, then user verifies, then register
-    // Step 1: Send OTP to email
-    sendOTPMutation.mutate(
-      {
-        email: form.email,
-        purpose: "register",
+    // Step 1: Register first (creates user with is_active=False)
+    registerMutation.mutate(regData, {
+      onSuccess: () => {
+        // Step 2: Send OTP to email (backend requires user to exist first)
+        sendOTPMutation.mutate(
+          { email: form.email, purpose: "register" },
+          {
+            onSuccess: () => setRegistrationStep("otp"),
+            onError: () => {
+              // Stay on form, user can try again
+            },
+          }
+        );
       },
-      {
-        onSuccess: () => {
-          // Move to OTP verification step
-          setRegistrationStep("otp");
-        },
-        onError: () => {
-          // If sending OTP fails, stay on form
-        },
-      }
-    );
+    });
   };
 
   const handleOTPVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!registrationData) return;
+    if (otp.length !== 6) return;
 
-    if (otp.length !== 6) {
-      return;
-    }
-
-    // API Flow Step 2: Verify OTP
+    // Step 3: Verify OTP - backend activates user and returns tokens (user is logged in)
     verifyOTPMutation.mutate(
       {
         email: registrationData.email,
@@ -109,15 +109,7 @@ const Auth = () => {
         otp: otp,
       },
       {
-        onSuccess: () => {
-          // API Flow Step 3: After OTP verification succeeds, complete registration
-          // Registration will automatically navigate on success (handled in useRegister hook)
-          registerMutation.mutate(registrationData);
-        },
-        onError: () => {
-          // OTP verification failed - clear OTP input and stay on OTP screen
-          setOtp("");
-        },
+        onError: () => setOtp(""),
       }
     );
   };
@@ -311,14 +303,16 @@ const Auth = () => {
 
               <form onSubmit={handleRegisterFormSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="name">Full name</Label>
+                  <Label htmlFor="name">
+                    {role === 'seller' ? 'Store name' : 'Full name (optional)'}
+                  </Label>
                   <Input
                     id="name"
-                    placeholder="Amina Uwase"
+                    placeholder={role === 'seller' ? 'My Awesome Store' : 'Amina Uwase'}
                     className="mt-1.5 h-11 rounded-xl"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    required
+                    required={role === 'seller'}
                   />
                 </div>
 
@@ -372,9 +366,9 @@ const Auth = () => {
                   type="submit"
                   size="lg"
                   className="w-full h-12 rounded-xl text-base font-semibold mt-2"
-                  disabled={sendOTPMutation.isPending}
+                  disabled={registerMutation.isPending}
                 >
-                  {sendOTPMutation.isPending ? "Sending code..." : `Continue`}
+                  {registerMutation.isPending ? "Creating account..." : "Continue"}
                 </Button>
               </form>
             </>

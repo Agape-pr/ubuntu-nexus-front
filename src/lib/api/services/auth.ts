@@ -78,12 +78,6 @@ export interface VerifyOTPRequest {
   otp: string;
 }
 
-export interface VerifyOTPResponse {
-  email: string;
-  purpose: OTPPurpose;
-  otp: string;
-}
-
 /**
  * Send OTP to email
  */
@@ -100,9 +94,22 @@ export const resendOTP = async (data: ResendOTPRequest): Promise<ResendOTPRespon
 
 /**
  * Verify OTP
+ * Backend returns tokens on success - we store them here
  */
-export const verifyOTP = async (data: VerifyOTPRequest): Promise<VerifyOTPResponse> => {
-  return apiClient.post<VerifyOTPResponse>(API_ENDPOINTS.AUTH.OTP_VERIFY, data);
+export interface VerifyOTPResponseWithTokens {
+  message: string;
+  access: string;
+  refresh: string;
+  user: { id: number; email: string; role: string };
+}
+
+export const verifyOTP = async (data: VerifyOTPRequest): Promise<VerifyOTPResponseWithTokens> => {
+  const response = await apiClient.post<VerifyOTPResponseWithTokens>(API_ENDPOINTS.AUTH.OTP_VERIFY, data);
+  // Backend returns tokens on verify - store them
+  if (response.access && response.refresh) {
+    apiClient.setTokens(response.access, response.refresh);
+  }
+  return response;
 };
 
 /**
@@ -127,16 +134,28 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
  * Register new user
  * Note: Registration might require OTP verification first
  */
+/**
+ * Register new user
+ * Backend creates user with is_active=False. User must then verify OTP to activate.
+ * For sellers: store is REQUIRED. For buyers: store must NOT be sent.
+ */
 export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
-  const response = await apiClient.post<RegisterResponse>(API_ENDPOINTS.AUTH.REGISTER, {
+  // Build payload - omit undefined/null, never send store for buyers
+  const payload: Record<string, unknown> = {
     email: data.email,
     password: data.password,
     account_type: data.account_type,
-    phone_number: data.phone_number,
-    store: data.store,
-  });
+  };
+  if (data.phone_number) payload.phone_number = data.phone_number;
+  if (data.account_type === 'seller' && data.store) {
+    payload.store = {
+      store_name: data.store.store_name,
+      ...(data.store.store_description && { store_description: data.store.store_description }),
+      ...(data.store.store_logo && { store_logo: data.store.store_logo }),
+    };
+  }
   
-  return response;
+  return apiClient.post<RegisterResponse>(API_ENDPOINTS.AUTH.REGISTER, payload);
 };
 
 /**

@@ -1,0 +1,28 @@
+---
+description: Frontend must match Ubuntunow-now-BE API - never modify the backend
+globs: src/**/*.ts, src/**/*.tsx, src/lib/api/**
+alwaysApply: true
+---
+
+# Frontend Follows Backend API
+
+The `Ubuntunow-now-BE/` folder contains the Django backend. **Do not modify it.**
+
+- **Only modify the frontend** (`src/`) to align with the existing API
+- **Never change** files in `Ubuntunow-now-BE/`
+
+## Before Implementing Frontend Features
+
+Read the backend to understand the API, then adapt the frontend:
+
+1. **Serializers** – `Ubuntunow-now-BE/apps/**/serializers.py` → request/response shapes
+2. **Views** – `Ubuntunow-now-BE/apps/**/views.py` → flow and validation
+3. **URLs** – `Ubuntunow-now-BE/config/urls.py`, `apps/**/urls.py` → routes
+4. **Models** – `Ubuntunow-now-BE/apps/**/models.py` → field types
+
+## Rules
+
+- Modify **frontend only** to match the API
+- Match request payloads to serializer fields
+- Follow the flow the backend expects
+- Handle Django errors: `{"detail": "..."}` or `{"field": ["error"]}`

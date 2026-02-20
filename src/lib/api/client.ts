@@ -82,10 +82,14 @@ class ApiClient {
 
     try {
       const errorData = await response.json();
+      // Django REST uses "detail", some APIs use "message"
+      const message = errorData.detail || errorData.message || 'An error occurred';
+      // Handle detail as string or array (DRF can return {"detail": ["error1", "error2"]})
+      const messageStr = Array.isArray(message) ? message.join(' ') : String(message);
       error = {
-        message: errorData.message || 'An error occurred',
+        message: messageStr,
         status: response.status,
-        errors: errorData.errors,
+        errors: errorData.errors || (typeof errorData.detail === 'object' && !Array.isArray(errorData.detail) ? errorData.detail : undefined),
       };
     } catch {
       error = {

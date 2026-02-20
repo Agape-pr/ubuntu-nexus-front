@@ -49,15 +49,18 @@ export const useResendOTP = () => {
 
 /**
  * Hook for verifying OTP
- * Note: This hook doesn't navigate - navigation should be handled by the caller
- * after OTP verification succeeds and registration completes
+ * Backend returns tokens on success - user is logged in after verify
  */
 export const useVerifyOTP = () => {
+  const navigate = useNavigate();
+
   return useMutation({
     mutationFn: (data: VerifyOTPRequest) => authService.verifyOTP(data),
-    onSuccess: () => {
-      // Don't show success toast here - let registration handle it
-      // toast.success('OTP verified successfully!');
+    onSuccess: (response) => {
+      toast.success('Email verified! Welcome to UbuntuNow.');
+      // Tokens are stored by authService - navigate based on role
+      const role = response?.user?.role;
+      navigate(role === 'seller' ? '/dashboard' : '/marketplace');
     },
     onError: (error: { message?: string }) => {
       toast.error(error.message || 'Invalid OTP. Please try again.');
@@ -89,19 +92,12 @@ export const useLogin = () => {
 
 /**
  * Hook for user registration
- * Note: Registration might require OTP verification first
+ * Creates inactive user - OTP verification activates account.
+ * Caller handles onSuccess (e.g. send OTP in Auth page flow).
  */
 export const useRegister = () => {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (data: RegisterRequest) => authService.register(data),
-    onSuccess: (response, variables) => {
-      toast.success('Account created successfully!');
-      // Navigate based on account type
-      navigate(variables.account_type === 'seller' ? '/dashboard' : '/marketplace');
-    },
     onError: (error: { message?: string; errors?: Record<string, string[]> }) => {
       if (error.errors) {
         Object.values(error.errors).flat().forEach((msg) => {
