@@ -1,4 +1,4 @@
-import heroImage from "@/assets/hero-kigali.jpg";
+import heroImage from "@/assets/kigali-convention.jpeg";
 import kigaliSkyline from "@/assets/kigali-skyline.jpg";
 import kigaliMarket from "@/assets/kigali-market.jpg";
 import kigaliSeller from "@/assets/kigali-seller.jpg";
@@ -87,38 +87,40 @@ const Index = () => {
       <Navbar />
 
       {/* HERO */}
-      <section className="relative overflow-hidden gradient-hero min-h-[92vh] flex items-center">
-        {/* Background image overlay */}
+      <section className="relative overflow-hidden min-h-[92vh] flex items-center">
+        {/* Full background image */}
         <div className="absolute inset-0">
           <img
             src={heroImage}
-            alt="Kigali market scene"
-            className="w-full h-full object-cover opacity-20"
+            alt="Kigali Convention Centre at dusk"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 gradient-hero opacity-90" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/85 via-primary/70 to-primary/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-primary/30" />
         </div>
 
         {/* Decorative orbs */}
-        <div className="absolute top-20 right-20 h-64 w-64 rounded-full bg-accent/10 blur-3xl animate-float" />
-        <div className="absolute bottom-20 left-10 h-48 w-48 rounded-full bg-emerald/10 blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-20 right-20 h-64 w-64 rounded-full bg-accent/15 blur-3xl animate-float" />
+        <div className="absolute bottom-20 left-10 h-48 w-48 rounded-full bg-emerald/15 blur-3xl animate-float" style={{ animationDelay: "2s" }} />
 
         <div className="relative container py-24 lg:py-32">
           <div className="max-w-3xl">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/10 border border-primary-foreground/20 text-primary-foreground text-sm font-medium mb-8 backdrop-blur-sm">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium mb-8 backdrop-blur-md">
               <MapPin size={14} className="text-accent" />
               <span>Launching in Kigali, Rwanda 🇷🇼</span>
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary-foreground leading-[1.05] mb-6 text-balance">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.05] mb-6 text-balance drop-shadow-lg">
               Commerce built on{" "}
               <span className="relative inline-block">
-                <span className="text-accent">human</span>
+                <span className="text-accent drop-shadow-md">human</span>
+                <span className="absolute -bottom-2 left-0 right-0 h-1 bg-accent/60 rounded-full" />
               </span>{" "}
               connection
             </h1>
 
-            <p className="text-lg md:text-xl text-primary-foreground/70 max-w-xl leading-relaxed mb-10">
+            <p className="text-lg md:text-xl text-white/80 max-w-xl leading-relaxed mb-10 drop-shadow-sm backdrop-blur-[2px]">
               UbuntuNow is where Kigali's entrepreneurs meet their customers. Create your store, list your products, and grow your business — powered by community trust.
             </p>
 
@@ -136,7 +138,7 @@ const Index = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="h-14 px-8 text-base rounded-2xl border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10"
+                  className="h-14 px-8 text-base rounded-2xl border-white/30 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20"
                 >
                   Browse marketplace
                 </Button>
@@ -149,7 +151,7 @@ const Index = () => {
                 {["🧑🏿", "👩🏾", "👨🏿", "👩🏽"].map((emoji, i) => (
                   <div
                     key={i}
-                    className="h-8 w-8 rounded-full bg-primary-foreground/20 border-2 border-primary flex items-center justify-center text-sm"
+                    className="h-8 w-8 rounded-full bg-white/20 border-2 border-white/30 backdrop-blur-sm flex items-center justify-center text-sm"
                   >
                     {emoji}
                   </div>
@@ -157,8 +159,8 @@ const Index = () => {
               </div>
               <div className="flex items-center gap-1 ml-2">
                 <Star size={13} className="fill-accent text-accent" />
-                <span className="text-primary-foreground/70 text-sm">
-                  <strong className="text-primary-foreground">2,400+</strong> sellers already joined
+                <span className="text-white/70 text-sm">
+                  <strong className="text-white">2,400+</strong> sellers already joined
                 </span>
               </div>
             </div>
