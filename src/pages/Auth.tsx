@@ -56,7 +56,7 @@ const Auth = () => {
 
   const handleRegisterFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Sellers require store with store_name
     if (role === 'seller' && !form.name?.trim()) {
       toast.error('Store name is required for sellers');
@@ -82,16 +82,10 @@ const Auth = () => {
     // Step 1: Register first (creates user with is_active=False)
     registerMutation.mutate(regData, {
       onSuccess: () => {
-        // Step 2: Send OTP to email (backend requires user to exist first)
-        sendOTPMutation.mutate(
-          { email: form.email, purpose: "register" },
-          {
-            onSuccess: () => setRegistrationStep("otp"),
-            onError: () => {
-              // Stay on form, user can try again
-            },
-          }
-        );
+        // Backend automatically sends the OTP during registration.
+        // We just need to move to the verify step.
+        toast.success("Account created! Please check your email for the verification code.");
+        setRegistrationStep("otp");
       },
     });
   };
@@ -116,7 +110,7 @@ const Auth = () => {
 
   const handleResendOTP = () => {
     if (!registrationData) return;
-    
+
     resendOTPMutation.mutate({
       email: registrationData.email,
       purpose: "register",
@@ -182,11 +176,10 @@ const Auth = () => {
                     setRegistrationStep("form");
                     setOtp("");
                   }}
-                  className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${
-                    tab === t
+                  className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${tab === t
                       ? "bg-card shadow-card text-foreground"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {t === "login" ? "Sign in" : "Create account"}
                 </button>
@@ -199,15 +192,15 @@ const Auth = () => {
               {registrationStep === "otp"
                 ? "Verify your email"
                 : tab === "login"
-                ? "Welcome back"
-                : "Join UbuntuNow"}
+                  ? "Welcome back"
+                  : "Join UbuntuNow"}
             </h1>
             <p className="text-muted-foreground">
               {registrationStep === "otp"
                 ? `We've sent a verification code to ${form.email}. Please check your inbox.`
                 : tab === "login"
-                ? "Sign in to access your store and orders."
-                : "Create your account and start in minutes."}
+                  ? "Sign in to access your store and orders."
+                  : "Create your account and start in minutes."}
             </p>
           </div>
 
@@ -246,8 +239,8 @@ const Auth = () => {
                 {verifyOTPMutation.isPending
                   ? "Verifying code..."
                   : registerMutation.isPending
-                  ? "Creating account..."
-                  : "Verify & Create Account"}
+                    ? "Creating account..."
+                    : "Verify & Create Account"}
               </Button>
 
               <div className="flex items-center justify-between mt-4">
@@ -287,11 +280,10 @@ const Auth = () => {
                     <button
                       key={value}
                       onClick={() => setRole(value)}
-                      className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
-                        role === value
+                      className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${role === value
                           ? "border-primary bg-secondary"
                           : "border-border bg-card hover:border-border/80"
-                      }`}
+                        }`}
                     >
                       <Icon size={20} className={role === value ? "text-primary mb-2" : "text-muted-foreground mb-2"} />
                       <div className="font-semibold text-sm text-foreground">{label}</div>
