@@ -1,11 +1,21 @@
-import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
-import { Menu, X, ShoppingBag, Bell, Search } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Menu, X, ShoppingBag, Bell, Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLogout } from "@/lib/api/hooks/useAuth";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
+  const logoutMutation = useLogout();
+
+  useEffect(() => {
+    const checkAuth = () => setIsLoggedIn(!!localStorage.getItem('access_token'));
+    checkAuth();
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, [location]);
 
   const navLinks = [
     { label: "Marketplace", to: "/marketplace" },
@@ -60,16 +70,31 @@ const Navbar = () => {
             </button>
           </Link>
           <div className="w-px h-5 bg-border mx-1" />
-          <Link to="/auth">
-            <Button variant="ghost" size="sm" className="text-sm font-medium">
-              Sign in
-            </Button>
-          </Link>
-          <Link to="/auth?tab=register">
-            <Button size="sm" className="text-sm font-medium rounded-xl">
-              Get started
-            </Button>
-          </Link>
+          {isLoggedIn ? (
+            <>
+              <Link to="/dashboard">
+                <Button variant="ghost" size="sm" className="text-sm font-medium gap-1.5">
+                  <User size={16} /> Dashboard
+                </Button>
+              </Link>
+              <Button variant="ghost" size="sm" className="text-sm font-medium gap-1.5 text-muted-foreground" onClick={() => logoutMutation.mutate()}>
+                <LogOut size={16} /> Sign out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/auth">
+                <Button variant="ghost" size="sm" className="text-sm font-medium">
+                  Sign in
+                </Button>
+              </Link>
+              <Link to="/auth?tab=register">
+                <Button size="sm" className="text-sm font-medium rounded-xl">
+                  Get started
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu button */}
@@ -96,12 +121,25 @@ const Navbar = () => {
               </Link>
             ))}
             <div className="mt-3 pt-3 border-t border-border flex flex-col gap-2">
-              <Link to="/auth" onClick={() => setIsOpen(false)}>
-                <Button variant="outline" className="w-full">Sign in</Button>
-              </Link>
-              <Link to="/auth?tab=register" onClick={() => setIsOpen(false)}>
-                <Button className="w-full">Get started free</Button>
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" className="w-full gap-1.5"><User size={16} /> Dashboard</Button>
+                  </Link>
+                  <Button className="w-full gap-1.5" variant="ghost" onClick={() => { setIsOpen(false); logoutMutation.mutate(); }}>
+                    <LogOut size={16} /> Sign out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/auth" onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" className="w-full">Sign in</Button>
+                  </Link>
+                  <Link to="/auth?tab=register" onClick={() => setIsOpen(false)}>
+                    <Button className="w-full">Get started free</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
