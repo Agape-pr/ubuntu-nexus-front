@@ -97,11 +97,15 @@ class ApiClient {
       }
 
       // DRF validation: {"field": ["error1"], "other": ["error2"]}
-      const fieldErrors = errorData as Record<string, string[]>;
-      if (typeof fieldErrors === 'object' && !Array.isArray(fieldErrors)) {
-        const msgs = Object.entries(fieldErrors)
-          .flatMap(([k, v]) => (Array.isArray(v) ? v : [String(v)]))
-          .filter(Boolean);
+      const fieldErrors = errorData as Record<string, any>;
+      if (typeof fieldErrors === 'object' && !Array.isArray(fieldErrors) && fieldErrors !== null) {
+        const extractStrings = (val: any): string[] => {
+          if (typeof val === 'string') return [val];
+          if (Array.isArray(val)) return val.flatMap(extractStrings);
+          if (val && typeof val === 'object') return Object.values(val).flatMap(extractStrings);
+          return [];
+        };
+        const msgs = extractStrings(fieldErrors).filter(Boolean);
         if (msgs.length > 0) {
           error = {
             message: msgs.join('. '),

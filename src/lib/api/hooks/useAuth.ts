@@ -98,11 +98,20 @@ export const useLogin = () => {
 export const useRegister = () => {
   return useMutation({
     mutationFn: (data: RegisterRequest) => authService.register(data),
-    onError: (error: { message?: string; errors?: Record<string, string[]> }) => {
+    onError: (error: { message?: string; errors?: Record<string, any> }) => {
       if (error.errors) {
-        Object.values(error.errors).flat().forEach((msg) => {
-          toast.error(msg);
-        });
+        const extractMsgs = (obj: any): string[] => {
+          if (typeof obj === 'string') return [obj];
+          if (Array.isArray(obj)) return obj.flatMap(extractMsgs);
+          if (obj && typeof obj === 'object') return Object.values(obj).flatMap(extractMsgs);
+          return [String(obj)];
+        };
+        const msgs = extractMsgs(error.errors);
+        if (msgs.length > 0) {
+          msgs.forEach((msg) => toast.error(msg));
+        } else {
+          toast.error(error.message || 'Registration failed. Please try again.');
+        }
       } else {
         toast.error(error.message || 'Registration failed. Please try again.');
       }
