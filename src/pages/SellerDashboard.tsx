@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +51,15 @@ const statusColors: Record<string, string> = {
 };
 
 const SellerDashboard = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const role = localStorage.getItem('user_role');
+    if (role !== 'seller') {
+      navigate('/marketplace');
+    }
+  }, [navigate]);
+
   const [view, setView] = useState<DashView>("overview");
   const [copied, setCopied] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
@@ -103,11 +112,10 @@ const SellerDashboard = () => {
               <button
                 key={item.id}
                 onClick={() => setView(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium mb-1 transition-all duration-200 ${
-                  view === item.id
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium mb-1 transition-all duration-200 ${view === item.id
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                }`}
+                  }`}
               >
                 <item.icon size={16} />
                 {item.label}
@@ -274,7 +282,7 @@ const SellerDashboard = () => {
                             {product.status === "out-of-stock" ? "Out of stock" : "Active"}
                           </span>
                           <span className="text-xs text-muted-foreground">{product.stock} in stock</span>
-          {product.stock <= 3 && product.stock > 0 && (
+                          {product.stock <= 3 && product.stock > 0 && (
                             <span className="text-xs text-accent flex items-center gap-1">
                               <AlertCircle size={11} /> Low stock
                             </span>

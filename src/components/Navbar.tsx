@@ -7,11 +7,15 @@ import { useLogout } from "@/lib/api/hooks/useAuth";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const location = useLocation();
   const logoutMutation = useLogout();
 
   useEffect(() => {
-    const checkAuth = () => setIsLoggedIn(!!localStorage.getItem('access_token'));
+    const checkAuth = () => {
+      setIsLoggedIn(!!localStorage.getItem('access_token'));
+      setUserRole(localStorage.getItem('user_role'));
+    };
     checkAuth();
     window.addEventListener('storage', checkAuth);
     return () => window.removeEventListener('storage', checkAuth);
@@ -19,7 +23,8 @@ const Navbar = () => {
 
   const navLinks = [
     { label: "Marketplace", to: "/marketplace" },
-    { label: "Sell", to: "/dashboard" },
+    // Only show Sell link if user is explicitly a seller
+    ...(userRole === 'seller' ? [{ label: "Sell", to: "/dashboard" }] : []),
     { label: "How it works", to: "/#how-it-works" },
   ];
 
@@ -44,11 +49,10 @@ const Navbar = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                isActive(link.to)
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(link.to)
                   ? "bg-secondary text-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-              }`}
+                }`}
             >
               {link.label}
             </Link>
@@ -72,11 +76,13 @@ const Navbar = () => {
           <div className="w-px h-5 bg-border mx-1" />
           {isLoggedIn ? (
             <>
-              <Link to="/dashboard">
-                <Button variant="ghost" size="sm" className="text-sm font-medium gap-1.5">
-                  <User size={16} /> Dashboard
-                </Button>
-              </Link>
+              {userRole === 'seller' && (
+                <Link to="/dashboard">
+                  <Button variant="ghost" size="sm" className="text-sm font-medium gap-1.5">
+                    <User size={16} /> Dashboard
+                  </Button>
+                </Link>
+              )}
               <Button variant="ghost" size="sm" className="text-sm font-medium gap-1.5 text-muted-foreground" onClick={() => logoutMutation.mutate()}>
                 <LogOut size={16} /> Sign out
               </Button>
@@ -123,9 +129,11 @@ const Navbar = () => {
             <div className="mt-3 pt-3 border-t border-border flex flex-col gap-2">
               {isLoggedIn ? (
                 <>
-                  <Link to="/dashboard" onClick={() => setIsOpen(false)}>
-                    <Button variant="outline" className="w-full gap-1.5"><User size={16} /> Dashboard</Button>
-                  </Link>
+                  {userRole === 'seller' && (
+                    <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full gap-1.5"><User size={16} /> Dashboard</Button>
+                    </Link>
+                  )}
                   <Button className="w-full gap-1.5" variant="ghost" onClick={() => { setIsOpen(false); logoutMutation.mutate(); }}>
                     <LogOut size={16} /> Sign out
                   </Button>

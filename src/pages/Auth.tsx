@@ -3,7 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, ArrowRight } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, ArrowRight, Upload } from "lucide-react";
 import { useLogin, useRegister, useSendOTP, useVerifyOTP, useResendOTP } from "@/lib/api/hooks/useAuth";
 import { toast } from "sonner";
 
@@ -30,14 +31,14 @@ const Auth = () => {
   const [role, setRole] = useState<Role>(defaultRole);
   const [showPassword, setShowPassword] = useState(false);
   const [registrationStep, setRegistrationStep] = useState<RegistrationStep>("form");
-  const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", phone: "", store_description: "", store_logo: "" });
   const [otp, setOtp] = useState("");
   const [registrationData, setRegistrationData] = useState<{
     email: string;
     password: string;
     account_type: Role;
     phone_number?: string;
-    store?: { store_name: string; store_description: string };
+    store?: { store_name: string; store_description?: string; store_logo?: string };
   } | null>(null);
 
   const loginMutation = useLogin();
@@ -63,6 +64,7 @@ const Auth = () => {
       return;
     }
 
+    // Convert file to base64 handler is inline in the JSX
     // Prepare registration data - backend: sellers MUST have store, buyers must NOT
     const regData = {
       email: form.email,
@@ -72,7 +74,8 @@ const Auth = () => {
       ...(role === 'seller' && form.name?.trim() ? {
         store: {
           store_name: form.name.trim(),
-          store_description: '',
+          ...(form.store_description.trim() && { store_description: form.store_description.trim() }),
+          ...(form.store_logo && { store_logo: form.store_logo }),
         }
       } : {}),
     };
@@ -177,8 +180,8 @@ const Auth = () => {
                     setOtp("");
                   }}
                   className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${tab === t
-                      ? "bg-card shadow-card text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
+                    ? "bg-card shadow-card text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                     }`}
                 >
                   {t === "login" ? "Sign in" : "Create account"}
@@ -281,8 +284,8 @@ const Auth = () => {
                       key={value}
                       onClick={() => setRole(value)}
                       className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${role === value
-                          ? "border-primary bg-secondary"
-                          : "border-border bg-card hover:border-border/80"
+                        ? "border-primary bg-secondary"
+                        : "border-border bg-card hover:border-border/80"
                         }`}
                     >
                       <Icon size={20} className={role === value ? "text-primary mb-2" : "text-muted-foreground mb-2"} />
@@ -307,6 +310,52 @@ const Auth = () => {
                     required={role === 'seller'}
                   />
                 </div>
+
+                {role === 'seller' && (
+                  <>
+                    <div>
+                      <Label htmlFor="store_description">Store Description</Label>
+                      <Textarea
+                        id="store_description"
+                        placeholder="Tell customers about what you sell..."
+                        className="mt-1.5 rounded-xl resize-none"
+                        rows={3}
+                        value={form.store_description}
+                        onChange={(e) => setForm({ ...form, store_description: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="store_logo">Store Logo (optional)</Label>
+                      <div className="relative mt-1.5">
+                        <Input
+                          id="store_logo"
+                          type="file"
+                          accept="image/*"
+                          className="h-11 py-2 px-3 rounded-xl border border-input file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 text-sm"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              // Ensure it's under a reasonable size
+                              if (file.size > 2 * 1024 * 1024) {
+                                toast.error('Logo must be less than 2MB');
+                                e.target.value = '';
+                                return;
+                              }
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setForm({ ...form, store_logo: reader.result as string });
+                              };
+                              reader.readAsDataURL(file);
+                            } else {
+                              setForm({ ...form, store_logo: "" });
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div>
                   <Label htmlFor="email">Email address</Label>

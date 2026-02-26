@@ -78,11 +78,11 @@ export const useLogin = () => {
 
   return useMutation({
     mutationFn: (data: LoginRequest) => authService.login(data),
-    onSuccess: () => {
+    onSuccess: (response) => {
       // Tokens are stored automatically by the service
       toast.success('Welcome back!');
-      // Navigate based on stored user preference or default to marketplace
-      navigate('/marketplace');
+      const role = response.user?.role || localStorage.getItem('user_role');
+      navigate(role === 'seller' ? '/dashboard' : '/marketplace');
     },
     onError: (error: { message?: string }) => {
       toast.error(error.message || 'Login failed. Please check your credentials.');

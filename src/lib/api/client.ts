@@ -42,10 +42,13 @@ class ApiClient {
   /**
    * Set authentication tokens in localStorage
    */
-  setTokens(access: string, refresh?: string): void {
+  setTokens(access: string, refresh?: string, role?: string): void {
     localStorage.setItem('access_token', access);
     if (refresh) {
       localStorage.setItem('refresh_token', refresh);
+    }
+    if (role) {
+      localStorage.setItem('user_role', role);
     }
   }
 
@@ -55,6 +58,7 @@ class ApiClient {
   removeTokens(): void {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_role');
   }
 
   /**

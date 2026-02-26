@@ -19,6 +19,11 @@ export interface LoginRequest {
 export interface LoginResponse {
   access: string;
   refresh: string;
+  user?: {
+    id: number;
+    email: string;
+    role: string;
+  };
 }
 
 export interface RegisterRequest {
@@ -107,7 +112,7 @@ export const verifyOTP = async (data: VerifyOTPRequest): Promise<VerifyOTPRespon
   const response = await apiClient.post<VerifyOTPResponseWithTokens>(API_ENDPOINTS.AUTH.OTP_VERIFY, data);
   // Backend returns tokens on verify - store them
   if (response.access && response.refresh) {
-    apiClient.setTokens(response.access, response.refresh);
+    apiClient.setTokens(response.access, response.refresh, response.user?.role);
   }
   return response;
 };
@@ -121,12 +126,12 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
     username: data.username,
     password: data.password,
   });
-  
+
   // Store tokens after successful login
   if (response.access && response.refresh) {
-    apiClient.setTokens(response.access, response.refresh);
+    apiClient.setTokens(response.access, response.refresh, response.user?.role);
   }
-  
+
   return response;
 };
 
@@ -154,7 +159,7 @@ export const register = async (data: RegisterRequest): Promise<RegisterResponse>
       ...(data.store.store_logo && { store_logo: data.store.store_logo }),
     };
   }
-  
+
   return apiClient.post<RegisterResponse>(API_ENDPOINTS.AUTH.REGISTER, payload);
 };
 
@@ -163,7 +168,7 @@ export const register = async (data: RegisterRequest): Promise<RegisterResponse>
  */
 export const refreshToken = async (refreshToken?: string): Promise<TokenRefreshResponse> => {
   const refresh = refreshToken || localStorage.getItem('refresh_token');
-  
+
   if (!refresh) {
     throw new Error('No refresh token available');
   }
@@ -172,12 +177,12 @@ export const refreshToken = async (refreshToken?: string): Promise<TokenRefreshR
     API_ENDPOINTS.AUTH.TOKEN_REFRESH,
     { refresh }
   );
-  
+
   // Update access token
   if (response.access) {
     apiClient.setTokens(response.access);
   }
-  
+
   return response;
 };
 
