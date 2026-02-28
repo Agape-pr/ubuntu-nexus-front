@@ -65,12 +65,15 @@ class ApiClient {
    * Get headers for API requests
    */
   private getHeaders(customHeaders?: Record<string, string>, isFormData: boolean = false): HeadersInit {
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       ...customHeaders,
     };
 
-    if (!isFormData) {
-      (headers as Record<string, string>)['Content-Type'] = 'application/json';
+    if (isFormData) {
+      delete headers['Content-Type'];
+      delete headers['content-type'];
+    } else {
+      headers['Content-Type'] = 'application/json';
     }
 
     const token = this.getAccessToken();

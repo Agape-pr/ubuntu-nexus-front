@@ -162,15 +162,6 @@ export const register = async (data: RegisterRequest): Promise<RegisterResponse>
       if (data.store.store_logo instanceof File) {
         formData.append('store.store_logo', data.store.store_logo);
       }
-
-      // Some DRF parsers expect bracket notation for nested dicts
-      formData.append('store[store_name]', data.store.store_name);
-      if (data.store.store_description) {
-        formData.append('store[store_description]', data.store.store_description);
-      }
-      if (data.store.store_logo instanceof File) {
-        formData.append('store[store_logo]', data.store.store_logo);
-      }
     }
 
     return apiClient.post<RegisterResponse>(API_ENDPOINTS.AUTH.REGISTER, formData);

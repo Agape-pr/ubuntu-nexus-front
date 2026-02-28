@@ -63,6 +63,7 @@ const SellerDashboard = () => {
   const [view, setView] = useState<DashView>("overview");
   const [copied, setCopied] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [productImages, setProductImages] = useState<File[]>([]);
   const [storeName] = useState("Nyirangarama Fashion");
   const storeSlug = "nyirangarama-fashion";
   const storeUrl = `ubuntunow.com/store/${storeSlug}`;
@@ -260,16 +261,19 @@ const SellerDashboard = () => {
                           onChange={(e) => {
                             if (e.target.files) {
                               const filesArr = Array.from(e.target.files);
-                              console.log("Selected product images:", filesArr);
-                              // TODO: Update local state and pass these File objects
-                              // to your API call (createProduct). The API is already
-                              // configured to convert File arrays to FormData.
+                              setProductImages(filesArr);
+                            } else {
+                              setProductImages([]);
                             }
                           }}
                         />
                         <div className="text-2xl mb-2">📷</div>
                         <p className="text-sm text-muted-foreground">Click to upload images</p>
-                        <p className="text-xs text-muted-foreground mt-1">PNG, JPG up to 10MB</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {productImages.length > 0
+                            ? `${productImages.length} image(s) selected`
+                            : "PNG, JPG up to 10MB"}
+                        </p>
                       </div>
                     </div>
                   </div>
