@@ -61,7 +61,7 @@ export interface ProductCreateUpdate {
   price: string | number; // Can be string or number
   stock_quantity: number;
   is_active?: boolean;
-  uploaded_images?: string[]; // Array of image URLs
+  uploaded_images?: (File | string)[]; // Array of Files for upload or string URLs
 }
 
 /**
@@ -69,7 +69,7 @@ export interface ProductCreateUpdate {
  */
 export const getProducts = async (params?: ProductsListParams): Promise<Product[]> => {
   const queryParams = new URLSearchParams();
-  
+
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
@@ -77,11 +77,11 @@ export const getProducts = async (params?: ProductsListParams): Promise<Product[
       }
     });
   }
-  
+
   const endpoint = queryParams.toString()
     ? `${API_ENDPOINTS.PRODUCTS.LIST}?${queryParams.toString()}`
     : API_ENDPOINTS.PRODUCTS.LIST;
-  
+
   return apiClient.get<Product[]>(endpoint);
 };
 
@@ -107,15 +107,43 @@ export const getSellerProduct = async (id: string): Promise<SellerProduct> => {
 };
 
 /**
+ * Helper to convert product data to FormData if needed
+ */
+const buildProductPayload = (data: ProductCreateUpdate | Partial<ProductCreateUpdate>): FormData | Record<string, unknown> => {
+  const hasFiles = data.uploaded_images?.some(img => img instanceof File);
+
+  if (hasFiles) {
+    const formData = new FormData();
+    if (data.category !== undefined) formData.append('category', String(data.category));
+    if (data.name !== undefined) formData.append('name', data.name);
+    if (data.description !== undefined) formData.append('description', data.description);
+    if (data.price !== undefined) formData.append('price', String(data.price));
+    if (data.stock_quantity !== undefined) formData.append('stock_quantity', String(data.stock_quantity));
+    if (data.is_active !== undefined) formData.append('is_active', String(data.is_active));
+
+    if (data.uploaded_images) {
+      data.uploaded_images.forEach(img => {
+        if (img instanceof File) {
+          // Send exactly as DRF ListField expects
+          formData.append('uploaded_images', img);
+        }
+      });
+    }
+    return formData;
+  }
+
+  // Return JSON payload if no files
+  return {
+    ...data,
+    ...(data.price !== undefined ? { price: String(data.price) } : {}),
+  } as Record<string, unknown>;
+};
+
+/**
  * Create new product (Seller)
  */
 export const createProduct = async (data: ProductCreateUpdate): Promise<SellerProduct> => {
-  // Ensure price is string as API expects
-  const payload = {
-    ...data,
-    price: String(data.price),
-  };
-  
+  const payload = buildProductPayload(data);
   return apiClient.post<SellerProduct>(API_ENDPOINTS.SELLER_PRODUCTS.CREATE, payload);
 };
 
@@ -126,12 +154,7 @@ export const updateProduct = async (
   id: string,
   data: ProductCreateUpdate
 ): Promise<SellerProduct> => {
-  // Ensure price is string as API expects
-  const payload = {
-    ...data,
-    price: String(data.price),
-  };
-  
+  const payload = buildProductPayload(data);
   return apiClient.put<SellerProduct>(API_ENDPOINTS.SELLER_PRODUCTS.UPDATE(id), payload);
 };
 
@@ -142,11 +165,7 @@ export const patchProduct = async (
   id: string,
   data: Partial<ProductCreateUpdate>
 ): Promise<SellerProduct> => {
-  // Ensure price is string if provided
-  const payload = data.price !== undefined
-    ? { ...data, price: String(data.price) }
-    : data;
-  
+  const payload = buildProductPayload(data);
   return apiClient.patch<SellerProduct>(API_ENDPOINTS.SELLER_PRODUCTS.PATCH(id), payload);
 };
 

@@ -113,8 +113,8 @@ const SellerDashboard = () => {
                 key={item.id}
                 onClick={() => setView(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium mb-1 transition-all duration-200 ${view === item.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                   }`}
               >
                 <item.icon size={16} />
@@ -251,7 +251,22 @@ const SellerDashboard = () => {
                     </div>
                     <div className="md:col-span-2">
                       <Label>Product images</Label>
-                      <div className="mt-1.5 border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-ring transition-colors">
+                      <div className="mt-1.5 border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-ring transition-colors relative">
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          onChange={(e) => {
+                            if (e.target.files) {
+                              const filesArr = Array.from(e.target.files);
+                              console.log("Selected product images:", filesArr);
+                              // TODO: Update local state and pass these File objects
+                              // to your API call (createProduct). The API is already
+                              // configured to convert File arrays to FormData.
+                            }
+                          }}
+                        />
                         <div className="text-2xl mb-2">📷</div>
                         <p className="text-sm text-muted-foreground">Click to upload images</p>
                         <p className="text-xs text-muted-foreground mt-1">PNG, JPG up to 10MB</p>

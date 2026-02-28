@@ -34,7 +34,7 @@ export interface RegisterRequest {
   store?: {
     store_name: string;
     store_description?: string;
-    store_logo?: string;
+    store_logo?: File | string; // File for multipart upload
   };
 }
 
@@ -139,13 +139,44 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
  * Register new user
  * Note: Registration might require OTP verification first
  */
-/**
- * Register new user
- * Backend creates user with is_active=False. User must then verify OTP to activate.
- * For sellers: store is REQUIRED. For buyers: store must NOT be sent.
- */
 export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
-  // Build payload - omit undefined/null, never send store for buyers
+  // If there's a file, we MUST use FormData (multipart/form-data)
+  // so Django can upload the file to Cloudinary
+  const hasFile = data.account_type === 'seller' && data.store?.store_logo instanceof File;
+
+  if (hasFile) {
+    const formData = new FormData();
+    formData.append('email', data.email);
+    formData.append('password', data.password);
+    formData.append('account_type', data.account_type);
+
+    if (data.phone_number) {
+      formData.append('phone_number', data.phone_number);
+    }
+
+    if (data.account_type === 'seller' && data.store) {
+      formData.append('store.store_name', data.store.store_name);
+      if (data.store.store_description) {
+        formData.append('store.store_description', data.store.store_description);
+      }
+      if (data.store.store_logo instanceof File) {
+        formData.append('store.store_logo', data.store.store_logo);
+      }
+
+      // Some DRF parsers expect bracket notation for nested dicts
+      formData.append('store[store_name]', data.store.store_name);
+      if (data.store.store_description) {
+        formData.append('store[store_description]', data.store.store_description);
+      }
+      if (data.store.store_logo instanceof File) {
+        formData.append('store[store_logo]', data.store.store_logo);
+      }
+    }
+
+    return apiClient.post<RegisterResponse>(API_ENDPOINTS.AUTH.REGISTER, formData);
+  }
+
+  // Fallback to JSON payload if no file
   const payload: Record<string, unknown> = {
     email: data.email,
     password: data.password,
@@ -156,7 +187,7 @@ export const register = async (data: RegisterRequest): Promise<RegisterResponse>
     payload.store = {
       store_name: data.store.store_name,
       ...(data.store.store_description && { store_description: data.store.store_description }),
-      ...(data.store.store_logo && { store_logo: data.store.store_logo }),
+      ...(typeof data.store.store_logo === 'string' && { store_logo: data.store.store_logo }),
     };
   }
 

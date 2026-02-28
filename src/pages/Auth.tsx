@@ -31,14 +31,16 @@ const Auth = () => {
   const [role, setRole] = useState<Role>(defaultRole);
   const [showPassword, setShowPassword] = useState(false);
   const [registrationStep, setRegistrationStep] = useState<RegistrationStep>("form");
-  const [form, setForm] = useState({ name: "", email: "", password: "", phone: "", store_description: "", store_logo: "" });
+  const [form, setForm] = useState<{
+    name: string; email: string; password: string; phone: string; store_description: string; store_logo: File | string | null;
+  }>({ name: "", email: "", password: "", phone: "", store_description: "", store_logo: null });
   const [otp, setOtp] = useState("");
   const [registrationData, setRegistrationData] = useState<{
     email: string;
     password: string;
     account_type: Role;
     phone_number?: string;
-    store?: { store_name: string; store_description?: string; store_logo?: string };
+    store?: { store_name: string; store_description?: string; store_logo?: File | string };
   } | null>(null);
 
   const loginMutation = useLogin();
@@ -336,19 +338,16 @@ const Auth = () => {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              // Ensure it's under a reasonable size
+                              // Ensure it's under a reasonable size (2MB)
                               if (file.size > 2 * 1024 * 1024) {
                                 toast.error('Logo must be less than 2MB');
                                 e.target.value = '';
                                 return;
                               }
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                setForm({ ...form, store_logo: reader.result as string });
-                              };
-                              reader.readAsDataURL(file);
+                              // Store the actual File object instead of base64 string for FormData upload
+                              setForm({ ...form, store_logo: file });
                             } else {
-                              setForm({ ...form, store_logo: "" });
+                              setForm({ ...form, store_logo: null });
                             }
                           }}
                         />

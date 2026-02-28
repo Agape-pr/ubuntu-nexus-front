@@ -64,11 +64,14 @@ class ApiClient {
   /**
    * Get headers for API requests
    */
-  private getHeaders(customHeaders?: Record<string, string>): HeadersInit {
+  private getHeaders(customHeaders?: Record<string, string>, isFormData: boolean = false): HeadersInit {
     const headers: HeadersInit = {
-      'Content-Type': 'application/json',
       ...customHeaders,
     };
+
+    if (!isFormData) {
+      (headers as Record<string, string>)['Content-Type'] = 'application/json';
+    }
 
     const token = this.getAccessToken();
     if (token) {
@@ -157,10 +160,12 @@ class ApiClient {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
+    const isFormData = options.body instanceof FormData;
+
     try {
       const response = await fetch(url, {
         ...options,
-        headers: this.getHeaders(options.headers as Record<string, string>),
+        headers: this.getHeaders(options.headers as Record<string, string>, isFormData),
         signal: controller.signal,
       });
 
@@ -218,10 +223,11 @@ class ApiClient {
     data?: unknown,
     options?: RequestInit
   ): Promise<T> {
+    const isFormData = data instanceof FormData;
     return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
     });
   }
 
@@ -233,10 +239,11 @@ class ApiClient {
     data?: unknown,
     options?: RequestInit
   ): Promise<T> {
+    const isFormData = data instanceof FormData;
     return this.request<T>(endpoint, {
       ...options,
       method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
+      body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
     });
   }
 
@@ -248,10 +255,11 @@ class ApiClient {
     data?: unknown,
     options?: RequestInit
   ): Promise<T> {
+    const isFormData = data instanceof FormData;
     return this.request<T>(endpoint, {
       ...options,
       method: 'PATCH',
-      body: data ? JSON.stringify(data) : undefined,
+      body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
     });
   }
 
