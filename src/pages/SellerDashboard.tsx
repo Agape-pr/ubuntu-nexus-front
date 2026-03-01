@@ -1,6 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { generateSlug } from "@/lib/utils/slug";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,15 +63,9 @@ const SellerDashboard = () => {
   const [view, setView] = useState<DashView>("overview");
   const [copied, setCopied] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
-  const [storeName, setStoreName] = useState(() => localStorage.getItem('store_name') || 'My Store');
-  const storeSlug = useMemo(() => generateSlug(storeName), [storeName]);
+  const [storeName] = useState("Nyirangarama Fashion");
+  const storeSlug = "nyirangarama-fashion";
   const storeUrl = `ubuntunow.com/store/${storeSlug}`;
-
-  // Listen for store_name changes
-  useEffect(() => {
-    const name = localStorage.getItem('store_name');
-    if (name) setStoreName(name);
-  }, []);
 
   const copyLink = () => {
     navigator.clipboard.writeText(`https://${storeUrl}`);
@@ -98,7 +91,7 @@ const SellerDashboard = () => {
           <div className="p-5 border-b border-border">
             <div className="flex items-center gap-3 mb-3">
               <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-                {storeName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                NF
               </div>
               <div>
                 <div className="font-semibold text-sm text-foreground">{storeName}</div>
