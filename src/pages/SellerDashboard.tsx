@@ -22,6 +22,7 @@ import {
   Eye,
 } from "lucide-react";
 import { useCreateProduct } from "@/lib/api/hooks/useProducts";
+import { useCurrentUser } from "@/lib/api/hooks/useUsers";
 import { toast } from "sonner";
 
 type DashView = "overview" | "products" | "orders" | "store-settings";
@@ -62,6 +63,8 @@ const SellerDashboard = () => {
       navigate('/marketplace');
     }
   }, [navigate]);
+
+  const { data: userProfile, isLoading: isUserLoading } = useCurrentUser();
 
   const [view, setView] = useState<DashView>("overview");
   const [copied, setCopied] = useState(false);
@@ -105,12 +108,16 @@ const SellerDashboard = () => {
       }
     );
   };
-  const [storeName] = useState("Nyirangarama Fashion");
-  const storeSlug = "nyirangarama-fashion";
-  const storeUrl = `ubuntunow.com/store/${storeSlug}`;
+
+  // Extract store details from API or fallback to placeholder
+  const storeName = userProfile?.store?.store_name || "Nyirangarama Fashion";
+  const storeSlug = userProfile?.store?.slug || "nyirangarama-fashion";
+  const storeUrl = `${window.location.origin}/store/${storeSlug}`;
+  const storeUrlDisplay = `ubuntunow.com/store/${storeSlug}`;
+  const storeInitials = storeName.substring(0, 2).toUpperCase();
 
   const copyLink = () => {
-    navigator.clipboard.writeText(`https://${storeUrl}`);
+    navigator.clipboard.writeText(storeUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -132,17 +139,25 @@ const SellerDashboard = () => {
           {/* Store Identity */}
           <div className="p-5 border-b border-border">
             <div className="flex items-center gap-3 mb-3">
-              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-                NF
-              </div>
-              <div>
-                <div className="font-semibold text-sm text-foreground">{storeName}</div>
+              {userProfile?.store?.store_logo ? (
+                <div className="h-10 w-10 rounded-xl border border-border overflow-hidden flex-shrink-0 bg-white">
+                  <img src={userProfile.store.store_logo} alt={storeName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
+                  {storeInitials}
+                </div>
+              )}
+              <div className="min-w-0">
+                <div className="font-semibold text-sm text-foreground truncate" title={storeName}>
+                  {isUserLoading ? "Loading..." : storeName}
+                </div>
                 <div className="text-xs text-muted-foreground">Seller</div>
               </div>
             </div>
             {/* Store link */}
             <div className="p-2.5 rounded-xl bg-secondary text-xs text-muted-foreground flex items-center gap-2">
-              <span className="truncate">{storeUrl}</span>
+              <span className="truncate">{storeUrlDisplay}</span>
               <button onClick={copyLink} className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors">
                 {copied ? <CheckCircle size={13} className="text-emerald" /> : <Copy size={13} />}
               </button>
@@ -204,7 +219,7 @@ const SellerDashboard = () => {
                     <Store size={14} />
                     Your store link
                   </div>
-                  <div className="text-primary-foreground font-mono text-lg mb-4">{storeUrl}</div>
+                  <div className="text-primary-foreground font-mono text-lg mb-4">{storeUrlDisplay}</div>
                   <div className="flex gap-2">
                     <Button onClick={copyLink} size="sm" className="gradient-amber text-accent-foreground rounded-xl border-0 gap-2">
                       {copied ? <CheckCircle size={14} /> : <Copy size={14} />}
@@ -453,7 +468,7 @@ const SellerDashboard = () => {
                 <div className="space-y-5">
                   <div>
                     <Label>Store name</Label>
-                    <Input defaultValue={storeName} className="mt-1.5 rounded-xl" />
+                    <Input value={storeName} readOnly className="mt-1.5 rounded-xl bg-secondary/50" />
                   </div>
                   <div>
                     <Label>Store URL</Label>
@@ -461,13 +476,13 @@ const SellerDashboard = () => {
                       <div className="px-3 h-10 flex items-center bg-secondary border border-border border-r-0 rounded-l-xl text-sm text-muted-foreground flex-shrink-0">
                         ubuntunow.com/store/
                       </div>
-                      <Input defaultValue={storeSlug} className="rounded-l-none rounded-r-xl" />
+                      <Input value={storeSlug} readOnly className="rounded-l-none rounded-r-xl bg-secondary/50" />
                     </div>
                   </div>
                   <div>
                     <Label>Store description</Label>
                     <Textarea
-                      defaultValue="Handcrafted African fashion made with love in Kigali. Authentic Ankara prints, embroidered accessories, and more."
+                      defaultValue={userProfile?.store?.store_description || "Handcrafted African fashion made with love in Kigali. Authentic Ankara prints, embroidered accessories, and more."}
                       className="mt-1.5 rounded-xl resize-none"
                       rows={4}
                     />

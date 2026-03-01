@@ -5,57 +5,29 @@ import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { MapPin, Star, Package, Heart, Share2, MessageCircle } from "lucide-react";
 
-const STORE_DATA: Record<string, {
-  name: string;
-  slug: string;
-  description: string;
-  location: string;
-  emoji: string;
-  rating: number;
-  reviewCount: number;
-  memberSince: string;
-  products: {
-    id: string; name: string; price: number; category: string; rating: number; reviewCount: number;
-  }[];
-}> = {
-  "nyirangarama-fashion": {
-    name: "Nyirangarama Fashion",
-    slug: "nyirangarama-fashion",
-    description: "Handcrafted African fashion made with love in Kigali. Authentic Ankara prints, embroidered accessories, and wearable art for every occasion.",
-    location: "Kigali, Rwanda",
-    emoji: "👗",
-    rating: 4.8,
-    reviewCount: 124,
-    memberSince: "January 2024",
-    products: [
-      { id: "1", name: "Ankara Print Tote Bag", price: 12500, category: "Fashion", rating: 4.8, reviewCount: 24 },
-      { id: "7", name: "Hand-Embroidered Table Runner", price: 9500, category: "Home", rating: 4.8, reviewCount: 9 },
-      { id: "9", name: "Kitenge Wrap Skirt", price: 18000, category: "Fashion", rating: 4.9, reviewCount: 37 },
-    ],
-  },
-  "kigali-crafts": {
-    name: "Kigali Crafts",
-    slug: "kigali-crafts",
-    description: "Traditional Rwandan craftsmanship for the modern home. Every piece tells a story of culture, skill, and pride.",
-    location: "Nyamirambo, Kigali",
-    emoji: "🧺",
-    rating: 4.9,
-    reviewCount: 89,
-    memberSince: "March 2024",
-    products: [
-      { id: "2", name: "Handwoven Agaseke Basket", price: 8000, category: "Crafts", rating: 5, reviewCount: 18 },
-      { id: "5", name: "Imigongo Art Print (A3)", price: 15000, category: "Crafts", rating: 4.7, reviewCount: 13 },
-    ],
-  },
-};
+import { Loader2 } from "lucide-react";
+import { usePublicStore } from "@/lib/api/hooks/useUsers";
 
 const StorePage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const store = slug ? STORE_DATA[slug] : null;
+  const { data: store, isLoading, error } = usePublicStore(slug);
 
-  if (!store) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-background">
+        <Navbar />
+        <div className="flex-1 flex flex-col items-center justify-center p-8">
+          <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
+          <h2 className="text-xl font-medium text-muted-foreground">Loading store...</h2>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !store) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <div className="text-6xl mb-4">🏪</div>
@@ -84,30 +56,36 @@ const StorePage = () => {
         </div>
         <div className="relative container py-12">
           <div className="flex flex-col md:flex-row md:items-end gap-6">
-            {/* Store Avatar */}
-            <div className="h-24 w-24 rounded-2xl bg-primary-foreground/10 border-2 border-primary-foreground/20 flex items-center justify-center text-4xl flex-shrink-0 backdrop-blur-sm">
-              {store.emoji}
-            </div>
+            {/* Store Avatar / Logo */}
+            {store.store_logo ? (
+              <div className="h-24 w-24 rounded-2xl border-2 border-primary-foreground/20 flex items-center justify-center overflow-hidden flex-shrink-0 bg-white">
+                <img src={store.store_logo} alt={store.store_name} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="h-24 w-24 rounded-2xl bg-primary-foreground/10 border-2 border-primary-foreground/20 flex items-center justify-center text-4xl flex-shrink-0 backdrop-blur-sm font-bold text-primary-foreground">
+                {store.store_name?.substring(0, 2).toUpperCase()}
+              </div>
+            )}
             <div className="flex-1">
               <div className="flex flex-wrap items-start gap-3 mb-2">
-                <h1 className="text-3xl font-bold text-primary-foreground">{store.name}</h1>
+                <h1 className="text-3xl font-bold text-primary-foreground">{store.store_name}</h1>
                 <span className="px-2.5 py-1 rounded-full bg-emerald/20 text-emerald text-xs font-medium border border-emerald/30 mt-1.5">
                   Verified seller
                 </span>
               </div>
-              <p className="text-primary-foreground/70 max-w-lg mb-3">{store.description}</p>
+              <p className="text-primary-foreground/70 max-w-lg mb-3">{store.store_description || "Welcome to my store on UbuntuNow!"}</p>
               <div className="flex flex-wrap items-center gap-4 text-sm text-primary-foreground/60">
                 <span className="flex items-center gap-1.5">
                   <MapPin size={13} />
-                  {store.location}
+                  Kigali, Rwanda
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Star size={13} className="fill-accent text-accent" />
-                  {store.rating} ({store.reviewCount} reviews)
+                  4.8 Rating
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Package size={13} />
-                  {store.products.length} products
+                  {store.products?.length || 0} products
                 </span>
               </div>
             </div>
@@ -134,11 +112,11 @@ const StorePage = () => {
       <div className="container py-10 flex-1">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-foreground">
-            Products <span className="text-muted-foreground font-normal text-base">({store.products.length})</span>
+            Products <span className="text-muted-foreground font-normal text-base">({store.products?.length || 0})</span>
           </h2>
         </div>
 
-        {store.products.length === 0 ? (
+        {!store.products || store.products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="text-5xl mb-4">📦</div>
             <h3 className="font-semibold text-foreground mb-2">No products yet</h3>
@@ -148,14 +126,23 @@ const StorePage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {store.products.map((product) => (
-              <ProductCard
-                key={product.id}
-                {...product}
-                storeName={store.name}
-                storeSlug={store.slug}
-              />
-            ))}
+            {store.products.map((product) => {
+              const primaryImage = product.images?.find(img => img.is_primary)?.image || product.images?.[0]?.image;
+
+              return (
+                <ProductCard
+                  key={product.id}
+                  id={String(product.id)}
+                  name={product.name}
+                  price={Number(product.price)}
+                  category={product.category_name}
+                  image={primaryImage}
+                  storeName={store.store_name}
+                  storeSlug={store.slug}
+                  inStock={product.stock_quantity > 0}
+                />
+              );
+            })}
           </div>
         )}
       </div>

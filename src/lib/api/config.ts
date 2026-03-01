@@ -19,19 +19,25 @@ export const API_ENDPOINTS = {
     OTP_SEND: '/auth/otp/email/send/',
     OTP_RESEND: '/auth/otp/resend/',
     OTP_VERIFY: '/auth/otp/verify/',
-    
+
     // User Authentication
     LOGIN: '/users/login',
     REGISTER: '/users/register',
     TOKEN_REFRESH: '/users/token/refresh',
   },
-  
+
+  // Users
+  USERS: {
+    ME: '/users/me/',
+    STORE_PUBLIC: (slug: string) => `/users/store/${slug}/`,
+  },
+
   // Products (Public)
   PRODUCTS: {
     LIST: '/products/products/',
     DETAIL: (slug: string) => `/products/products/${slug}/`,
   },
-  
+
   // Products (Seller)
   SELLER_PRODUCTS: {
     LIST: '/products/seller/products/',
@@ -41,7 +47,7 @@ export const API_ENDPOINTS = {
     PATCH: (id: string) => `/products/seller/products/${id}/`,
     DELETE: (id: string) => `/products/seller/products/${id}/`,
   },
-  
+
   // Categories
   CATEGORIES: {
     LIST: '/products/categories/',
