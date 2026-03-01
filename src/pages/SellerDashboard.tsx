@@ -16,10 +16,13 @@ import {
   CheckCircle,
   Edit3,
   Trash2,
-  Eye,
   ShoppingBag,
   AlertCircle,
+  Loader2,
+  Eye,
 } from "lucide-react";
+import { useCreateProduct } from "@/lib/api/hooks/useProducts";
+import { toast } from "sonner";
 
 type DashView = "overview" | "products" | "orders" | "store-settings";
 
@@ -64,6 +67,44 @@ const SellerDashboard = () => {
   const [copied, setCopied] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [productImages, setProductImages] = useState<File[]>([]);
+
+  // Product Form State
+  const [productForm, setProductForm] = useState({
+    name: "",
+    price: "",
+    stock_quantity: "",
+    category: "",
+    description: "",
+  });
+
+  const createProductMutation = useCreateProduct();
+
+  const handleCreateProduct = () => {
+    if (!productForm.name || !productForm.price || !productForm.stock_quantity || !productForm.category) {
+      toast.error("Please fill in all required fields (Name, Price, Stock, Category).");
+      return;
+    }
+
+    createProductMutation.mutate(
+      {
+        name: productForm.name,
+        price: Number(productForm.price),
+        stock_quantity: Number(productForm.stock_quantity),
+        // For testing/mocking we'll hardcode category 1 if not string.
+        category: 1, // Ideally we'd fetch categories and use IDs
+        description: productForm.description,
+        is_active: true,
+        uploaded_images: productImages.length > 0 ? productImages : undefined,
+      },
+      {
+        onSuccess: () => {
+          setShowAddProduct(false);
+          setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "" });
+          setProductImages([]);
+        },
+      }
+    );
+  };
   const [storeName] = useState("Nyirangarama Fashion");
   const storeSlug = "nyirangarama-fashion";
   const storeUrl = `ubuntunow.com/store/${storeSlug}`;
@@ -228,27 +269,55 @@ const SellerDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Product name</Label>
-                      <Input placeholder="e.g. Ankara Tote Bag" className="mt-1.5 rounded-xl" />
+                      <Input
+                        placeholder="e.g. Ankara Tote Bag"
+                        className="mt-1.5 rounded-xl"
+                        value={productForm.name}
+                        onChange={(e) => setProductForm(prev => ({ ...prev, name: e.target.value }))}
+                      />
                     </div>
                     <div>
                       <Label>Price (RWF)</Label>
-                      <Input type="number" placeholder="12500" className="mt-1.5 rounded-xl" />
+                      <Input
+                        type="number"
+                        placeholder="12500"
+                        className="mt-1.5 rounded-xl"
+                        value={productForm.price}
+                        onChange={(e) => setProductForm(prev => ({ ...prev, price: e.target.value }))}
+                      />
                     </div>
                     <div>
                       <Label>Stock quantity</Label>
-                      <Input type="number" placeholder="10" className="mt-1.5 rounded-xl" />
+                      <Input
+                        type="number"
+                        placeholder="10"
+                        className="mt-1.5 rounded-xl"
+                        value={productForm.stock_quantity}
+                        onChange={(e) => setProductForm(prev => ({ ...prev, stock_quantity: e.target.value }))}
+                      />
                     </div>
                     <div>
                       <Label>Category</Label>
-                      <select className="w-full h-10 mt-1.5 px-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                      <select
+                        className="w-full h-10 mt-1.5 px-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        value={productForm.category}
+                        onChange={(e) => setProductForm(prev => ({ ...prev, category: e.target.value }))}
+                      >
+                        <option value="" disabled>Select a category</option>
                         {["Fashion", "Food", "Crafts", "Beauty", "Tech", "Books", "Home"].map((c) => (
-                          <option key={c}>{c}</option>
+                          <option key={c} value={c}>{c}</option>
                         ))}
                       </select>
                     </div>
                     <div className="md:col-span-2">
                       <Label>Description</Label>
-                      <Textarea placeholder="Describe your product..." className="mt-1.5 rounded-xl resize-none" rows={3} />
+                      <Textarea
+                        placeholder="Describe your product..."
+                        className="mt-1.5 rounded-xl resize-none"
+                        rows={3}
+                        value={productForm.description}
+                        onChange={(e) => setProductForm(prev => ({ ...prev, description: e.target.value }))}
+                      />
                     </div>
                     <div className="md:col-span-2">
                       <Label>Product images</Label>
@@ -278,8 +347,15 @@ const SellerDashboard = () => {
                     </div>
                   </div>
                   <div className="flex gap-2 mt-5">
-                    <Button className="rounded-xl">Save product</Button>
-                    <Button variant="outline" className="rounded-xl" onClick={() => setShowAddProduct(false)}>
+                    <Button
+                      className="rounded-xl"
+                      onClick={handleCreateProduct}
+                      disabled={createProductMutation.isPending}
+                    >
+                      {createProductMutation.isPending && <Loader2 size={16} className="mr-2 animate-spin" />}
+                      Save product
+                    </Button>
+                    <Button variant="outline" className="rounded-xl" onClick={() => setShowAddProduct(false)} disabled={createProductMutation.isPending}>
                       Cancel
                     </Button>
                   </div>
