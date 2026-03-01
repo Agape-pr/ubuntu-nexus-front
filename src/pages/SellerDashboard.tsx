@@ -21,29 +21,16 @@ import {
   Loader2,
   Eye,
 } from "lucide-react";
-import { useCreateProduct, useCategories } from "@/lib/api/hooks/useProducts";
+import { useCreateProduct, useCategories, useSellerProducts } from "@/lib/api/hooks/useProducts";
 import { useCurrentUser } from "@/lib/api/hooks/useUsers";
 import { toast } from "sonner";
 
 type DashView = "overview" | "products" | "orders" | "store-settings";
 
-const MOCK_PRODUCTS = [
-  { id: "1", name: "Ankara Print Tote Bag", price: 12500, stock: 8, status: "active" },
-  { id: "2", name: "Hand-Embroidered Table Runner", price: 9500, stock: 3, status: "active" },
-  { id: "3", name: "Beaded Necklace Set", price: 7000, stock: 0, status: "out-of-stock" },
-];
-
 const MOCK_ORDERS = [
   { id: "ORD-001", customer: "Jean Pierre N.", product: "Ankara Print Tote Bag", amount: 12500, status: "pending", date: "2025-02-18" },
   { id: "ORD-002", customer: "Amina U.", product: "Hand-Embroidered Table Runner", amount: 9500, status: "shipped", date: "2025-02-17" },
   { id: "ORD-003", customer: "Eric K.", product: "Beaded Necklace Set", amount: 7000, status: "completed", date: "2025-02-15" },
-];
-
-const STATS = [
-  { label: "Total sales", value: "29,000 RWF", icon: TrendingUp, color: "text-emerald" },
-  { label: "Active products", value: "2", icon: Package, color: "text-primary" },
-  { label: "Orders this month", value: "3", icon: ShoppingBag, color: "text-accent" },
-  { label: "Store views", value: "142", icon: Eye, color: "text-muted-foreground" },
 ];
 
 const statusColors: Record<string, string> = {
@@ -66,6 +53,7 @@ const SellerDashboard = () => {
 
   const { data: userProfile, isLoading: isUserLoading } = useCurrentUser();
   const { data: categories, isLoading: isCategoriesLoading } = useCategories();
+  const { data: sellerProducts, isLoading: isProductsLoading } = useSellerProducts();
 
   const [view, setView] = useState<DashView>("overview");
   const [copied, setCopied] = useState(false);
@@ -127,6 +115,15 @@ const SellerDashboard = () => {
     { id: "products" as DashView, label: "Products", icon: Package },
     { id: "orders" as DashView, label: "Orders", icon: ShoppingBag },
     { id: "store-settings" as DashView, label: "Store settings", icon: Settings },
+  ];
+
+  const activeProductsCount = sellerProducts?.filter(p => p.is_active).length || 0;
+
+  const STATS = [
+    { label: "Total sales", value: "29,000 RWF", icon: TrendingUp, color: "text-emerald" },
+    { label: "Active products", value: activeProductsCount.toString(), icon: Package, color: "text-primary" },
+    { label: "Orders this month", value: "3", icon: ShoppingBag, color: "text-accent" },
+    { label: "Store views", value: "142", icon: Eye, color: "text-muted-foreground" },
   ];
 
   return (
@@ -269,7 +266,7 @@ const SellerDashboard = () => {
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <h1 className="text-2xl font-bold text-foreground">Products</h1>
-                  <p className="text-muted-foreground mt-1">{MOCK_PRODUCTS.length} products in your store</p>
+                  <p className="text-muted-foreground mt-1">{sellerProducts?.length || 0} products in your store</p>
                 </div>
                 <Button className="rounded-xl gap-2" onClick={() => setShowAddProduct(!showAddProduct)}>
                   <Plus size={16} />
@@ -384,36 +381,57 @@ const SellerDashboard = () => {
 
               <div className="bg-card rounded-2xl border border-border/50 shadow-card">
                 <div className="divide-y divide-border">
-                  {MOCK_PRODUCTS.map((product) => (
-                    <div key={product.id} className="p-5 flex items-center gap-4">
-                      <div className="h-14 w-14 rounded-xl bg-secondary flex items-center justify-center text-xl flex-shrink-0">
-                        🛍️
+                  {isProductsLoading ? (
+                    <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center">
+                      <Loader2 size={24} className="animate-spin mb-2" />
+                      Loading products...
+                    </div>
+                  ) : !sellerProducts || sellerProducts.length === 0 ? (
+                    <div className="p-12 text-center flex flex-col items-center justify-center">
+                      <div className="h-16 w-16 bg-secondary rounded-full flex items-center justify-center text-3xl mb-4 text-emerald">
+                        <Package size={32} />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-foreground truncate">{product.name}</div>
-                        <div className="text-sm text-muted-foreground">{product.price.toLocaleString()} RWF</div>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${statusColors[product.status]}`}>
-                            {product.status === "out-of-stock" ? "Out of stock" : "Active"}
-                          </span>
-                          <span className="text-xs text-muted-foreground">{product.stock} in stock</span>
-                          {product.stock <= 3 && product.stock > 0 && (
-                            <span className="text-xs text-accent flex items-center gap-1">
-                              <AlertCircle size={11} /> Low stock
+                      <h3 className="font-semibold text-foreground text-lg mb-1">No products yet</h3>
+                      <p className="text-muted-foreground text-sm max-w-[280px] mb-6">
+                        You haven't uploaded any products to your store yet. Add your first product to start selling!
+                      </p>
+                      <Button onClick={() => setShowAddProduct(true)} className="rounded-xl gap-2">
+                        <Plus size={16} />
+                        Upload a product
+                      </Button>
+                    </div>
+                  ) : (
+                    sellerProducts.map((product) => (
+                      <div key={product.id} className="p-5 flex items-center gap-4">
+                        <div className="h-14 w-14 rounded-xl bg-secondary flex items-center justify-center text-xl flex-shrink-0">
+                          🛍️
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm text-foreground truncate">{product.name}</div>
+                          <div className="text-sm text-muted-foreground">{Number(product.price).toLocaleString()} RWF</div>
+                          <div className="flex items-center gap-3 mt-1">
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${product.stock_quantity === 0 ? statusColors["out-of-stock"] : statusColors["active"]}`}>
+                              {product.stock_quantity === 0 ? "Out of stock" : "Active"}
                             </span>
-                          )}
+                            <span className="text-xs text-muted-foreground">{product.stock_quantity} in stock</span>
+                            {product.stock_quantity <= 3 && product.stock_quantity > 0 && (
+                              <span className="text-xs text-accent flex items-center gap-1">
+                                <AlertCircle size={11} /> Low stock
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-1 flex-shrink-0">
+                          <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all">
+                            <Edit3 size={14} />
+                          </button>
+                          <button className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all">
+                            <Trash2 size={14} />
+                          </button>
                         </div>
                       </div>
-                      <div className="flex gap-1 flex-shrink-0">
-                        <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all">
-                          <Edit3 size={14} />
-                        </button>
-                        <button className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             </div>
