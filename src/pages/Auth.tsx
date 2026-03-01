@@ -87,8 +87,11 @@ const Auth = () => {
     // Step 1: Register first (creates user with is_active=False)
     registerMutation.mutate(regData, {
       onSuccess: () => {
+        // Save store name for dashboard use after login
+        if (role === 'seller' && form.name?.trim()) {
+          localStorage.setItem('store_name', form.name.trim());
+        }
         // Backend automatically sends the OTP during registration.
-        // We just need to move to the verify step.
         toast.success("Account created! Please check your email for the verification code.");
         setRegistrationStep("otp");
       },
