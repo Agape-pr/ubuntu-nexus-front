@@ -21,7 +21,7 @@ import {
   Loader2,
   Eye,
 } from "lucide-react";
-import { useCreateProduct, useCategories, useSellerProducts } from "@/lib/api/hooks/useProducts";
+import { useCreateProduct, useUpdateProduct, useCategories, useSellerProducts } from "@/lib/api/hooks/useProducts";
 import { useCurrentUser } from "@/lib/api/hooks/useUsers";
 import { toast } from "sonner";
 
@@ -58,6 +58,7 @@ const SellerDashboard = () => {
   const [view, setView] = useState<DashView>("overview");
   const [copied, setCopied] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [productImages, setProductImages] = useState<File[]>([]);
 
   // Product Form State
@@ -70,31 +71,60 @@ const SellerDashboard = () => {
   });
 
   const createProductMutation = useCreateProduct();
+  const updateProductMutation = useUpdateProduct();
 
-  const handleCreateProduct = () => {
+  const handleSaveProduct = () => {
     if (!productForm.name || !productForm.price || !productForm.stock_quantity || !productForm.category) {
       toast.error("Please fill in all required fields (Name, Price, Stock, Category).");
       return;
     }
 
-    createProductMutation.mutate(
-      {
-        name: productForm.name,
-        price: Number(productForm.price),
-        stock_quantity: Number(productForm.stock_quantity),
-        category: Number(productForm.category),
-        description: productForm.description,
-        is_active: true,
-        uploaded_images: productImages.length > 0 ? productImages : undefined,
-      },
-      {
-        onSuccess: () => {
-          setShowAddProduct(false);
-          setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "" });
-          setProductImages([]);
-        },
-      }
-    );
+    const payload = {
+      name: productForm.name,
+      price: Number(productForm.price),
+      stock_quantity: Number(productForm.stock_quantity),
+      category: Number(productForm.category),
+      description: productForm.description,
+      is_active: true,
+      uploaded_images: productImages.length > 0 ? productImages : undefined,
+    };
+
+    const onSuccess = () => {
+      setShowAddProduct(false);
+      setEditingProductId(null);
+      setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "" });
+      setProductImages([]);
+    };
+
+    if (editingProductId) {
+      updateProductMutation.mutate(
+        { id: editingProductId, data: payload },
+        { onSuccess }
+      );
+    } else {
+      createProductMutation.mutate(payload, { onSuccess });
+    }
+  };
+
+  const handleEditClick = (product: any) => {
+    setEditingProductId(product.id.toString());
+    setProductForm({
+      name: product.name,
+      price: product.price.toString(),
+      stock_quantity: product.stock_quantity.toString(),
+      category: product.category.toString(),
+      description: product.description || "",
+    });
+    setProductImages([]);
+    setShowAddProduct(true);
+    setView("products");
+  };
+
+  const handleCancelEdit = () => {
+    setShowAddProduct(false);
+    setEditingProductId(null);
+    setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "" });
+    setProductImages([]);
   };
 
   // Extract store details from API or fallback to placeholder
@@ -268,16 +298,21 @@ const SellerDashboard = () => {
                   <h1 className="text-2xl font-bold text-foreground">Products</h1>
                   <p className="text-muted-foreground mt-1">{sellerProducts?.length || 0} products in your store</p>
                 </div>
-                <Button className="rounded-xl gap-2" onClick={() => setShowAddProduct(!showAddProduct)}>
+                <Button className="rounded-xl gap-2" onClick={() => {
+                  setEditingProductId(null);
+                  setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "" });
+                  setProductImages([]);
+                  setShowAddProduct(!showAddProduct);
+                }}>
                   <Plus size={16} />
                   Add product
                 </Button>
               </div>
 
-              {/* Add product form */}
+              {/* Add/Edit product form */}
               {showAddProduct && (
                 <div className="bg-card rounded-2xl border border-border shadow-card p-6 mb-6 animate-fade-up">
-                  <h3 className="font-semibold text-foreground mb-5">New product</h3>
+                  <h3 className="font-semibold text-foreground mb-5">{editingProductId ? "Edit product" : "New product"}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Product name</Label>
@@ -366,13 +401,13 @@ const SellerDashboard = () => {
                   <div className="flex gap-2 mt-5">
                     <Button
                       className="rounded-xl"
-                      onClick={handleCreateProduct}
-                      disabled={createProductMutation.isPending}
+                      onClick={handleSaveProduct}
+                      disabled={createProductMutation.isPending || updateProductMutation.isPending}
                     >
-                      {createProductMutation.isPending && <Loader2 size={16} className="mr-2 animate-spin" />}
-                      Save product
+                      {(createProductMutation.isPending || updateProductMutation.isPending) && <Loader2 size={16} className="mr-2 animate-spin" />}
+                      {editingProductId ? "Update product" : "Save product"}
                     </Button>
-                    <Button variant="outline" className="rounded-xl" onClick={() => setShowAddProduct(false)} disabled={createProductMutation.isPending}>
+                    <Button variant="outline" className="rounded-xl" onClick={handleCancelEdit} disabled={createProductMutation.isPending || updateProductMutation.isPending}>
                       Cancel
                     </Button>
                   </div>
@@ -422,7 +457,10 @@ const SellerDashboard = () => {
                           </div>
                         </div>
                         <div className="flex gap-1 flex-shrink-0">
-                          <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all">
+                          <button
+                            onClick={() => handleEditClick(product)}
+                            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                          >
                             <Edit3 size={14} />
                           </button>
                           <button className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all">
