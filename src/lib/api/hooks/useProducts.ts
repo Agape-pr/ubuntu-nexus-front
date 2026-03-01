@@ -37,6 +37,17 @@ export const useProduct = (slug: string) => {
 };
 
 /**
+ * Hook to get categories
+ */
+export const useCategories = () => {
+  return useQuery({
+    queryKey: ['categories'],
+    queryFn: () => productService.getCategories(),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+};
+
+/**
  * Hook to get seller's products
  */
 export const useSellerProducts = () => {

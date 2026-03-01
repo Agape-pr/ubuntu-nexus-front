@@ -16,6 +16,13 @@ export interface ProductImage {
   is_primary: boolean;
 }
 
+// Category
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 // Public Product (from /products/products/)
 export interface Product {
   id: number;
@@ -104,6 +111,13 @@ export const getSellerProducts = async (): Promise<SellerProduct[]> => {
  */
 export const getSellerProduct = async (id: string): Promise<SellerProduct> => {
   return apiClient.get<SellerProduct>(API_ENDPOINTS.SELLER_PRODUCTS.DETAIL(id));
+};
+
+/**
+ * Get all product categories
+ */
+export const getCategories = async (): Promise<Category[]> => {
+  return apiClient.get<Category[]>(API_ENDPOINTS.CATEGORIES.LIST);
 };
 
 /**

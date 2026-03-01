@@ -21,7 +21,7 @@ import {
   Loader2,
   Eye,
 } from "lucide-react";
-import { useCreateProduct } from "@/lib/api/hooks/useProducts";
+import { useCreateProduct, useCategories } from "@/lib/api/hooks/useProducts";
 import { useCurrentUser } from "@/lib/api/hooks/useUsers";
 import { toast } from "sonner";
 
@@ -65,6 +65,7 @@ const SellerDashboard = () => {
   }, [navigate]);
 
   const { data: userProfile, isLoading: isUserLoading } = useCurrentUser();
+  const { data: categories, isLoading: isCategoriesLoading } = useCategories();
 
   const [view, setView] = useState<DashView>("overview");
   const [copied, setCopied] = useState(false);
@@ -93,8 +94,7 @@ const SellerDashboard = () => {
         name: productForm.name,
         price: Number(productForm.price),
         stock_quantity: Number(productForm.stock_quantity),
-        // For testing/mocking we'll hardcode category 1 if not string.
-        category: 1, // Ideally we'd fetch categories and use IDs
+        category: Number(productForm.category),
         description: productForm.description,
         is_active: true,
         uploaded_images: productImages.length > 0 ? productImages : undefined,
@@ -318,10 +318,15 @@ const SellerDashboard = () => {
                         value={productForm.category}
                         onChange={(e) => setProductForm(prev => ({ ...prev, category: e.target.value }))}
                       >
-                        <option value="" disabled>Select a category</option>
-                        {["Fashion", "Food", "Crafts", "Beauty", "Tech", "Books", "Home"].map((c) => (
-                          <option key={c} value={c}>{c}</option>
-                        ))}
+                        {isCategoriesLoading ? (
+                          <option value="" disabled>Loading categories...</option>
+                        ) : categories && categories.length > 0 ? (
+                          categories.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))
+                        ) : (
+                          <option value="" disabled>No categories available</option>
+                        )}
                       </select>
                     </div>
                     <div className="md:col-span-2">

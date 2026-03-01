@@ -5,7 +5,7 @@
  * It handles authentication, error handling, and request/response interceptors.
  */
 
-import { API_BASE_URL, API_TIMEOUT } from './config';
+import { API_BASE_URL, API_ENDPOINTS, API_TIMEOUT } from './config';
 
 export interface ApiError {
   message: string;
@@ -145,11 +145,37 @@ class ApiClient {
   }
 
   private maybeClearTokensAndReturn(error: ApiError, status: number): ApiError {
-
-    if (status === 401) {
-      this.removeTokens();
-    }
+    // We now handle 401s centrally in the request method with auto-refresh logic.
+    // However, if refresh completely fails, we will remove tokens there.
     return error;
+  }
+
+  /**
+   * Attempt to refresh the JWT Access Token
+   */
+  private async refreshAccessToken(): Promise<boolean> {
+    const refresh = this.getRefreshToken();
+    if (!refresh) return false;
+
+    try {
+      const response = await fetch(`${this.baseURL}${API_ENDPOINTS.AUTH.TOKEN_REFRESH}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.access) {
+          // Keep the existing refresh token, just update the access token
+          this.setTokens(data.access, refresh, localStorage.getItem('user_role') || undefined);
+          return true;
+        }
+      }
+      return false;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -175,6 +201,39 @@ class ApiClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
+        // Handle 401 Unauthorized by attempting a token refresh
+        if (
+          response.status === 401 &&
+          endpoint !== API_ENDPOINTS.AUTH.LOGIN &&
+          endpoint !== API_ENDPOINTS.AUTH.TOKEN_REFRESH
+        ) {
+          const refreshed = await this.refreshAccessToken();
+          if (refreshed) {
+            // Retry the exact identical request with the new headers
+            const retryResponse = await fetch(url, {
+              ...options,
+              headers: this.getHeaders(options.headers as Record<string, string>, isFormData),
+              signal: controller.signal, // Reuse the same AbortController
+            });
+
+            if (!retryResponse.ok) {
+              this.removeTokens(); // Refresh succeeded but request still 401'd
+              const error = await this.handleError(retryResponse);
+              throw error;
+            }
+
+            // Return the successful retry data
+            if (retryResponse.status === 204 || retryResponse.headers.get('content-length') === '0') {
+              return null as T;
+            }
+            return (await retryResponse.json()) as T;
+          } else {
+            // Token refresh failed or didn't exist, log user out
+            this.removeTokens();
+            window.location.href = '/login'; // Force a visual redirect
+          }
+        }
+
         const error = await this.handleError(response);
         throw error;
       }
