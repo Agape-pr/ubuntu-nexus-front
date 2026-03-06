@@ -9,9 +9,6 @@ const Footer = () => {
           {/* Brand */}
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent text-accent-foreground font-bold text-sm">
-                UN
-              </div>
               <span className="font-bold text-xl text-primary-foreground">
                 Ubuntu<span className="text-accent">Now</span>
               </span>
@@ -68,9 +65,10 @@ const Footer = () => {
           <p className="text-xs text-primary-foreground/40">
             © 2025 UbuntuNow Ltd. Built with pride in Kigali, Rwanda 🇷🇼
           </p>
-          <p className="text-xs text-primary-foreground/40">
-            "I am because we are." — Ubuntu
-          </p>
+          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-6 text-xs text-primary-foreground/40">
+            <span className="px-2 py-1 rounded bg-primary-foreground/10 font-bold text-primary-foreground/80">💳 Powered by Pesapal</span>
+            <span>"I am because we are." — Ubuntu</span>
+          </div>
         </div>
       </div>
     </footer>

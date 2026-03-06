@@ -35,9 +35,6 @@ const Navbar = () => {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-sm shadow-ambient group-hover:shadow-lift transition-shadow duration-300">
-            UN
-          </div>
           <span className="font-bold text-lg text-foreground tracking-tight">
             Ubuntu<span className="text-accent">Now</span>
           </span>
@@ -50,8 +47,8 @@ const Navbar = () => {
               key={link.to}
               to={link.to}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(link.to)
-                  ? "bg-secondary text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                ? "bg-secondary text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
                 }`}
             >
               {link.label}

@@ -5,19 +5,9 @@ import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, SlidersHorizontal, X } from "lucide-react";
+import { useProducts } from "@/lib/api/hooks/useProducts";
 
 const CATEGORIES = ["All", "Fashion", "Food", "Crafts", "Beauty", "Tech", "Books", "Home"];
-
-const PRODUCTS = [
-  { id: "1", name: "Ankara Print Tote Bag", price: 12500, storeName: "Nyirangarama Fashion", storeSlug: "nyirangarama-fashion", category: "Fashion", rating: 4.8, reviewCount: 24 },
-  { id: "2", name: "Handwoven Agaseke Basket", price: 8000, storeName: "Kigali Crafts", storeSlug: "kigali-crafts", category: "Crafts", rating: 5, reviewCount: 18 },
-  { id: "3", name: "Organic Kinigi Honey (500g)", price: 4500, storeName: "Hills & Harvest", storeSlug: "hills-harvest", category: "Food", rating: 4.6, reviewCount: 41 },
-  { id: "4", name: "Rwandan Coffee Arabica Blend", price: 6800, storeName: "Great Lakes Coffee", storeSlug: "great-lakes-coffee", category: "Food", rating: 4.9, reviewCount: 87 },
-  { id: "5", name: "Imigongo Art Print (A3)", price: 15000, storeName: "Rwanda Art House", storeSlug: "rwanda-art-house", category: "Crafts", rating: 4.7, reviewCount: 13 },
-  { id: "6", name: "Natural Shea Butter Body Cream", price: 3500, storeName: "Ubuzima Beauty", storeSlug: "ubuzima-beauty", category: "Beauty", rating: 4.5, reviewCount: 52 },
-  { id: "7", name: "Hand-Embroidered Table Runner", price: 9500, storeName: "Nyirangarama Fashion", storeSlug: "nyirangarama-fashion", category: "Home", rating: 4.8, reviewCount: 9 },
-  { id: "8", name: "Kinyarwanda Learning Book Set", price: 5500, storeName: "Kanda Books", storeSlug: "kanda-books", category: "Books", rating: 4.3, reviewCount: 27 },
-];
 
 const SORT_OPTIONS = ["Most popular", "Newest", "Price: Low to High", "Price: High to Low"];
 
@@ -27,10 +17,19 @@ const Marketplace = () => {
   const [sortBy, setSortBy] = useState("Most popular");
   const [showFilters, setShowFilters] = useState(false);
 
-  const filtered = PRODUCTS.filter((p) => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.storeName.toLowerCase().includes(search.toLowerCase());
-    const matchCategory = selectedCategory === "All" || p.category === selectedCategory;
+  const { data: allProducts = [], isLoading } = useProducts();
+
+  const filtered = allProducts.filter((p) => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.store_name?.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = selectedCategory === "All" || p.category_name === selectedCategory;
     return matchSearch && matchCategory;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === "Price: Low to High") return Number(a.price) - Number(b.price);
+    if (sortBy === "Price: High to Low") return Number(b.price) - Number(a.price);
+    if (sortBy === "Newest") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    return 0;
   });
 
   return (
@@ -42,7 +41,7 @@ const Marketplace = () => {
         <div className="container py-8">
           <h1 className="text-3xl font-bold text-foreground mb-1">Marketplace</h1>
           <p className="text-muted-foreground">
-            {PRODUCTS.length} products from Kigali's finest sellers
+            {allProducts.length} products from Kigali's finest sellers
           </p>
         </div>
       </div>
@@ -94,11 +93,10 @@ const Marketplace = () => {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                selectedCategory === cat
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${selectedCategory === cat
                   ? "bg-primary text-primary-foreground shadow-card"
                   : "bg-secondary text-secondary-foreground hover:bg-secondary/70"
-              }`}
+                }`}
             >
               {cat}
             </button>
@@ -106,7 +104,11 @@ const Marketplace = () => {
         </div>
 
         {/* Results */}
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <p className="text-muted-foreground">Loading products...</p>
+          </div>
+        ) : sorted.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="text-5xl mb-4">🔍</div>
             <h3 className="font-semibold text-foreground mb-2">No products found</h3>
@@ -124,11 +126,21 @@ const Marketplace = () => {
         ) : (
           <>
             <p className="text-sm text-muted-foreground mb-4">
-              {filtered.length} product{filtered.length !== 1 ? "s" : ""} found
+              {sorted.length} product{sorted.length !== 1 ? "s" : ""} found
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filtered.map((product) => (
-                <ProductCard key={product.id} {...product} />
+              {sorted.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={String(product.id)}
+                  name={product.name}
+                  price={Number(product.price)}
+                  image={product.images?.[0]?.image}
+                  storeName={product.store_name}
+                  storeSlug={product.store_name?.toLowerCase().replace(/\s+/g, '-')}
+                  category={product.category_name}
+                  inStock={product.stock_quantity > 0}
+                />
               ))}
             </div>
           </>
