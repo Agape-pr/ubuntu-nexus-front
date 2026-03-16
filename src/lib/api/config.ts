@@ -21,9 +21,9 @@ export const API_ENDPOINTS = {
     OTP_VERIFY: '/auth/otp/verify/',
 
     // User Authentication
-    LOGIN: '/users/login',
-    REGISTER: '/users/register',
-    TOKEN_REFRESH: '/users/token/refresh',
+    LOGIN: '/users/login/',
+    REGISTER: '/users/register/',
+    TOKEN_REFRESH: '/users/token/refresh/',
   },
 
   // Users
