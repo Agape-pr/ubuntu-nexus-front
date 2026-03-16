@@ -8,7 +8,14 @@
 // Get API base URL from environment variable
 // In Vite, environment variables must be prefixed with VITE_
 // Default assumes backend is at /api/v1/
-const BASE_API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+let BASE_API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+
+// Auto-fix misconfigured production environment variables (e.g. Vercel)
+// If the URL starts with a domain name instead of a protocol or a slash, prepend https://
+if (!BASE_API_URL.startsWith('http://') && !BASE_API_URL.startsWith('https://') && !BASE_API_URL.startsWith('/')) {
+  BASE_API_URL = `https://${BASE_API_URL}`;
+}
+
 export const API_BASE_URL = BASE_API_URL.endsWith('/v1') ? BASE_API_URL : `${BASE_API_URL}/v1`;
 
 // API endpoints matching Swagger documentation
