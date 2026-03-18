@@ -67,4 +67,4 @@ export const API_ENDPOINTS = {
 } as const;
 
 // Request timeout (in milliseconds)
-export const API_TIMEOUT = 30000; // 30 seconds
+export const API_TIMEOUT = 60000; // 60 seconds
