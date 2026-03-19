@@ -140,46 +140,35 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
  * Note: Registration might require OTP verification first
  */
 export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
-  // If there's a file, we MUST use FormData (multipart/form-data)
-  // so Django can upload the file to Cloudinary
-  const hasFile = data.account_type === 'seller' && data.store?.store_logo instanceof File;
-
-  if (hasFile) {
-    const formData = new FormData();
-    formData.append('email', data.email);
-    formData.append('password', data.password);
-    formData.append('account_type', data.account_type);
-
-    if (data.phone_number) {
-      formData.append('phone_number', data.phone_number);
-    }
-
-    if (data.account_type === 'seller' && data.store) {
-      formData.append('store.store_name', data.store.store_name);
-      if (data.store.store_description) {
-        formData.append('store.store_description', data.store.store_description);
-      }
-      if (data.store.store_logo instanceof File) {
-        formData.append('store.store_logo', data.store.store_logo);
-      }
-    }
-
-    return apiClient.post<RegisterResponse>(API_ENDPOINTS.AUTH.REGISTER, formData);
-  }
-
-  // Fallback to JSON payload if no file
+  // Always build nested JSON payload to perfectly match backend expectations
   const payload: Record<string, unknown> = {
     email: data.email,
     password: data.password,
     account_type: data.account_type,
   };
-  if (data.phone_number) payload.phone_number = data.phone_number;
+
+  if (data.phone_number) {
+    payload.phone_number = data.phone_number;
+  }
+
   if (data.account_type === 'seller' && data.store) {
-    payload.store = {
+    // If store_logo is a File object, it cannot be serialized directly into JSON.
+    // For now, we drop it to ensure the JSON strictly matches the requested format.
+    // Base64 encoding a 10MB image would crash standard JSON parsers.
+    const storePayload: Record<string, unknown> = {
       store_name: data.store.store_name,
-      ...(data.store.store_description && { store_description: data.store.store_description }),
-      ...(typeof data.store.store_logo === 'string' && { store_logo: data.store.store_logo }),
     };
+    
+    if (data.store.store_description) {
+      storePayload.store_description = data.store.store_description;
+    }
+    
+    // Only pass store_logo if it's already a URL/string. File objects are ignored in pure JSON.
+    if (typeof data.store.store_logo === 'string') {
+      storePayload.store_logo = data.store.store_logo;
+    }
+
+    payload.store = storePayload;
   }
 
   return apiClient.post<RegisterResponse>(API_ENDPOINTS.AUTH.REGISTER, payload);

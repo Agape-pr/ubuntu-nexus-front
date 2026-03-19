@@ -33,10 +33,11 @@ export const API_ENDPOINTS = {
     TOKEN_REFRESH: '/users/token/refresh',
   },
 
-  // Users
+  // Users & Store Profiles
   USERS: {
     ME: '/users/me/',
     STORE_PUBLIC: (slug: string) => `/users/store/${slug}/`,
+    STORE_UPDATE: '/store/me/',
   },
 
   // Products (Public)

@@ -39,3 +39,25 @@ export const getCurrentUser = async (): Promise<UserProfile> => {
 export const getPublicStore = async (slug: string): Promise<PublicStoreData> => {
     return apiClient.get<PublicStoreData>(API_ENDPOINTS.USERS.STORE_PUBLIC(slug));
 };
+
+export interface UpdateStoreRequest {
+    store_name?: string;
+    store_description?: string;
+    store_logo?: File | string | null;
+}
+
+/**
+ * Update the current seller's store profile
+ */
+export const updateStore = async (data: UpdateStoreRequest): Promise<UserStore> => {
+    const formData = new FormData();
+    if (data.store_name) formData.append('store_name', data.store_name);
+    if (data.store_description !== undefined) {
+        formData.append('store_description', data.store_description || '');
+    }
+    if (data.store_logo instanceof File) {
+        formData.append('store_logo', data.store_logo);
+    }
+
+    return apiClient.patch<UserStore>(API_ENDPOINTS.USERS.STORE_UPDATE, formData);
+};

@@ -32,15 +32,15 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [registrationStep, setRegistrationStep] = useState<RegistrationStep>("form");
   const [form, setForm] = useState<{
-    name: string; email: string; password: string; phone: string; store_description: string; store_logo: File | string | null;
-  }>({ name: "", email: "", password: "", phone: "", store_description: "", store_logo: null });
+    name: string; email: string; password: string; phone: string; store_description: string;
+  }>({ name: "", email: "", password: "", phone: "", store_description: "" });
   const [otp, setOtp] = useState("");
   const [registrationData, setRegistrationData] = useState<{
     email: string;
     password: string;
     account_type: Role;
     phone_number?: string;
-    store?: { store_name: string; store_description?: string; store_logo?: File | string };
+    store?: { store_name: string; store_description?: string };
   } | null>(null);
 
   const loginMutation = useLogin();
@@ -77,7 +77,6 @@ const Auth = () => {
         store: {
           store_name: form.name.trim(),
           ...(form.store_description.trim() && { store_description: form.store_description.trim() }),
-          ...(form.store_logo && { store_logo: form.store_logo }),
         }
       } : {}),
     };
@@ -327,32 +326,7 @@ const Auth = () => {
                       />
                     </div>
 
-                    <div>
-                      <Label htmlFor="store_logo">Store Logo (optional)</Label>
-                      <div className="relative mt-1.5">
-                        <Input
-                          id="store_logo"
-                          type="file"
-                          accept="image/*"
-                          className="h-11 py-2 px-3 rounded-xl border border-input file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 text-sm"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              // Ensure it's under a reasonable size (10MB)
-                              if (file.size > 10 * 1024 * 1024) {
-                                toast.error('Logo must be less than 10MB');
-                                e.target.value = '';
-                                return;
-                              }
-                              // Store the actual File object instead of base64 string for FormData upload
-                              setForm({ ...form, store_logo: file });
-                            } else {
-                              setForm({ ...form, store_logo: null });
-                            }
-                          }}
-                        />
-                      </div>
-                    </div>
+
                   </>
                 )}
 

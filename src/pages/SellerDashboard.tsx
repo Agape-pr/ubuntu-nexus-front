@@ -22,7 +22,7 @@ import {
   Eye,
 } from "lucide-react";
 import { useCreateProduct, useUpdateProduct, useCategories, useSellerProducts } from "@/lib/api/hooks/useProducts";
-import { useCurrentUser } from "@/lib/api/hooks/useUsers";
+import { useCurrentUser, useUpdateStore } from "@/lib/api/hooks/useUsers";
 import { toast } from "sonner";
 import { CloudImage } from "@/components/ui/CloudImage";
 
@@ -73,6 +73,43 @@ const SellerDashboard = () => {
 
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
+  const updateStoreMutation = useUpdateStore();
+
+  // Store Settings State
+  const [storeForm, setStoreForm] = useState({
+    name: "",
+    description: "",
+  });
+  const [storeLogoFile, setStoreLogoFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    if (userProfile?.store) {
+      setStoreForm({
+        name: userProfile.store.store_name || "",
+        description: userProfile.store.store_description || "",
+      });
+    }
+  }, [userProfile]);
+
+  const handleSaveStoreSettings = () => {
+    if (!storeForm.name.trim()) {
+      toast.error("Store name is required.");
+      return;
+    }
+
+    updateStoreMutation.mutate({
+      store_name: storeForm.name.trim(),
+      store_description: storeForm.description.trim() || undefined,
+      ...(storeLogoFile && { store_logo: storeLogoFile })
+    }, {
+      onSuccess: () => {
+        setStoreLogoFile(null); // Clear selected file after upload
+        // The mutation automatically invalidates the currentUser query, refreshing the view
+        const fileInput = document.getElementById('store_logo_input') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+      }
+    });
+  };
 
   const handleSaveProduct = () => {
     if (!productForm.name || !productForm.price || !productForm.stock_quantity || !productForm.category) {
@@ -549,9 +586,52 @@ const SellerDashboard = () => {
               </div>
               <div className="bg-card rounded-2xl border border-border/50 shadow-card p-6 max-w-2xl">
                 <div className="space-y-5">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 border-b border-border/50 pb-5">
+                    {userProfile?.store?.store_logo ? (
+                      <CloudImage 
+                        publicId={userProfile.store.store_logo} 
+                        alt="Store Logo"
+                        width={80}
+                        height={80}
+                        crop="fill"
+                        className="w-20 h-20 rounded-xl object-cover border border-border"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground border border-border">
+                        <Store size={24} />
+                      </div>
+                    )}
+                    <div className="flex-1 w-full">
+                      <Label htmlFor="store_logo_input">Update Store Logo (max 10MB)</Label>
+                      <Input
+                        id="store_logo_input"
+                        type="file"
+                        accept="image/*"
+                        className="mt-1.5 h-11 py-2 px-3 rounded-xl file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 text-sm"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            const file = e.target.files[0];
+                            if (file.size > 10 * 1024 * 1024) {
+                                toast.error('Logo must be less than 10MB');
+                                e.target.value = '';
+                                return;
+                            }
+                            setStoreLogoFile(file);
+                          } else {
+                            setStoreLogoFile(null);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <Label>Store name</Label>
-                    <Input value={storeName} readOnly className="mt-1.5 rounded-xl bg-secondary/50" />
+                    <Input 
+                      value={storeForm.name} 
+                      onChange={e => setStoreForm({...storeForm, name: e.target.value})} 
+                      className="mt-1.5 rounded-xl focus:bg-background" 
+                    />
                   </div>
                   <div>
                     <Label>Store URL</Label>
@@ -565,16 +645,25 @@ const SellerDashboard = () => {
                   <div>
                     <Label>Store description</Label>
                     <Textarea
-                      defaultValue={userProfile?.store?.store_description || "Handcrafted African fashion made with love in Kigali. Authentic Ankara prints, embroidered accessories, and more."}
-                      className="mt-1.5 rounded-xl resize-none"
+                      value={storeForm.description}
+                      onChange={e => setStoreForm({...storeForm, description: e.target.value})}
+                      placeholder="Handcrafted African fashion made with love in Kigali. Authentic Ankara prints, embroidered accessories, and more."
+                      className="mt-1.5 rounded-xl resize-none focus:bg-background"
                       rows={4}
                     />
                   </div>
                   <div>
                     <Label>Location</Label>
-                    <Input defaultValue="Kigali, Rwanda" className="mt-1.5 rounded-xl" />
+                    <Input defaultValue="Kigali, Rwanda" className="mt-1.5 rounded-xl bg-secondary/50" readOnly />
                   </div>
-                  <Button className="rounded-xl">Save changes</Button>
+                  <Button 
+                    className="rounded-xl" 
+                    onClick={handleSaveStoreSettings} 
+                    disabled={updateStoreMutation.isPending}
+                  >
+                    {updateStoreMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    Save changes
+                  </Button>
                 </div>
               </div>
             </div>
