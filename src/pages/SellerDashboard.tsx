@@ -24,6 +24,7 @@ import {
 import { useCreateProduct, useUpdateProduct, useCategories, useSellerProducts } from "@/lib/api/hooks/useProducts";
 import { useCurrentUser } from "@/lib/api/hooks/useUsers";
 import { toast } from "sonner";
+import { CloudImage } from "@/components/ui/CloudImage";
 
 type DashView = "overview" | "products" | "orders" | "store-settings";
 
@@ -168,7 +169,14 @@ const SellerDashboard = () => {
             <div className="flex items-center gap-3 mb-3">
               {userProfile?.store?.store_logo ? (
                 <div className="h-10 w-10 rounded-xl border border-border overflow-hidden flex-shrink-0 bg-white">
-                  <img src={userProfile.store.store_logo} alt={storeName} className="w-full h-full object-cover" />
+                  <CloudImage
+                    publicId={userProfile.store.store_logo as string}
+                    alt={storeName}
+                    width={120}
+                    height={120}
+                    crop="fill"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               ) : (
                 <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
@@ -436,39 +444,53 @@ const SellerDashboard = () => {
                       </Button>
                     </div>
                   ) : (
-                    sellerProducts.map((product) => (
-                      <div key={product.id} className="p-5 flex items-center gap-4">
-                        <div className="h-14 w-14 rounded-xl bg-secondary flex items-center justify-center text-xl flex-shrink-0">
-                          🛍️
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm text-foreground truncate">{product.name}</div>
-                          <div className="text-sm text-muted-foreground">{Number(product.price).toLocaleString()} RWF</div>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${product.stock_quantity === 0 ? statusColors["out-of-stock"] : statusColors["active"]}`}>
-                              {product.stock_quantity === 0 ? "Out of stock" : "Active"}
-                            </span>
-                            <span className="text-xs text-muted-foreground">{product.stock_quantity} in stock</span>
-                            {product.stock_quantity <= 3 && product.stock_quantity > 0 && (
-                              <span className="text-xs text-accent flex items-center gap-1">
-                                <AlertCircle size={11} /> Low stock
-                              </span>
+                    sellerProducts.map((product) => {
+                      const productImage = product.images?.[0]?.image;
+                      return (
+                        <div key={product.id} className="p-5 flex items-center gap-4">
+                          <div className="h-14 w-14 rounded-xl border border-border overflow-hidden flex-shrink-0 bg-card flex items-center justify-center">
+                            {productImage ? (
+                              <CloudImage
+                                publicId={productImage}
+                                alt={product.name}
+                                width={80}
+                                height={80}
+                                crop="fill"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-xl">🛍️</span>
                             )}
                           </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm text-foreground truncate">{product.name}</div>
+                            <div className="text-sm text-muted-foreground">{Number(product.price).toLocaleString()} RWF</div>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${product.stock_quantity === 0 ? statusColors["out-of-stock"] : statusColors["active"]}`}>
+                                {product.stock_quantity === 0 ? "Out of stock" : "Active"}
+                              </span>
+                              <span className="text-xs text-muted-foreground">{product.stock_quantity} in stock</span>
+                              {product.stock_quantity <= 3 && product.stock_quantity > 0 && (
+                                <span className="text-xs text-accent flex items-center gap-1">
+                                  <AlertCircle size={11} /> Low stock
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex gap-1 flex-shrink-0">
+                            <button
+                              onClick={() => handleEditClick(product)}
+                              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                            >
+                              <Edit3 size={14} />
+                            </button>
+                            <button className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all">
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex gap-1 flex-shrink-0">
-                          <button
-                            onClick={() => handleEditClick(product)}
-                            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-                          >
-                            <Edit3 size={14} />
-                          </button>
-                          <button className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all">
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>

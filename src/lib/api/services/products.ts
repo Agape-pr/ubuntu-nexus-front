@@ -48,6 +48,7 @@ export interface SellerProduct {
   price: string; // API returns as string
   stock_quantity: number;
   is_active: boolean;
+  images?: ProductImage[];
 }
 
 // Product List Query Parameters

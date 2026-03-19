@@ -338,9 +338,9 @@ const Auth = () => {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              // Ensure it's under a reasonable size (2MB)
-                              if (file.size > 2 * 1024 * 1024) {
-                                toast.error('Logo must be less than 2MB');
+                              // Ensure it's under a reasonable size (10MB)
+                              if (file.size > 10 * 1024 * 1024) {
+                                toast.error('Logo must be less than 10MB');
                                 e.target.value = '';
                                 return;
                               }

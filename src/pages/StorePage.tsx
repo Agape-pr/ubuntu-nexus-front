@@ -7,6 +7,7 @@ import { MapPin, Star, Package, Heart, Share2, MessageCircle } from "lucide-reac
 
 import { Loader2 } from "lucide-react";
 import { usePublicStore } from "@/lib/api/hooks/useUsers";
+import { CloudImage } from "@/components/ui/CloudImage";
 
 const StorePage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -59,7 +60,15 @@ const StorePage = () => {
             {/* Store Avatar / Logo */}
             {store.store_logo ? (
               <div className="h-24 w-24 rounded-2xl border-2 border-primary-foreground/20 flex items-center justify-center overflow-hidden flex-shrink-0 bg-white">
-                <img src={store.store_logo} alt={store.store_name} className="w-full h-full object-cover" />
+                <CloudImage
+                  publicId={store.store_logo as string}
+                  alt={store.store_name}
+                  width={200}
+                  height={200}
+                  crop="fill"
+                  priority
+                  className="w-full h-full object-cover"
+                />
               </div>
             ) : (
               <div className="h-24 w-24 rounded-2xl bg-primary-foreground/10 border-2 border-primary-foreground/20 flex items-center justify-center text-4xl flex-shrink-0 backdrop-blur-sm font-bold text-primary-foreground">

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Star, ShoppingCart, Heart, Store } from "lucide-react";
+import { CloudImage } from "@/components/ui/CloudImage";
 
 interface ProductCardProps {
   id: string;
@@ -35,9 +36,11 @@ const ProductCard = ({
       {/* Image */}
       <div className="relative h-52 bg-secondary overflow-hidden">
         {image ? (
-          <img
-            src={image}
+          <CloudImage
+            publicId={image}
             alt={name}
+            width={400}
+            crop="fill"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
