@@ -1,4 +1,7 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Menu, X, ShoppingBag, Bell, Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +11,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const location = useLocation();
+  const pathname = usePathname();
   const logoutMutation = useLogout();
 
   useEffect(() => {
@@ -19,7 +22,7 @@ const Navbar = () => {
     checkAuth();
     window.addEventListener('storage', checkAuth);
     return () => window.removeEventListener('storage', checkAuth);
-  }, [location]);
+  }, [pathname]);
 
   const navLinks = [
     { label: "Marketplace", to: "/marketplace" },
@@ -28,13 +31,13 @@ const Navbar = () => {
     { label: "How it works", to: "/#how-it-works" },
   ];
 
-  const isActive = (to: string) => location.pathname === to;
+  const isActive = (to: string) => pathname === to;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/80 backdrop-blur-md">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-14 items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group">
+        <Link href="/" className="flex items-center gap-2.5 group">
           <span className="font-bold text-lg text-foreground tracking-tight">
             Ubuntu<span className="text-accent">Now</span>
           </span>
@@ -45,7 +48,7 @@ const Navbar = () => {
           {navLinks.map((link) => (
             <Link
               key={link.to}
-              to={link.to}
+              href={link.to}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(link.to)
                 ? "bg-secondary text-foreground"
                 : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
@@ -64,7 +67,7 @@ const Navbar = () => {
           <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200">
             <Bell size={18} />
           </button>
-          <Link to="/marketplace">
+          <Link href="/marketplace">
             <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 relative">
               <ShoppingBag size={18} />
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-accent" />
@@ -74,7 +77,7 @@ const Navbar = () => {
           {isLoggedIn ? (
             <>
               {userRole === 'seller' && (
-                <Link to="/dashboard">
+                <Link href="/dashboard">
                   <Button variant="ghost" size="sm" className="text-sm font-medium gap-1.5">
                     <User size={16} /> Dashboard
                   </Button>
@@ -86,12 +89,12 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/auth">
+              <Link href="/auth">
                 <Button variant="ghost" size="sm" className="text-sm font-medium">
                   Sign in
                 </Button>
               </Link>
-              <Link to="/auth?tab=register">
+              <Link href="/auth?tab=register">
                 <Button size="sm" className="text-sm font-medium rounded-xl">
                   Get started
                 </Button>
@@ -116,7 +119,7 @@ const Navbar = () => {
             {navLinks.map((link) => (
               <Link
                 key={link.to}
-                to={link.to}
+                href={link.to}
                 onClick={() => setIsOpen(false)}
                 className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
               >
@@ -127,7 +130,7 @@ const Navbar = () => {
               {isLoggedIn ? (
                 <>
                   {userRole === 'seller' && (
-                    <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+                    <Link href="/dashboard" onClick={() => setIsOpen(false)}>
                       <Button variant="outline" className="w-full gap-1.5"><User size={16} /> Dashboard</Button>
                     </Link>
                   )}
@@ -137,10 +140,10 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <Link to="/auth" onClick={() => setIsOpen(false)}>
+                  <Link href="/auth" onClick={() => setIsOpen(false)}>
                     <Button variant="outline" className="w-full">Sign in</Button>
                   </Link>
-                  <Link to="/auth?tab=register" onClick={() => setIsOpen(false)}>
+                  <Link href="/auth?tab=register" onClick={() => setIsOpen(false)}>
                     <Button className="w-full">Get started free</Button>
                   </Link>
                 </>

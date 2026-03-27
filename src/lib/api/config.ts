@@ -8,7 +8,7 @@
 // Get API base URL from environment variable
 // In Vite, environment variables must be prefixed with VITE_
 // Default assumes backend is at /api/v1/
-let BASE_API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+let BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
 
 // Auto-fix misconfigured production environment variables (e.g. Vercel)
 // If the URL starts with a domain name instead of a protocol or a slash, prepend https://
@@ -37,7 +37,7 @@ export const API_ENDPOINTS = {
   USERS: {
     ME: '/users/me/',
     STORE_PUBLIC: (slug: string) => `/users/store/${slug}/`,
-    STORE_UPDATE: '/store/me/',
+    STORE_UPDATE: '/users/store/me/',
   },
 
   // Products (Public)

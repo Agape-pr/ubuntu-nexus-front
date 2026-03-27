@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
+
 import { Twitter, Instagram, Linkedin, Mail } from "lucide-react";
 
 const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground">
-      <div className="container py-16">
+      <div className="container py-10 md:py-14">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="col-span-1 md:col-span-1">
@@ -20,7 +20,7 @@ const Footer = () => {
               {[Twitter, Instagram, Linkedin, Mail].map((Icon, i) => (
                 <button
                   key={i}
-                  className="h-9 w-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+                  className="h-8 w-8 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
                 >
                   <Icon size={16} />
                 </button>
@@ -61,7 +61,7 @@ const Footer = () => {
           ))}
         </div>
 
-        <div className="mt-14 pt-6 border-t border-primary-foreground/15 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mt-10 pt-6 border-t border-primary-foreground/15 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-primary-foreground/40">
             © 2025 UbuntuNow Ltd. Built with pride in Kigali, Rwanda 🇷🇼
           </p>

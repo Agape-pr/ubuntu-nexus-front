@@ -1,5 +1,8 @@
-import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+"use client";
+
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,8 +25,8 @@ type RegistrationStep = "form" | "otp";
  * Backend requires: Register FIRST (user must exist), then Send OTP, then Verify
  */
 
-const Auth = () => {
-  const [searchParams] = useSearchParams();
+const AuthContent = () => {
+  const searchParams = useSearchParams();
   const defaultTab = (searchParams.get("tab") as Tab) || "login";
   const defaultRole = (searchParams.get("role") as Role) || "buyer";
 
@@ -133,7 +136,7 @@ const Auth = () => {
         <div className="absolute top-0 right-0 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
         <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-emerald/10 blur-3xl" />
 
-        <Link to="/" className="flex items-center gap-2.5 z-10 relative">
+        <Link href="/" className="flex items-center gap-2.5 z-10 relative">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground font-bold">
             UN
           </div>
@@ -164,7 +167,7 @@ const Auth = () => {
       {/* Right panel — form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-16 overflow-y-auto">
         <div className="max-w-md w-full mx-auto">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
             <ArrowLeft size={15} />
             Back to home
           </Link>
@@ -466,6 +469,14 @@ const Auth = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const Auth = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <AuthContent />
+    </Suspense>
   );
 };
 

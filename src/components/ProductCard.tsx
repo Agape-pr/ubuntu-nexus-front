@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Star, ShoppingCart, Heart, Store } from "lucide-react";
 import { CloudImage } from "@/components/ui/CloudImage";
 
@@ -41,7 +41,7 @@ const ProductCard = ({
             alt={name}
             width={400}
             crop="fill"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -68,11 +68,11 @@ const ProductCard = ({
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-3.5">
         {/* Store link */}
         {storeName && storeSlug && (
           <Link
-            to={`/store/${storeSlug}`}
+            href={`/store/${storeSlug}`}
             className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-accent transition-colors mb-2"
           >
             <Store size={11} />
@@ -80,7 +80,7 @@ const ProductCard = ({
           </Link>
         )}
 
-        <Link to={`/product/${id}`}>
+        <Link href={`/product/${id}`}>
           <h3 className="font-semibold text-sm text-foreground line-clamp-2 hover:text-accent transition-colors leading-tight mb-2">
             {name}
           </h3>

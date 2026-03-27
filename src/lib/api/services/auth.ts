@@ -178,7 +178,7 @@ export const register = async (data: RegisterRequest): Promise<RegisterResponse>
  * Refresh access token using refresh token
  */
 export const refreshToken = async (refreshToken?: string): Promise<TokenRefreshResponse> => {
-  const refresh = refreshToken || localStorage.getItem('refresh_token');
+  const refresh = refreshToken || (typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null);
 
   if (!refresh) {
     throw new Error('No refresh token available');

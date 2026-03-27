@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 env
 Ubuntunow-now-BE/
+
+# Next.js
+.next
+.env*

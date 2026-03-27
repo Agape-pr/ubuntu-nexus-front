@@ -1,7 +1,7 @@
-const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
 if (!CLOUD_NAME) {
-  throw new Error("VITE_CLOUDINARY_CLOUD_NAME is not set.");
+  throw new Error("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME is not set.");
 }
 
 export type CloudinaryCrop = "fill" | "fit" | "scale" | "thumb";

@@ -1,4 +1,7 @@
-import { useParams, Link } from "react-router-dom";
+"use client";
+
+import { useParams } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
@@ -10,7 +13,8 @@ import { usePublicStore } from "@/lib/api/hooks/useUsers";
 import { CloudImage } from "@/components/ui/CloudImage";
 
 const StorePage = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const params = useParams();
+  const slug = params?.slug as string;
   const { data: store, isLoading, error } = usePublicStore(slug);
 
   if (isLoading) {
@@ -36,7 +40,7 @@ const StorePage = () => {
           <p className="text-muted-foreground mb-6">
             This store doesn't exist or may have moved.
           </p>
-          <Link to="/marketplace">
+          <Link href="/marketplace">
             <Button className="rounded-xl">Browse marketplace</Button>
           </Link>
         </div>

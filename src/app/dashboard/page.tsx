@@ -1,5 +1,8 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,14 +46,14 @@ const statusColors: Record<string, string> = {
 };
 
 const SellerDashboard = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     const role = localStorage.getItem('user_role');
     if (role !== 'seller') {
-      navigate('/marketplace');
+      router.push('/marketplace');
     }
-  }, [navigate]);
+  }, [router]);
 
   const { data: userProfile, isLoading: isUserLoading } = useCurrentUser();
   const { data: categories, isLoading: isCategoriesLoading } = useCategories();
@@ -168,7 +171,7 @@ const SellerDashboard = () => {
   // Extract store details from API or fallback to placeholder
   const storeName = userProfile?.store?.store_name || "Nyirangarama Fashion";
   const storeSlug = userProfile?.store?.slug || "nyirangarama-fashion";
-  const storeUrl = `${window.location.origin}/store/${storeSlug}`;
+  const storeUrl = typeof window !== 'undefined' ? `${window.location.origin}/store/${storeSlug}` : `https://ubuntunow.com/store/${storeSlug}`;
   const storeUrlDisplay = `ubuntunow.com/store/${storeSlug}`;
   const storeInitials = storeName.substring(0, 2).toUpperCase();
 
@@ -253,7 +256,7 @@ const SellerDashboard = () => {
           </nav>
 
           <div className="p-4 border-t border-border">
-            <Link to={`/store/${storeSlug}`} target="_blank">
+            <Link href={`/store/${storeSlug}`} target="_blank">
               <Button variant="outline" className="w-full rounded-xl text-xs gap-2">
                 <ExternalLink size={13} />
                 View my store
@@ -297,7 +300,7 @@ const SellerDashboard = () => {
                       {copied ? <CheckCircle size={14} /> : <Copy size={14} />}
                       {copied ? "Copied!" : "Copy link"}
                     </Button>
-                    <Link to={`/store/${storeSlug}`}>
+                    <Link href={`/store/${storeSlug}`}>
                       <Button size="sm" variant="outline" className="rounded-xl border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 gap-2">
                         <Eye size={14} />
                         Preview

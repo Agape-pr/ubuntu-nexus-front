@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import * as authService from '../services/auth';
 import type {
@@ -52,7 +52,7 @@ export const useResendOTP = () => {
  * Backend returns tokens on success - user is logged in after verify
  */
 export const useVerifyOTP = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: (data: VerifyOTPRequest) => authService.verifyOTP(data),
@@ -60,7 +60,7 @@ export const useVerifyOTP = () => {
       toast.success('Email verified! Welcome to UbuntuNow.');
       // Tokens are stored by authService - navigate based on role
       const role = response?.user?.role;
-      navigate(role === 'seller' ? '/dashboard' : '/marketplace');
+      router.push(role === 'seller' ? '/dashboard' : '/marketplace');
     },
     onError: (error: { message?: string }) => {
       toast.error(error.message || 'Invalid OTP. Please try again.');
@@ -73,7 +73,7 @@ export const useVerifyOTP = () => {
  * Returns access and refresh tokens
  */
 export const useLogin = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -81,8 +81,8 @@ export const useLogin = () => {
     onSuccess: (response) => {
       // Tokens are stored automatically by the service
       toast.success('Welcome back!');
-      const role = response.user?.role || localStorage.getItem('user_role');
-      navigate(role === 'seller' ? '/dashboard' : '/marketplace');
+      const role = response.user?.role || (typeof window !== 'undefined' ? localStorage.getItem('user_role') : null);
+      router.push(role === 'seller' ? '/dashboard' : '/marketplace');
     },
     onError: (error: { message?: string }) => {
       toast.error(error.message || 'Login failed. Please check your credentials.');
@@ -136,7 +136,7 @@ export const useRefreshToken = () => {
  * Hook for user logout
  */
 export const useLogout = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -144,12 +144,12 @@ export const useLogout = () => {
     onSuccess: () => {
       queryClient.clear();
       toast.success('Logged out successfully');
-      navigate('/');
+      router.push('/');
     },
     onError: () => {
       // Even if API call fails, clear local state
       queryClient.clear();
-      navigate('/');
+      router.push('/');
     },
   });
 };

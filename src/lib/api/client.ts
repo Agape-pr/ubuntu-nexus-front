@@ -29,6 +29,7 @@ class ApiClient {
    * Get access token from localStorage
    */
   private getAccessToken(): string | null {
+    if (typeof window === 'undefined') return null;
     return localStorage.getItem('access_token');
   }
 
@@ -36,6 +37,7 @@ class ApiClient {
    * Get refresh token from localStorage
    */
   private getRefreshToken(): string | null {
+    if (typeof window === 'undefined') return null;
     return localStorage.getItem('refresh_token');
   }
 
@@ -43,12 +45,14 @@ class ApiClient {
    * Set authentication tokens in localStorage
    */
   setTokens(access: string, refresh?: string, role?: string): void {
-    localStorage.setItem('access_token', access);
-    if (refresh) {
-      localStorage.setItem('refresh_token', refresh);
-    }
-    if (role) {
-      localStorage.setItem('user_role', role);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('access_token', access);
+      if (refresh) {
+        localStorage.setItem('refresh_token', refresh);
+      }
+      if (role) {
+        localStorage.setItem('user_role', role);
+      }
     }
   }
 
@@ -56,9 +60,11 @@ class ApiClient {
    * Remove authentication tokens from localStorage
    */
   removeTokens(): void {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_role');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_role');
+    }
   }
 
   /**
@@ -168,7 +174,7 @@ class ApiClient {
         const data = await response.json();
         if (data.access) {
           // Keep the existing refresh token, just update the access token
-          this.setTokens(data.access, refresh, localStorage.getItem('user_role') || undefined);
+          this.setTokens(data.access, refresh, typeof window !== 'undefined' ? (localStorage.getItem('user_role') || undefined) : undefined);
           return true;
         }
       }
