@@ -8,6 +8,7 @@ import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import {
   MapPin, Star, Package, Heart, Share2, MessageCircle, ShoppingBag,
+  AlertCircle,
 } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { usePublicStore } from "@/lib/api/hooks/useUsers";
@@ -44,20 +45,43 @@ const StorePage = () => {
     );
   }
 
-  // ── Store not found ────────────────────────────────────────
+  // ── Store not found / API error ────────────────────────────
   if (error || !store) {
+    const isNetworkError = error && (!("status" in error) || (error as any).status === 0 || (error as any).status === 408);
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-4">
-          <div className="text-6xl">🏪</div>
-          <h2 className="text-2xl font-bold text-foreground">Store not found</h2>
-          <p className="text-muted-foreground max-w-sm">
-            This store doesn&apos;t exist or may have moved. Try browsing the marketplace for other sellers.
-          </p>
-          <Link href="/marketplace">
-            <Button className="rounded-xl">Browse marketplace</Button>
-          </Link>
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-5">
+          <div className="h-20 w-20 rounded-3xl bg-muted flex items-center justify-center">
+            {isNetworkError ? (
+              <AlertCircle className="h-10 w-10 text-muted-foreground" />
+            ) : (
+              <ShoppingBag className="h-10 w-10 text-muted-foreground" />
+            )}
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">
+              {isNetworkError ? "Connection problem" : "Store not found"}
+            </h2>
+            <p className="text-muted-foreground max-w-sm">
+              {isNetworkError
+                ? "We couldn't reach the server right now. Please check your connection and try again."
+                : "This store doesn't exist or may have moved. Try browsing the marketplace for other sellers."}
+            </p>
+          </div>
+          <div className="flex gap-3 flex-wrap justify-center">
+            {isNetworkError && (
+              <Button onClick={() => window.location.reload()} className="rounded-xl gap-2">
+                Try again
+              </Button>
+            )}
+            <Link href="/marketplace">
+              <Button variant="outline" className="rounded-xl gap-2">
+                <ShoppingBag size={15} />
+                Browse marketplace
+              </Button>
+            </Link>
+          </div>
         </div>
         <Footer />
       </div>
@@ -95,8 +119,8 @@ const StorePage = () => {
                 />
               </div>
             ) : (
-              <div className="h-24 w-24 rounded-2xl bg-primary-foreground/10 border-2 border-primary-foreground/20 flex items-center justify-center text-4xl flex-shrink-0 backdrop-blur-sm font-bold text-primary-foreground shadow-lg">
-                {store.store_name?.substring(0, 2).toUpperCase()}
+              <div className="h-24 w-24 rounded-2xl bg-primary-foreground/10 border-2 border-primary-foreground/20 flex items-center justify-center text-3xl flex-shrink-0 backdrop-blur-sm font-bold text-primary-foreground shadow-lg select-none">
+                {store.store_name?.substring(0, 2).toUpperCase() || "??"}
               </div>
             )}
 
@@ -171,54 +195,46 @@ const StorePage = () => {
         {!hasProducts ? (
           /* ── Empty State ── */
           <div className="flex flex-col items-center justify-center py-24 text-center gap-6">
-            {/* Illustration */}
+            {/* Logo recap + illustration */}
             <div className="relative">
-              <div className="h-32 w-32 rounded-3xl bg-primary/8 flex items-center justify-center mb-2 mx-auto">
-                <ShoppingBag className="h-16 w-16 text-primary/30" />
+              <div className="h-28 w-28 rounded-3xl bg-primary/8 flex items-center justify-center mx-auto">
+                {store.store_logo ? (
+                  <div className="h-20 w-20 rounded-2xl border border-border overflow-hidden bg-muted shadow-sm">
+                    <CloudImage
+                      publicId={store.store_logo as string}
+                      alt={store.store_name}
+                      width={80}
+                      height={80}
+                      crop="fill"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-20 w-20 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-2xl text-primary select-none">
+                    {store.store_name?.substring(0, 2).toUpperCase() || "?"}
+                  </div>
+                )}
               </div>
               <div className="absolute -top-2 -right-2 h-10 w-10 rounded-2xl bg-amber-100 flex items-center justify-center shadow-sm">
                 <span className="text-xl">🌱</span>
               </div>
             </div>
 
-            {/* Store name + logo recap */}
-            <div className="flex flex-col items-center gap-2">
-              {store.store_logo ? (
-                <div className="h-14 w-14 rounded-2xl border border-border overflow-hidden bg-muted shadow-sm">
-                  <CloudImage
-                    publicId={store.store_logo as string}
-                    alt={store.store_name}
-                    width={56}
-                    height={56}
-                    crop="fill"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-xl text-primary">
-                  {store.store_name?.substring(0, 2).toUpperCase()}
-                </div>
-              )}
-              <span className="text-sm font-semibold text-muted-foreground">{store.store_name}</span>
-            </div>
-
             <div>
               <h3 className="text-2xl font-bold text-foreground mb-2">
-                No products yet
+                {store.store_name} — Coming soon!
               </h3>
               <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-                This seller is still setting up their store. Check back soon — great things are coming!
+                This seller hasn't added any products yet. Check back soon — great things are coming!
               </p>
             </div>
 
-            <div className="flex gap-3 flex-wrap justify-center">
-              <Link href="/marketplace">
-                <Button variant="outline" className="rounded-xl gap-2">
-                  <ShoppingBag size={15} />
-                  Browse Marketplace
-                </Button>
-              </Link>
-            </div>
+            <Link href="/marketplace">
+              <Button variant="outline" className="rounded-xl gap-2">
+                <ShoppingBag size={15} />
+                Browse Marketplace
+              </Button>
+            </Link>
           </div>
         ) : (
           /* ── Product Grid ── */

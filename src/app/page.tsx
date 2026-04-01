@@ -11,12 +11,81 @@ import Link from "next/link";
 import { useProducts } from "@/lib/api/hooks/useProducts";
 import {
   ArrowRight, Store, ShieldCheck, Zap, Star, MapPin, 
-  CheckCircle, ThumbsUp, CreditCard, PackageCheck, Sparkles 
+  CheckCircle, ThumbsUp, CreditCard, PackageCheck, Sparkles,
+  Heart, ShoppingCart,
 } from "lucide-react";
+
+// ── Seeded Kigali market products (shown when API returns nothing) ──────────
+const SEED_PRODUCTS = [
+  {
+    id: "seed-1",
+    name: "Ankara Print Tote Bag",
+    price: 12500,
+    category: "Bags & Leather",
+    image: "/products/ankara-bag.png",
+    storeName: "Kigali Crafts",
+    storeSlug: "kigali-crafts",
+    inStock: true,
+  },
+  {
+    id: "seed-2",
+    name: "Handmade Beaded Necklace Set",
+    price: 8500,
+    category: "Jewelry & Accessories",
+    image: "/products/beaded-necklace.png",
+    storeName: "Umucyo Jewels",
+    storeSlug: "umucyo-jewels",
+    inStock: true,
+  },
+  {
+    id: "seed-3",
+    name: "Organic Shea Butter Cream",
+    price: 5500,
+    category: "Beauty & Skincare",
+    image: "/products/shea-butter.png",
+    storeName: "Uruto Organics",
+    storeSlug: "uruto-organics",
+    inStock: true,
+  },
+  {
+    id: "seed-4",
+    name: "Rwanda Single-Origin Coffee",
+    price: 7000,
+    category: "Food & Spices",
+    image: "/products/coffee.png",
+    storeName: "Akagera Roasters",
+    storeSlug: "akagera-roasters",
+    inStock: true,
+  },
+  {
+    id: "seed-5",
+    name: "Traditional Peace Basket",
+    price: 15000,
+    category: "Handmade Crafts",
+    image: "/products/basket.png",
+    storeName: "Inzozi Baskets",
+    storeSlug: "inzozi-baskets",
+    inStock: true,
+  },
+  {
+    id: "seed-6",
+    name: "Hand-Carved Wood Sculpture",
+    price: 22000,
+    category: "Art & Paintings",
+    image: "/products/wood-carving.png",
+    storeName: "Ubumuntu Arts",
+    storeSlug: "ubumuntu-arts",
+    inStock: true,
+  },
+];
 
 export default function Index() {
   const { data: products = [], isLoading } = useProducts();
-  const recentProducts = products.slice(0, 4);
+
+  // Show API products if available, fall back to seeded data
+  const displayProducts = products.length > 0 ? products.slice(0, 6) : SEED_PRODUCTS;
+  const isSeeded = products.length === 0 && !isLoading;
+
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -237,7 +306,9 @@ export default function Index() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Fresh from Kigali</h2>
-              <p className="text-muted-foreground mt-2">Discover curated local products</p>
+              <p className="text-muted-foreground mt-2">
+                {isSeeded ? "Curated products from your local community" : "Discover products from Kigali's finest sellers"}
+              </p>
             </div>
             <Link href="/marketplace">
               <Button variant="outline" className="rounded-full bg-card hover:bg-secondary gap-2 transition-all border-border shadow-sm hover:shadow-md">
@@ -246,10 +317,10 @@ export default function Index() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {isLoading ? (
               <>
-                {[1,2,3,4].map(i => (
+                {[1,2,3,4,5,6].map(i => (
                   <div key={i} className="rounded-3xl bg-card border border-border shadow-sm overflow-hidden animate-pulse">
                     <div className="h-52 bg-secondary" />
                     <div className="p-4 space-y-2">
@@ -260,29 +331,74 @@ export default function Index() {
                   </div>
                 ))}
               </>
-            ) : recentProducts.length > 0 ? (
-              recentProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={String(product.id)}
-                  name={product.name}
-                  price={Number(product.price)}
-                  image={product.images?.[0]?.image}
-                  storeName={product.store_name}
-                  storeSlug={product.store_name?.toLowerCase().replace(/\s+/g, '-')}
-                  category={product.category_name}
-                  inStock={product.stock_quantity > 0}
-                />
-              ))
             ) : (
-              <div className="col-span-full text-center text-muted-foreground py-20 bg-card rounded-3xl border border-dashed border-border shadow-sm">
-                <div className="text-4xl mb-3">🛍️</div>
-                <p>No products featured yet. Be the first to add one!</p>
-              </div>
+              displayProducts.map((product) => {
+                // Seeded products have a plain image path; API products have Cloudinary public IDs
+                const isSeed = product.id.toString().startsWith("seed-");
+                return (
+                  <div key={product.id} className="group bg-card rounded-2xl shadow-card hover:shadow-lift transition-all duration-300 overflow-hidden border border-border/50 hover:border-border">
+                    {/* Image */}
+                    <div className="relative h-56 bg-secondary overflow-hidden">
+                      {isSeed ? (
+                        <img
+                          src={(product as any).image}
+                          alt={product.name}
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                        />
+                      ) : (
+                        <ProductCard
+                          id={String(product.id)}
+                          name={product.name}
+                          price={Number(product.price)}
+                          image={(product as any).images?.[0]?.image}
+                          storeName={(product as any).store_name}
+                          storeSlug={(product as any).store_name?.toLowerCase().replace(/\s+/g, "-")}
+                          category={(product as any).category_name}
+                          inStock={(product as any).stock_quantity > 0}
+                        />
+                      )}
+                      {isSeed && (
+                        <>
+                          {/* Category badge */}
+                          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-primary/90 text-primary-foreground text-xs font-medium backdrop-blur-sm">
+                            {product.category}
+                          </span>
+                          {/* Wishlist btn */}
+                          <button className="absolute top-3 right-3 h-8 w-8 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-rose-500 transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-card">
+                            <Heart size={14} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    {isSeed && (
+                      <div className="p-3.5">
+                        {/* Store link */}
+                        <Link href={`/store/${product.storeSlug}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-accent transition-colors mb-2">
+                          <Store size={11} />
+                          <span>{product.storeName}</span>
+                        </Link>
+                        <h3 className="font-semibold text-sm text-foreground line-clamp-2 hover:text-accent transition-colors leading-tight mb-3">
+                          {product.name}
+                        </h3>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-lg font-bold text-foreground">{new Intl.NumberFormat("en-RW").format(product.price)}</span>
+                            <span className="text-xs text-muted-foreground ml-1">RWF</span>
+                          </div>
+                          <button className="h-9 w-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/80 transition-all duration-200 shadow-card hover:shadow-ambient">
+                            <ShoppingCart size={15} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
       </section>
+
 
       {/* 5. SELLER CTA MODAL STYLE */}
       <section className="py-20 md:py-32 bg-background relative overflow-hidden flex items-center justify-center">
