@@ -74,7 +74,7 @@ export default function Index() {
                       <div key={i} className="h-6 w-6 rounded-full bg-secondary border border-background flex items-center justify-center text-[10px] z-10 shadow-sm">{emoji}</div>
                     ))}
                   </div>
-                  <span className="ml-1"><strong className="text-foreground">2.4k+</strong> locals</span>
+                  <span className="ml-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald/10 border border-emerald/20 text-xs font-semibold text-emerald-700">🌱 Early Access — Be a founding seller</span>
                 </div>
               </div>
             </div>
@@ -248,10 +248,18 @@ export default function Index() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {isLoading ? (
-              <div className="col-span-full text-center text-muted-foreground py-20 flex flex-col items-center">
-                <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin mb-4" />
-                Loading fresh products...
-              </div>
+              <>
+                {[1,2,3,4].map(i => (
+                  <div key={i} className="rounded-3xl bg-card border border-border shadow-sm overflow-hidden animate-pulse">
+                    <div className="h-52 bg-secondary" />
+                    <div className="p-4 space-y-2">
+                      <div className="h-4 bg-secondary rounded-full w-3/4" />
+                      <div className="h-3 bg-secondary rounded-full w-1/2" />
+                      <div className="h-5 bg-secondary rounded-full w-1/3 mt-2" />
+                    </div>
+                  </div>
+                ))}
+              </>
             ) : recentProducts.length > 0 ? (
               recentProducts.map((product) => (
                 <ProductCard

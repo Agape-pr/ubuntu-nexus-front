@@ -32,27 +32,37 @@ const Footer = () => {
           {[
             {
               title: "Platform",
-              links: ["Marketplace", "Sell on UbuntuNow", "How it works", "Pricing"],
+              links: [
+                { label: "Marketplace", href: "/marketplace" },
+                { label: "Start selling", href: "/auth?tab=register&role=seller" },
+              ],
             },
             {
               title: "Company",
-              links: ["About us", "Blog", "Careers", "Press"],
+              links: [
+                { label: "About UbuntuNow", href: "/about" },
+                { label: "Contact us", href: "/contact" },
+              ],
             },
             {
-              title: "Support",
-              links: ["Help center", "Contact us", "Privacy policy", "Terms of service"],
+              title: "Legal",
+              links: [
+                { label: "Privacy policy", href: "/privacy-policy" },
+                { label: "Terms of service", href: "/terms-of-service" },
+                { label: "Refund policy", href: "/refund-policy" },
+              ],
             },
           ].map((group) => (
             <div key={group.title}>
               <h4 className="font-semibold text-sm text-primary-foreground mb-4">{group.title}</h4>
               <ul className="space-y-2.5">
                 {group.links.map((link) => (
-                  <li key={link}>
+                  <li key={link.label}>
                     <a
-                      href="#"
+                      href={link.href}
                       className="text-sm text-primary-foreground/60 hover:text-primary-foreground transition-colors duration-200"
                     >
-                      {link}
+                      {link.label}
                     </a>
                   </li>
                 ))}

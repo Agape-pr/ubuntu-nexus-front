@@ -15,8 +15,8 @@ const dmSerifDisplay = DM_Serif_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Ubuntu Nexus",
-  description: "Ubuntu Nexus Marketplace",
+  title: "UbuntuNow — Buy & Sell Locally in Rwanda",
+  description: "UbuntuNow is Rwanda's trusted marketplace. Buy unique local products and sell online in minutes with escrow-protected payments.",
 };
 
 export default function RootLayout({
