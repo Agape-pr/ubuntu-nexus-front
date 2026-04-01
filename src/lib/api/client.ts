@@ -70,7 +70,7 @@ class ApiClient {
   /**
    * Get headers for API requests
    */
-  private getHeaders(customHeaders?: Record<string, string>, isFormData: boolean = false): HeadersInit {
+  private getHeaders(customHeaders?: Record<string, string>, isFormData: boolean = false, skipAuth: boolean = false): HeadersInit {
     const headers: Record<string, string> = {
       ...customHeaders,
     };
@@ -82,9 +82,11 @@ class ApiClient {
       headers['Content-Type'] = 'application/json';
     }
 
-    const token = this.getAccessToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    if (!skipAuth) {
+      const token = this.getAccessToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
     }
 
     return headers;
@@ -281,6 +283,39 @@ class ApiClient {
       ...options,
       method: 'GET',
     });
+  }
+
+  /**
+   * Public GET request — no Authorization header sent.
+   * Use for endpoints that are publicly accessible without a token.
+   */
+  async publicGet<T>(endpoint: string): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getHeaders(undefined, false, true),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (!response.ok) {
+        const error = await this.handleError(response);
+        throw error;
+      }
+      if (response.status === 204 || response.headers.get('content-length') === '0') {
+        return null as T;
+      }
+      return (await response.json()) as T;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw { message: 'Request timeout. Please try again.', status: 408 };
+      }
+      if (error && typeof error === 'object' && 'message' in error) throw error;
+      throw { message: 'Network error. Please check your connection.', status: 0 };
+    }
   }
 
   /**

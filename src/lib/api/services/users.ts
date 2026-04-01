@@ -37,7 +37,7 @@ export const getCurrentUser = async (): Promise<UserProfile> => {
  * Get a public store's profile and products by slug
  */
 export const getPublicStore = async (slug: string): Promise<PublicStoreData> => {
-    return apiClient.get<PublicStoreData>(API_ENDPOINTS.USERS.STORE_PUBLIC(slug));
+    return apiClient.publicGet<PublicStoreData>(API_ENDPOINTS.USERS.STORE_PUBLIC(slug));
 };
 
 export interface UpdateStoreRequest {

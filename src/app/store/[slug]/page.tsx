@@ -6,39 +6,54 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
-import { MapPin, Star, Package, Heart, Share2, MessageCircle } from "lucide-react";
-
+import {
+  MapPin, Star, Package, Heart, Share2, MessageCircle, ShoppingBag,
+} from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { usePublicStore } from "@/lib/api/hooks/useUsers";
 import { CloudImage } from "@/components/ui/CloudImage";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const StorePage = () => {
   const params = useParams();
   const slug = params?.slug as string;
   const { data: store, isLoading, error } = usePublicStore(slug);
+  const [shareCopied, setShareCopied] = useState(false);
 
+  const handleShare = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      setShareCopied(true);
+      toast.success("Store link copied!");
+      setTimeout(() => setShareCopied(false), 2000);
+    });
+  };
+
+  // ── Loading ────────────────────────────────────────────────
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
-        <div className="flex-1 flex flex-col items-center justify-center p-8">
-          <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
-          <h2 className="text-xl font-medium text-muted-foreground">Loading store...</h2>
+        <div className="flex-1 flex flex-col items-center justify-center p-8 gap-4">
+          <Loader2 className="h-10 w-10 text-primary animate-spin" />
+          <h2 className="text-xl font-medium text-muted-foreground">Loading store…</h2>
         </div>
         <Footer />
       </div>
     );
   }
 
+  // ── Store not found ────────────────────────────────────────
   if (error || !store) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <div className="text-6xl mb-4">🏪</div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Store not found</h2>
-          <p className="text-muted-foreground mb-6">
-            This store doesn't exist or may have moved.
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-4">
+          <div className="text-6xl">🏪</div>
+          <h2 className="text-2xl font-bold text-foreground">Store not found</h2>
+          <p className="text-muted-foreground max-w-sm">
+            This store doesn&apos;t exist or may have moved. Try browsing the marketplace for other sellers.
           </p>
           <Link href="/marketplace">
             <Button className="rounded-xl">Browse marketplace</Button>
@@ -49,21 +64,26 @@ const StorePage = () => {
     );
   }
 
+  const hasProducts = store.products && store.products.length > 0;
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
-      {/* Store Header */}
+      {/* ── Store Header ──────────────────────────────── */}
       <div className="bg-primary relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
+        {/* Decorative blobs */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
           <div className="absolute top-0 right-0 h-64 w-64 rounded-full bg-accent blur-3xl" />
           <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-emerald blur-3xl" />
         </div>
+
         <div className="relative container py-12">
           <div className="flex flex-col md:flex-row md:items-end gap-6">
+
             {/* Store Avatar / Logo */}
             {store.store_logo ? (
-              <div className="h-24 w-24 rounded-2xl border-2 border-primary-foreground/20 flex items-center justify-center overflow-hidden flex-shrink-0 bg-white">
+              <div className="h-24 w-24 rounded-2xl border-2 border-primary-foreground/20 flex items-center justify-center overflow-hidden flex-shrink-0 bg-white shadow-lg">
                 <CloudImage
                   publicId={store.store_logo as string}
                   alt={store.store_name}
@@ -75,10 +95,11 @@ const StorePage = () => {
                 />
               </div>
             ) : (
-              <div className="h-24 w-24 rounded-2xl bg-primary-foreground/10 border-2 border-primary-foreground/20 flex items-center justify-center text-4xl flex-shrink-0 backdrop-blur-sm font-bold text-primary-foreground">
+              <div className="h-24 w-24 rounded-2xl bg-primary-foreground/10 border-2 border-primary-foreground/20 flex items-center justify-center text-4xl flex-shrink-0 backdrop-blur-sm font-bold text-primary-foreground shadow-lg">
                 {store.store_name?.substring(0, 2).toUpperCase()}
               </div>
             )}
+
             <div className="flex-1">
               <div className="flex flex-wrap items-start gap-3 mb-2">
                 <h1 className="text-3xl font-bold text-primary-foreground">{store.store_name}</h1>
@@ -86,7 +107,9 @@ const StorePage = () => {
                   Verified seller
                 </span>
               </div>
-              <p className="text-primary-foreground/70 max-w-lg mb-3">{store.store_description || "Welcome to my store on UbuntuNow!"}</p>
+              <p className="text-primary-foreground/70 max-w-lg mb-3">
+                {store.store_description || "Welcome to our store on UbuntuNow!"}
+              </p>
               <div className="flex flex-wrap items-center gap-4 text-sm text-primary-foreground/60">
                 <span className="flex items-center gap-1.5">
                   <MapPin size={13} />
@@ -98,21 +121,34 @@ const StorePage = () => {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Package size={13} />
-                  {store.products?.length || 0} products
+                  {store.products?.length || 0} product{store.products?.length !== 1 ? "s" : ""}
                 </span>
               </div>
             </div>
+
             {/* Actions */}
-            <div className="flex gap-2 flex-shrink-0">
-              <Button variant="outline" size="sm" className="rounded-xl border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 gap-2">
+            <div className="flex gap-2 flex-shrink-0 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 gap-2"
+              >
                 <Heart size={14} />
                 Follow
               </Button>
-              <Button variant="outline" size="sm" className="rounded-xl border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 gap-2"
+                onClick={handleShare}
+              >
                 <Share2 size={14} />
-                Share
+                {shareCopied ? "Copied!" : "Share"}
               </Button>
-              <Button size="sm" className="gradient-amber text-accent-foreground rounded-xl border-0 gap-2">
+              <Button
+                size="sm"
+                className="gradient-amber text-accent-foreground rounded-xl border-0 gap-2"
+              >
                 <MessageCircle size={14} />
                 Contact
               </Button>
@@ -121,26 +157,76 @@ const StorePage = () => {
         </div>
       </div>
 
-      {/* Products */}
+      {/* ── Products Section ──────────────────────────── */}
       <div className="container py-10 flex-1">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-foreground">
-            Products <span className="text-muted-foreground font-normal text-base">({store.products?.length || 0})</span>
+            Products{" "}
+            <span className="text-muted-foreground font-normal text-base">
+              ({store.products?.length || 0})
+            </span>
           </h2>
         </div>
 
-        {!store.products || store.products.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="text-5xl mb-4">📦</div>
-            <h3 className="font-semibold text-foreground mb-2">No products yet</h3>
-            <p className="text-muted-foreground text-sm">
-              This seller is setting up their store. Check back soon!
-            </p>
+        {!hasProducts ? (
+          /* ── Empty State ── */
+          <div className="flex flex-col items-center justify-center py-24 text-center gap-6">
+            {/* Illustration */}
+            <div className="relative">
+              <div className="h-32 w-32 rounded-3xl bg-primary/8 flex items-center justify-center mb-2 mx-auto">
+                <ShoppingBag className="h-16 w-16 text-primary/30" />
+              </div>
+              <div className="absolute -top-2 -right-2 h-10 w-10 rounded-2xl bg-amber-100 flex items-center justify-center shadow-sm">
+                <span className="text-xl">🌱</span>
+              </div>
+            </div>
+
+            {/* Store name + logo recap */}
+            <div className="flex flex-col items-center gap-2">
+              {store.store_logo ? (
+                <div className="h-14 w-14 rounded-2xl border border-border overflow-hidden bg-muted shadow-sm">
+                  <CloudImage
+                    publicId={store.store_logo as string}
+                    alt={store.store_name}
+                    width={56}
+                    height={56}
+                    crop="fill"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-xl text-primary">
+                  {store.store_name?.substring(0, 2).toUpperCase()}
+                </div>
+              )}
+              <span className="text-sm font-semibold text-muted-foreground">{store.store_name}</span>
+            </div>
+
+            <div>
+              <h3 className="text-2xl font-bold text-foreground mb-2">
+                No products yet
+              </h3>
+              <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+                This seller is still setting up their store. Check back soon — great things are coming!
+              </p>
+            </div>
+
+            <div className="flex gap-3 flex-wrap justify-center">
+              <Link href="/marketplace">
+                <Button variant="outline" className="rounded-xl gap-2">
+                  <ShoppingBag size={15} />
+                  Browse Marketplace
+                </Button>
+              </Link>
+            </div>
           </div>
         ) : (
+          /* ── Product Grid ── */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {store.products.map((product) => {
-              const primaryImage = product.images?.find(img => img.is_primary)?.image || product.images?.[0]?.image;
+              const primaryImage =
+                product.images?.find((img) => img.is_primary)?.image ||
+                product.images?.[0]?.image;
 
               return (
                 <ProductCard

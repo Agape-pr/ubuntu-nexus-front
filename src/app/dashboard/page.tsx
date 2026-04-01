@@ -168,8 +168,12 @@ export default function SellerDashboard() {
 
   const storeName = userProfile?.store?.store_name || "My Store";
   const storeSlug = userProfile?.store?.slug || "";
-  const storeUrl = storeSlug ? `/store/${storeSlug}` : "#";
-  const storeUrlDisplay = `ubuntunow.rw/store/${storeSlug}`;
+  const storeUrl = storeSlug ? `/store/${storeSlug}` : null;
+  const storeUrlDisplay = storeSlug
+    ? `ubuntunow.rw/store/${storeSlug}`
+    : isUserLoading
+    ? "Loading your store link…"
+    : "ubuntunow.rw/store/your-store";
   const storeInitials = storeName.substring(0, 2).toUpperCase();
   const activeProductsCount = sellerProducts?.filter(p => p.is_active).length || 0;
 
@@ -225,11 +229,18 @@ export default function SellerDashboard() {
             </div>
 
             {/* Store link pill */}
-            <Link href={storeUrl} target="_blank"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 hover:bg-slate-100 transition-all group">
-              <ExternalLink size={12} className="text-slate-400 group-hover:text-slate-600 flex-shrink-0" />
-              <span className="text-[11px] text-slate-500 truncate flex-1">{storeUrlDisplay}</span>
-            </Link>
+            {storeUrl ? (
+              <Link href={storeUrl} target="_blank"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 hover:bg-slate-100 transition-all group">
+                <ExternalLink size={12} className="text-slate-400 group-hover:text-slate-600 flex-shrink-0" />
+                <span className="text-[11px] text-slate-500 truncate flex-1">{storeUrlDisplay}</span>
+              </Link>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 opacity-60 cursor-not-allowed">
+                {isUserLoading ? <Loader2 size={12} className="animate-spin text-slate-400 flex-shrink-0" /> : <ExternalLink size={12} className="text-slate-300 flex-shrink-0" />}
+                <span className="text-[11px] text-slate-400 truncate flex-1">{storeUrlDisplay}</span>
+              </div>
+            )}
           </div>
 
           {/* Nav */}
@@ -250,11 +261,18 @@ export default function SellerDashboard() {
 
           {/* View Store CTA */}
           <div className="p-4 border-t border-slate-100">
-            <Link href={storeUrl} target="_blank">
-              <Button variant="outline" className="w-full rounded-2xl h-10 text-sm font-semibold gap-2 border-slate-200 hover:border-slate-300">
-                <Eye size={14} /> Preview My Store
+            {storeUrl ? (
+              <Link href={storeUrl} target="_blank">
+                <Button variant="outline" className="w-full rounded-2xl h-10 text-sm font-semibold gap-2 border-slate-200 hover:border-slate-300">
+                  <Eye size={14} /> Preview My Store
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="outline" disabled className="w-full rounded-2xl h-10 text-sm font-semibold gap-2 border-slate-200 opacity-60 cursor-not-allowed">
+                {isUserLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
+                {isUserLoading ? "Loading store…" : "Preview unavailable"}
               </Button>
-            </Link>
+            )}
             <button className="flex items-center gap-2 w-full mt-2 px-4 py-2 text-xs text-slate-400 hover:text-rose-500 transition-colors">
               <LogOut size={13} /> Sign out
             </button>
@@ -309,16 +327,24 @@ export default function SellerDashboard() {
                     <p className="text-slate-400 text-sm">Share this link with your customers to drive traffic to your store.</p>
                   </div>
                   <div className="flex gap-3 flex-shrink-0">
-                    <Button onClick={() => { navigator.clipboard.writeText(`https://${storeUrlDisplay}`); setCopied(true); setTimeout(() => setCopied(false), 2000); toast.success("Link copied!"); }}
-                      className="bg-amber-400 text-slate-900 hover:bg-amber-300 rounded-2xl font-bold gap-2 h-11 px-5">
+                    <Button onClick={() => { if (!storeSlug) return; navigator.clipboard.writeText(`https://${storeUrlDisplay}`); setCopied(true); setTimeout(() => setCopied(false), 2000); toast.success("Link copied!"); }}
+                      disabled={!storeSlug}
+                      className="bg-amber-400 text-slate-900 hover:bg-amber-300 rounded-2xl font-bold gap-2 h-11 px-5 disabled:opacity-50">
                       {copied ? <CheckCircle size={15} /> : <Copy size={15} />}
                       {copied ? "Copied!" : "Copy"}
                     </Button>
-                    <Link href={storeUrl} target="_blank">
-                      <Button variant="outline" className="rounded-2xl border-white/20 text-white bg-white/5 hover:bg-white/10 h-11 px-5 gap-2">
-                        <Eye size={15} /> Preview
+                    {storeUrl ? (
+                      <Link href={storeUrl} target="_blank">
+                        <Button variant="outline" className="rounded-2xl border-white/20 text-white bg-white/5 hover:bg-white/10 h-11 px-5 gap-2">
+                          <Eye size={15} /> Preview
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button variant="outline" disabled className="rounded-2xl border-white/20 text-white/40 bg-white/5 h-11 px-5 gap-2 cursor-not-allowed">
+                        {isUserLoading ? <Loader2 size={15} className="animate-spin" /> : <Eye size={15} />}
+                        Preview
                       </Button>
-                    </Link>
+                    )}
                   </div>
                 </div>
               </div>
@@ -711,18 +737,30 @@ export default function SellerDashboard() {
               </div>
 
               {/* Preview CTA */}
-              <Link href={storeUrl} target="_blank">
-                <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 flex items-center gap-4 hover:opacity-90 transition-opacity cursor-pointer">
-                  <div className="h-12 w-12 rounded-2xl bg-amber-400 flex items-center justify-center flex-shrink-0">
-                    <Eye size={22} className="text-slate-900" />
+              {storeUrl ? (
+                <Link href={storeUrl} target="_blank">
+                  <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 flex items-center gap-4 hover:opacity-90 transition-opacity cursor-pointer">
+                    <div className="h-12 w-12 rounded-2xl bg-amber-400 flex items-center justify-center flex-shrink-0">
+                      <Eye size={22} className="text-slate-900" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-bold text-white mb-0.5">See how your store looks</div>
+                      <div className="text-slate-400 text-sm">Preview your public store page with all your products.</div>
+                    </div>
+                    <ArrowRight size={18} className="text-slate-500" />
+                  </div>
+                </Link>
+              ) : (
+                <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 flex items-center gap-4 opacity-60 cursor-not-allowed">
+                  <div className="h-12 w-12 rounded-2xl bg-amber-400/60 flex items-center justify-center flex-shrink-0">
+                    {isUserLoading ? <Loader2 size={22} className="text-slate-900 animate-spin" /> : <Eye size={22} className="text-slate-900" />}
                   </div>
                   <div className="flex-1">
-                    <div className="font-bold text-white mb-0.5">See how your store looks</div>
-                    <div className="text-slate-400 text-sm">Preview your public store page with all your products.</div>
+                    <div className="font-bold text-white mb-0.5">{isUserLoading ? "Loading store link…" : "Store link unavailable"}</div>
+                    <div className="text-slate-400 text-sm">Your store URL will appear here once your profile has loaded.</div>
                   </div>
-                  <ArrowRight size={18} className="text-slate-500" />
                 </div>
-              </Link>
+              )}
             </div>
           )}
         </main>
