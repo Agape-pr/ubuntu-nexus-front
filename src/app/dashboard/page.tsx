@@ -614,8 +614,15 @@ export default function SellerDashboard() {
                       <div key={product.id} className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-lg transition-all group">
                         <div className="h-52 relative bg-slate-50 overflow-hidden">
                           {img ? (
-                            <CloudImage publicId={img} alt={product.name} width={400} height={400} crop="fill"
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <CloudImage 
+                              publicId={img} 
+                              alt={product.name} 
+                              width={400} 
+                              height={400} 
+                              crop="fill"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              fallback={<div className="w-full h-full flex items-center justify-center text-5xl bg-slate-100">🛍️</div>}
+                            />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-5xl">🛍️</div>
                           )}

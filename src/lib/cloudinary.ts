@@ -27,6 +27,18 @@ export function buildImageUrl(
     return publicId;
   }
 
+  // Handle local Django media/upload paths dynamically
+  if (publicId.startsWith("/")) {
+    let host = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+    if (host.endsWith('/api/v1')) {
+      host = host.replace('/api/v1', '');
+    }
+    if (host.endsWith('/')) {
+      host = host.slice(0, -1);
+    }
+    return `${host}${publicId}`;
+  }
+
   // Need cloud name to build a Cloudinary URL from a public ID
   if (!CLOUD_NAME) return "";
 
