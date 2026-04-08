@@ -48,6 +48,23 @@ export const useCategories = () => {
 };
 
 /**
+ * Hook to create a category
+ */
+export const useCreateCategory = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (name: string) => productService.createCategory(name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+    onError: (error: { message?: string }) => {
+      toast.error(error.message || 'Failed to create category.');
+    },
+  });
+};
+
+/**
  * Hook to get seller's products
  */
 export const useSellerProducts = () => {

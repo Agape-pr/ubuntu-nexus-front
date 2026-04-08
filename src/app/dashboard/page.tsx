@@ -15,6 +15,7 @@ import {
   Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star,
 } from "lucide-react";
 import { useCreateProduct, useUpdateProduct, useCategories, useSellerProducts } from "@/lib/api/hooks/useProducts";
+import { createCategory } from "@/lib/api/services/products";
 import { useCurrentUser, useUpdateStore } from "@/lib/api/hooks/useUsers";
 import { toast } from "sonner";
 import { CloudImage } from "@/components/ui/CloudImage";
@@ -62,6 +63,7 @@ export default function SellerDashboard() {
     name: "", price: "", stock_quantity: "", category: "", description: "",
   });
   const [storeForm, setStoreForm] = useState({ name: "", description: "" });
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
 
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
@@ -121,31 +123,61 @@ export default function SellerDashboard() {
     });
   };
 
-  const handleSaveProduct = () => {
+  const handleSaveProduct = async () => {
     if (!productForm.name || !productForm.price || !productForm.stock_quantity || !productForm.category) {
       return toast.error("Please fill in all required fields.");
     }
-    const payload = {
-      name: productForm.name,
-      price: Number(productForm.price),
-      stock_quantity: Number(productForm.stock_quantity),
-      category: Number(productForm.category),
-      description: productForm.description,
-      is_active: true,
-      uploaded_images: productImages.length > 0 ? productImages : undefined,
-    };
-    const opts = {
-      onSuccess: () => {
-        setShowAddProduct(false);
-        setEditingProductId(null);
-        setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "" });
-        setProductImages([]);
-        setProductImagePreviews([]);
-        toast.success(editingProductId ? "Product updated!" : "Product listed successfully!");
-      },
-    };
-    if (editingProductId) updateProductMutation.mutate({ id: editingProductId, data: payload }, opts);
-    else createProductMutation.mutate(payload, opts);
+
+    setIsSavingProduct(true);
+    let categoryId = Number(productForm.category);
+
+    try {
+      // Check if the selected category actually exists in the backend
+      const isRealCategory = categories?.some(c => c.id === categoryId);
+      
+      if (!isRealCategory) {
+        // It's a fake mock category or typed name, we must create it first to avoid 'Invalid pk' error
+        const fakeSug = CATEGORY_SUGGESTIONS[categoryId - 1];
+        const categoryName = fakeSug || productForm.category;
+        const newCat = await createCategory(categoryName);
+        categoryId = newCat.id;
+      }
+
+      const payload = {
+        name: productForm.name,
+        price: Number(productForm.price),
+        stock_quantity: Number(productForm.stock_quantity),
+        category: categoryId,
+        description: productForm.description,
+        is_active: true,
+        uploaded_images: productImages.length > 0 ? productImages : undefined,
+      };
+
+      const opts = {
+        onSuccess: () => {
+          setShowAddProduct(false);
+          setEditingProductId(null);
+          setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "" });
+          setProductImages([]);
+          setProductImagePreviews([]);
+          setIsSavingProduct(false);
+          toast.success(editingProductId ? "Product updated!" : "Product listed successfully!");
+        },
+        onError: (error: any) => {
+          setIsSavingProduct(false);
+          toast.error(error.message || "Failed to save product.");
+        }
+      };
+
+      if (editingProductId) {
+        updateProductMutation.mutate({ id: editingProductId, data: payload }, opts);
+      } else {
+        createProductMutation.mutate(payload, opts);
+      }
+    } catch (e: any) {
+      setIsSavingProduct(false);
+      toast.error(e.message || "Failed to resolve category. Please try again.");
+    }
   };
 
   const handleEditClick = (product: any) => {
@@ -545,9 +577,9 @@ export default function SellerDashboard() {
                   {/* Actions */}
                   <div className="flex gap-3 mt-8 pt-6 border-t border-slate-100">
                     <Button onClick={handleSaveProduct}
-                      disabled={createProductMutation.isPending || updateProductMutation.isPending}
+                      disabled={isSavingProduct || createProductMutation.isPending || updateProductMutation.isPending}
                       className="bg-slate-900 text-white rounded-2xl px-8 h-11 font-semibold gap-2">
-                      {(createProductMutation.isPending || updateProductMutation.isPending) ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                      {(isSavingProduct || createProductMutation.isPending || updateProductMutation.isPending) ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                       {editingProductId ? "Update Product" : "Publish Product"}
                     </Button>
                     <Button variant="ghost" onClick={() => { setShowAddProduct(false); setEditingProductId(null); }}

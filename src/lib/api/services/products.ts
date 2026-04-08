@@ -122,6 +122,13 @@ export const getCategories = async (): Promise<Category[]> => {
 };
 
 /**
+ * Create a new product category
+ */
+export const createCategory = async (name: string): Promise<Category> => {
+  return apiClient.post<Category>(API_ENDPOINTS.CATEGORIES.CREATE, { name, slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-') });
+};
+
+/**
  * Helper to convert product data to FormData if needed
  */
 const buildProductPayload = (data: ProductCreateUpdate | Partial<ProductCreateUpdate>): FormData | Record<string, unknown> => {
