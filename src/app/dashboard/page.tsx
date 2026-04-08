@@ -197,12 +197,12 @@ export default function SellerDashboard() {
 
   const storeName = userProfile?.store?.store_name || "My Store";
   const storeSlug = userProfile?.store?.slug || "";
-  const storeUrl = storeSlug ? `/store/${storeSlug}` : null;
+  const storeUrl = storeSlug ? `https://www.ubuntunow.rw/store/${storeSlug}` : null;
   const storeUrlDisplay = storeSlug
-    ? `ubuntunow.rw/store/${storeSlug}`
+    ? `www.ubuntunow.rw/store/${storeSlug}`
     : isUserLoading
     ? "Loading your store link…"
-    : "ubuntunow.rw/store/your-store";
+    : "www.ubuntunow.rw/store/your-store";
   const storeInitials = storeName.substring(0, 2).toUpperCase();
   const activeProductsCount = sellerProducts?.filter(p => p.is_active).length || 0;
 
