@@ -6,13 +6,17 @@ import { useState, useEffect } from "react";
 import { Menu, X, ShoppingBag, Bell, Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLogout } from "@/lib/api/hooks/useAuth";
+import { useCartStore } from "@/lib/store/cartStore";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const logoutMutation = useLogout();
+  
+  const totalItems = useCartStore((state) => state.getTotalItems());
 
   useEffect(() => {
     const checkAuth = () => {
@@ -20,6 +24,7 @@ const Navbar = () => {
       setUserRole(localStorage.getItem('user_role'));
     };
     checkAuth();
+    setMounted(true);
     window.addEventListener('storage', checkAuth);
     return () => window.removeEventListener('storage', checkAuth);
   }, [pathname]);
@@ -67,10 +72,14 @@ const Navbar = () => {
           <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200">
             <Bell size={18} />
           </button>
-          <Link href="/marketplace">
+          <Link href="/cart">
             <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 relative">
               <ShoppingBag size={18} />
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-accent" />
+              {mounted && totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full bg-accent flex items-center justify-center px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-card">
+                  {totalItems}
+                </span>
+              )}
             </button>
           </Link>
           <div className="w-px h-5 bg-border mx-1" />
