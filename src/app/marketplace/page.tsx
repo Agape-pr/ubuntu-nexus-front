@@ -135,6 +135,7 @@ const Marketplace = () => {
                 <ProductCard
                   key={product.id}
                   id={String(product.id)}
+                  slug={product.name}
                   name={product.name}
                   price={Number(product.price)}
                   image={product.images?.[0]?.image}

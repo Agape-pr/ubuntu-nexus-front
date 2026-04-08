@@ -348,6 +348,7 @@ export default function Index() {
                       ) : (
                         <ProductCard
                           id={String(product.id)}
+                          slug={(product as any).name}
                           name={product.name}
                           price={Number(product.price)}
                           image={(product as any).images?.[0]?.image}

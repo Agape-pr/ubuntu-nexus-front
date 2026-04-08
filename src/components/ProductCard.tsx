@@ -5,6 +5,7 @@ import { CloudImage } from "@/components/ui/CloudImage";
 interface ProductCardProps {
   id: string;
   name: string;
+  slug?: string;
   price: number;
   currency?: string;
   image?: string;
@@ -19,6 +20,7 @@ interface ProductCardProps {
 const ProductCard = ({
   id,
   name,
+  slug,
   price,
   currency = "RWF",
   image,
@@ -80,7 +82,7 @@ const ProductCard = ({
           </Link>
         )}
 
-        <Link href={`/product/${id}`}>
+        <Link href={`/product/${encodeURIComponent(slug || id)}`}>
           <h3 className="font-semibold text-sm text-foreground line-clamp-2 hover:text-accent transition-colors leading-tight mb-2">
             {name}
           </h3>
