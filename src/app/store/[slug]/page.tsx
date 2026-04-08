@@ -22,6 +22,9 @@ const StorePage = () => {
   const { data: store, isLoading, error } = usePublicStore(slug);
   const [shareCopied, setShareCopied] = useState(false);
 
+  // Detect if the visitor is a logged-in seller (could be the store owner)
+  const isSeller = typeof window !== "undefined" && localStorage.getItem("user_role") === "seller";
+
   const handleShare = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
@@ -61,11 +64,13 @@ const StorePage = () => {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-2">
-              {isNetworkError ? "Connection problem" : "Store not found"}
+              {isNetworkError ? "Connection problem" : isSeller ? "Your store isn't set up yet" : "Store not found"}
             </h2>
             <p className="text-muted-foreground max-w-sm">
               {isNetworkError
                 ? "We couldn't reach the server right now. Please check your connection and try again."
+                : isSeller
+                ? "It looks like your store profile hasn't been created yet. This can happen if you registered before everything was fully configured. Head to your dashboard and your store will be ready."
                 : "This store doesn't exist or may have moved. Try browsing the marketplace for other sellers."}
             </p>
           </div>
@@ -74,6 +79,13 @@ const StorePage = () => {
               <Button onClick={() => window.location.reload()} className="rounded-xl gap-2">
                 Try again
               </Button>
+            )}
+            {isSeller && !isNetworkError && (
+              <Link href="/dashboard">
+                <Button className="rounded-xl gap-2 bg-primary text-primary-foreground">
+                  Go to my dashboard
+                </Button>
+              </Link>
             )}
             <Link href="/marketplace">
               <Button variant="outline" className="rounded-xl gap-2">
@@ -220,21 +232,49 @@ const StorePage = () => {
               </div>
             </div>
 
-            <div>
-              <h3 className="text-2xl font-bold text-foreground mb-2">
-                {store.store_name} — Coming soon!
-              </h3>
-              <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-                This seller hasn't added any products yet. Check back soon — great things are coming!
-              </p>
-            </div>
-
-            <Link href="/marketplace">
-              <Button variant="outline" className="rounded-xl gap-2">
-                <ShoppingBag size={15} />
-                Browse Marketplace
-              </Button>
-            </Link>
+            {isSeller ? (
+              /* Seller visiting their own empty store */
+              <>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">
+                    Your store is live — now add your first product!
+                  </h3>
+                  <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+                    Buyers can already find your store, but you haven't listed anything yet. Head to your dashboard to add products and start selling.
+                  </p>
+                </div>
+                <div className="flex gap-3 flex-wrap justify-center">
+                  <Link href="/dashboard">
+                    <Button className="rounded-xl gap-2 bg-primary text-primary-foreground font-semibold">
+                      <Package size={15} /> Add my first product
+                    </Button>
+                  </Link>
+                  <Link href="/marketplace">
+                    <Button variant="outline" className="rounded-xl gap-2">
+                      <ShoppingBag size={15} /> Browse marketplace
+                    </Button>
+                  </Link>
+                </div>
+              </>
+            ) : (
+              /* Public visitor viewing empty store */
+              <>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">
+                    {store.store_name} — Coming soon!
+                  </h3>
+                  <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+                    This seller hasn't added any products yet. Check back soon — great things are coming!
+                  </p>
+                </div>
+                <Link href="/marketplace">
+                  <Button variant="outline" className="rounded-xl gap-2">
+                    <ShoppingBag size={15} />
+                    Browse Marketplace
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         ) : (
           /* ── Product Grid ── */
