@@ -11,7 +11,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Loader2 } from "lucide-react";
-import { usePublicStore } from "@/lib/api/hooks/useUsers";
+import { usePublicStore, useCurrentUser } from "@/lib/api/hooks/useUsers";
+import { useSellerProducts } from "@/lib/api/hooks/useProducts";
 import { CloudImage } from "@/components/ui/CloudImage";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -19,11 +20,46 @@ import { toast } from "sonner";
 const StorePage = () => {
   const params = useParams();
   const slug = params?.slug as string;
-  const { data: store, isLoading, error } = usePublicStore(slug);
+  const { data: publicStoreData, isLoading: isPublicLoading, error: publicError } = usePublicStore(slug);
   const [shareCopied, setShareCopied] = useState(false);
 
   // Detect if the visitor is a logged-in seller (could be the store owner)
   const isSeller = typeof window !== "undefined" && localStorage.getItem("user_role") === "seller";
+  
+  // Fetch seller data as fallback for previewing
+  const { data: currentUser, isLoading: isUserLoading } = useCurrentUser();
+  const { data: sellerProducts = [], isLoading: isProductsLoading } = useSellerProducts();
+
+  // If the public store API fails (e.g. 500 Server Error) but this is the seller previewing their own store
+  const isOwnStorePreview = isSeller && currentUser?.store?.slug === slug;
+  
+  // Construct the store data either from the public API or fallback to local seller data
+  let store: any = null;
+  let isLoading = isPublicLoading;
+  let error = publicError;
+
+  if (publicStoreData) {
+    store = publicStoreData;
+    error = null;
+  } else if (isOwnStorePreview && currentUser?.store) {
+     // Overwrite loading and error if we are using fallback
+     if (!isUserLoading && !isProductsLoading) {
+       isLoading = false;
+       error = null;
+       store = {
+         store_name: currentUser.store.store_name,
+         slug: currentUser.store.slug,
+         store_description: currentUser.store.store_description,
+         store_logo: currentUser.store.store_logo,
+         products: sellerProducts.filter(p => p.is_active).map(p => ({
+            ...p,
+            category_name: p.category ? "Category" : "Uncategorized" // basic fallback mapping
+         }))
+       };
+     } else {
+       isLoading = true;
+     }
+  }
 
   const handleShare = () => {
     const url = window.location.href;
