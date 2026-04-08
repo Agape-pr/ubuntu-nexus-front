@@ -21,11 +21,8 @@ import { CloudImage } from "@/components/ui/CloudImage";
 
 type DashView = "overview" | "products" | "orders" | "store-settings";
 
-const MOCK_ORDERS = [
-  { id: "ORD-001", customer: "Jean Pierre N.", product: "Ankara Print Tote Bag", amount: 12500, status: "pending", date: "2025-02-18" },
-  { id: "ORD-002", customer: "Amina U.", product: "Hand-Embroidered Table Runner", amount: 9500, status: "shipped", date: "2025-02-17" },
-  { id: "ORD-003", customer: "Eric K.", product: "Beaded Necklace Set", amount: 7000, status: "completed", date: "2025-02-15" },
-];
+// Orders will come from the API in the future
+const REAL_ORDERS: never[] = [];
 
 // Curated category suggestions for African marketplace sellers
 const CATEGORY_SUGGESTIONS = [
@@ -193,11 +190,13 @@ export default function SellerDashboard() {
     { id: "store-settings" as DashView, label: "Store Settings", icon: Settings },
   ];
 
+  const totalRevenue = REAL_ORDERS.reduce((sum: number, order: any) => sum + (order?.amount || 0), 0);
+
   const STATS = [
-    { label: "Revenue", value: "29,000 RWF", sub: "+12% this week", icon: Wallet, color: "text-emerald-500", bg: "bg-emerald-50", border: "border-emerald-100" },
-    { label: "Active Listings", value: String(activeProductsCount), sub: "Across your store", icon: Package, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
-    { label: "Orders", value: "3", sub: "2 need action", icon: ShoppingBag, color: "text-amber-500", bg: "bg-amber-50", border: "border-amber-100" },
-    { label: "Store Views", value: "142", sub: "Past 30 days", icon: Eye, color: "text-violet-500", bg: "bg-violet-50", border: "border-violet-100" },
+    { label: "Active Listings", value: isProductsLoading ? "…" : String(activeProductsCount), sub: "Across your store", icon: Package, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
+    { label: "Store Views", value: "0", sub: "Analytics coming soon", icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-50", border: "border-emerald-100" },
+    { label: "Orders", value: String(REAL_ORDERS.length), sub: REAL_ORDERS.length === 0 ? "No orders yet" : `${REAL_ORDERS.length} order${REAL_ORDERS.length !== 1 ? "s" : ""}`, icon: ShoppingBag, color: "text-amber-500", bg: "bg-amber-50", border: "border-amber-100" },
+    { label: "Revenue", value: `${totalRevenue.toLocaleString()} RWF`, sub: totalRevenue === 0 ? "No revenue yet" : "All time", icon: Wallet, color: "text-violet-500", bg: "bg-violet-50", border: "border-violet-100" },
   ];
 
   return (
@@ -213,11 +212,17 @@ export default function SellerDashboard() {
               <div className="relative">
                 <div className="h-12 w-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
                   {storeLogoPreview ? (
-                    <img src={storeLogoPreview} alt="Logo" className="w-full h-full object-cover" />
-                  ) : userProfile?.store?.store_logo ? (
-                    <CloudImage publicId={userProfile.store.store_logo} alt="Logo" width={48} height={48} crop="fill" className="w-full h-full object-cover" />
+                    <img src={storeLogoPreview} alt={storeName} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-slate-700 font-bold text-sm">{storeInitials}</span>
+                    <CloudImage
+                      publicId={userProfile?.store?.store_logo || ""}
+                      alt={storeName}
+                      width={48}
+                      height={48}
+                      crop="fill"
+                      className="w-full h-full object-cover"
+                      fallback={<span className="text-slate-700 font-bold text-sm">{storeInitials}</span>}
+                    />
                   )}
                 </div>
                 <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-white" />
@@ -357,28 +362,38 @@ export default function SellerDashboard() {
                     View all <ChevronRight size={13} />
                   </button>
                 </div>
-                <div className="divide-y divide-slate-50">
-                  {MOCK_ORDERS.map(order => {
-                    const s = statusConfig[order.status];
-                    const statusEmoji: Record<string, string> = { completed: "✅", shipped: "🚚", pending: "📦" };
-                    const statusBg: Record<string, string> = { completed: "bg-emerald-50", shipped: "bg-blue-50", pending: "bg-amber-50" };
-                    return (
-                      <div key={order.id} className="px-6 py-4 flex items-center gap-4 hover:bg-slate-50/60 transition-colors">
-                        <div className={`h-8 w-8 rounded-xl flex items-center justify-center text-sm ${statusBg[order.status] || "bg-slate-100"}`}>
-                          {statusEmoji[order.status] || "📦"}
+                {REAL_ORDERS.length === 0 ? (
+                  <div className="px-6 py-14 flex flex-col items-center text-center">
+                    <div className="h-14 w-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                      <ShoppingBag size={24} className="text-slate-300" />
+                    </div>
+                    <p className="font-semibold text-slate-700 mb-1">No orders yet</p>
+                    <p className="text-sm text-slate-400 max-w-xs">When customers place orders from your store, they'll show up here.</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-50">
+                    {REAL_ORDERS.map((order: any) => {
+                      const s = statusConfig[order.status];
+                      const statusEmoji: Record<string, string> = { completed: "✅", shipped: "🚚", pending: "📦" };
+                      const statusBg: Record<string, string> = { completed: "bg-emerald-50", shipped: "bg-blue-50", pending: "bg-amber-50" };
+                      return (
+                        <div key={order.id} className="px-6 py-4 flex items-center gap-4 hover:bg-slate-50/60 transition-colors">
+                          <div className={`h-8 w-8 rounded-xl flex items-center justify-center text-sm ${statusBg[order.status] || "bg-slate-100"}`}>
+                            {statusEmoji[order.status] || "📦"}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-sm text-slate-900">{order.customer}</div>
+                            <div className="text-xs text-slate-400 truncate">{order.product}</div>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <div className="font-bold text-sm text-slate-900">{order.amount.toLocaleString()} RWF</div>
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s.color}`}>{s.label}</span>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm text-slate-900">{order.customer}</div>
-                          <div className="text-xs text-slate-400 truncate">{order.product}</div>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <div className="font-bold text-sm text-slate-900">{order.amount.toLocaleString()} RWF</div>
-                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s.color}`}>{s.label}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -620,40 +635,56 @@ export default function SellerDashboard() {
               <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
                   <BarChart2 size={16} className="text-slate-400" />
-                  <span className="font-bold text-slate-900 text-sm">Recent Orders</span>
-                  <span className="ml-auto text-xs font-bold text-slate-400">{MOCK_ORDERS.length} orders</span>
+                  <span className="font-bold text-slate-900 text-sm">All Orders</span>
+                  <span className="ml-auto text-xs font-bold text-slate-400">{REAL_ORDERS.length} order{REAL_ORDERS.length !== 1 ? "s" : ""}</span>
                 </div>
-                <div className="divide-y divide-slate-50">
-                  {MOCK_ORDERS.map(order => {
-                    const s = statusConfig[order.status];
-                    return (
-                      <div key={order.id} className="px-6 py-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-slate-50/60 transition-colors">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-1">
-                            <span className="text-xs text-slate-400 font-mono">{order.id}</span>
-                            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${s.color}`}>{s.label}</span>
+                {REAL_ORDERS.length === 0 ? (
+                  <div className="px-6 py-20 flex flex-col items-center text-center">
+                    <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-5">
+                      <ShoppingBag size={28} className="text-slate-300" />
+                    </div>
+                    <h3 className="font-bold text-slate-800 text-lg mb-2">No orders yet</h3>
+                    <p className="text-sm text-slate-400 max-w-sm">Once customers start buying from your store, their orders will appear here. Share your store link to get started!</p>
+                    {storeUrl && (
+                      <button onClick={() => { navigator.clipboard.writeText(`https://${storeUrlDisplay}`); toast.success("Link copied!"); }}
+                        className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-slate-900 text-white text-sm font-semibold hover:-translate-y-0.5 transition-all">
+                        <Copy size={14} /> Copy Store Link
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-50">
+                    {REAL_ORDERS.map((order: any) => {
+                      const s = statusConfig[order.status];
+                      return (
+                        <div key={order.id} className="px-6 py-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-slate-50/60 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-1">
+                              <span className="text-xs text-slate-400 font-mono">{order.id}</span>
+                              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${s.color}`}>{s.label}</span>
+                            </div>
+                            <div className="font-bold text-slate-900">{order.customer}</div>
+                            <div className="text-sm text-slate-500">{order.product}</div>
+                            <div className="text-xs text-slate-400 mt-1">{order.date}</div>
                           </div>
-                          <div className="font-bold text-slate-900">{order.customer}</div>
-                          <div className="text-sm text-slate-500">{order.product}</div>
-                          <div className="text-xs text-slate-400 mt-1">{order.date}</div>
+                          <div className="flex items-center gap-4 flex-shrink-0">
+                            <span className="font-black text-slate-900 text-lg">{order.amount.toLocaleString()} <span className="text-xs font-bold text-slate-400">RWF</span></span>
+                            {order.status === "pending" && (
+                              <Button size="sm" className="bg-slate-900 text-white rounded-2xl text-xs gap-1 h-9 px-4">
+                                Mark Shipped <ArrowRight size={12} />
+                              </Button>
+                            )}
+                            {order.status === "shipped" && (
+                              <Button size="sm" variant="outline" className="rounded-2xl text-xs gap-1 h-9 px-4 border-emerald-200 text-emerald-700">
+                                Mark Complete <CheckCircle size={12} />
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-4 flex-shrink-0">
-                          <span className="font-black text-slate-900 text-lg">{order.amount.toLocaleString()} <span className="text-xs font-bold text-slate-400">RWF</span></span>
-                          {order.status === "pending" && (
-                            <Button size="sm" className="bg-slate-900 text-white rounded-2xl text-xs gap-1 h-9 px-4">
-                              Mark Shipped <ArrowRight size={12} />
-                            </Button>
-                          )}
-                          {order.status === "shipped" && (
-                            <Button size="sm" variant="outline" className="rounded-2xl text-xs gap-1 h-9 px-4 border-emerald-200 text-emerald-700">
-                              Mark Complete <CheckCircle size={12} />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <div className="bg-amber-50 border border-amber-200 rounded-3xl p-8 flex flex-col sm:flex-row sm:items-center gap-6">
@@ -684,10 +715,16 @@ export default function SellerDashboard() {
                     <div className="h-24 w-24 rounded-2xl border-2 border-dashed border-slate-200 overflow-hidden bg-slate-50 flex items-center justify-center hover:border-amber-400 transition-colors">
                       {storeLogoPreview ? (
                         <img src={storeLogoPreview} alt="Logo preview" className="w-full h-full object-cover" />
-                      ) : userProfile?.store?.store_logo ? (
-                        <CloudImage publicId={userProfile.store.store_logo} alt="Logo" width={96} height={96} className="w-full h-full object-cover" />
                       ) : (
-                        <Store size={32} className="text-slate-300" />
+                        <CloudImage
+                          publicId={userProfile?.store?.store_logo || ""}
+                          alt={storeName}
+                          width={96}
+                          height={96}
+                          crop="fill"
+                          className="w-full h-full object-cover"
+                          fallback={<Store size={32} className="text-slate-300" />}
+                        />
                       )}
                       <div className="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-2xl">
                         <ImagePlus size={20} className="text-white" />
