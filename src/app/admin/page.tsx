@@ -172,9 +172,8 @@ export default function AdminPage() {
     setFilters(f => ({ ...f, search }));
   };
 
-  const { data, isLoading } = useAdminUsers(filters);
-  const users = data?.results ?? [];
-  const totalCount = data?.count ?? 0;
+  const { data: users = [], isLoading } = useAdminUsers(filters);
+  const totalCount = users.length;
 
   const sellerCount = users.filter(u => u.role === "seller").length;
   const buyerCount  = users.filter(u => u.role === "buyer").length;

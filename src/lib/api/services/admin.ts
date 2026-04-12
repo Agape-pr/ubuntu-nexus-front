@@ -22,12 +22,7 @@ export interface AdminUser {
   store?: AdminStore | null;
 }
 
-export interface AdminUsersResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: AdminUser[];
-}
+export type AdminUsersResponse = AdminUser[]; // Backend currently returns a raw unpaginated list
 
 export interface AdminUserFilters {
   role?: 'admin' | 'seller' | 'buyer' | '';
@@ -35,7 +30,7 @@ export interface AdminUserFilters {
   page?: number;
 }
 
-export const getAdminUsers = async (filters: AdminUserFilters = {}): Promise<AdminUsersResponse> => {
+export const getAdminUsers = async (filters: AdminUserFilters = {}): Promise<AdminUser[]> => {
   const params = new URLSearchParams();
   if (filters.role) params.append('role', filters.role);
   if (filters.search) params.append('search', filters.search);
@@ -43,7 +38,9 @@ export const getAdminUsers = async (filters: AdminUserFilters = {}): Promise<Adm
 
   const query = params.toString();
   const url = `${API_ENDPOINTS.ADMIN.USERS}${query ? `?${query}` : ''}`;
-  return apiClient.get<AdminUsersResponse>(url);
+  // Handle both paginated responses (if backend adds pagination later) and raw arrays
+  const res = await apiClient.get<any>(url);
+  return Array.isArray(res) ? res : (res.results || []);
 };
 
 export const getAdminUserDetail = async (id: number): Promise<AdminUser> => {
