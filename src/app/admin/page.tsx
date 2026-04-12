@@ -158,7 +158,7 @@ function DetailRow({ icon: Icon, label, value }: { icon: any; label: string; val
     </div>
 // ── Add User Drawer ───────────────────────────────────────────────────────────
 
-function AddUserDrawer({ onClose }: { onClose: () => void }) {
+function AddUserDrawer({ onClose, user }: { onClose: () => void, user: any }) {
   const mutation = useCreateAdminUser();
   const [formData, setFormData] = useState<AdminUserCreatePayload>({
     email: "",
@@ -228,7 +228,7 @@ function AddUserDrawer({ onClose }: { onClose: () => void }) {
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Account Role</label>
               <div className="flex gap-2">
-                {(['buyer', 'seller', 'admin'] as const).map(r => (
+                {(['buyer', 'seller', ...(hasPermission(user, 'is_superuser') ? ['admin'] : [])] as const).map(r => (
                   <button
                     key={r} type="button"
                     onClick={() => setFormData({ ...formData, role: r })}
@@ -331,11 +331,9 @@ export default function AdminPage() {
             <p className="text-slate-500 mt-1">Manage all users, sellers, and buyer accounts.</p>
           </div>
 
-          {hasPermission(me, 'is_superuser') && (
-            <Button onClick={() => setIsAddUserOpen(true)} className="h-10 bg-slate-900 text-white rounded-xl font-bold text-sm px-4 gap-2">
-              <Plus size={16} /> Add User
-            </Button>
-          )}
+          <Button onClick={() => setIsAddUserOpen(true)} className="h-10 bg-slate-900 text-white rounded-xl font-bold text-sm px-4 gap-2">
+            <Plus size={16} /> Add User
+          </Button>
         </div>
 
         {/* Stat cards */}
@@ -507,7 +505,7 @@ export default function AdminPage() {
 
       {/* Add user drawer */}
       {isAddUserOpen && (
-        <AddUserDrawer onClose={() => setIsAddUserOpen(false)} />
+        <AddUserDrawer onClose={() => setIsAddUserOpen(false)} user={me} />
       )}
     </div>
   );
