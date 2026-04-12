@@ -7,13 +7,22 @@ import Navbar from "@/components/Navbar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/lib/api/hooks/useUsers";
-import { useAdminUsers, useAdminUserDetail } from "@/lib/api/hooks/useAdmin";
-import { AdminUser, AdminUserFilters } from "@/lib/api/services/admin";
+import { useAdminUsers, useAdminUserDetail, useCreateAdminUser } from "@/lib/api/hooks/useAdmin";
+import { AdminUser, AdminUserFilters, AdminUserCreatePayload } from "@/lib/api/services/admin";
 import {
   Users, Store, ShoppingBag, Search, X, Shield,
   ChevronRight, Loader2, Mail, Phone, Calendar,
-  CheckCircle, XCircle, ExternalLink, ArrowLeft,
+  CheckCircle, XCircle, ExternalLink, ArrowLeft, Plus,
 } from "lucide-react";
+import { toast } from "sonner";
+
+// ── RBAC Utils ───────────────────────────────────────────────────────────────
+
+export const hasPermission = (user: any, permission: string) => {
+  if (!user) return false;
+  if (user.is_superuser) return true;
+  return user.admin_permissions?.includes(permission) ?? false;
+};
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -147,6 +156,130 @@ function DetailRow({ icon: Icon, label, value }: { icon: any; label: string; val
         <p className="text-sm font-medium text-slate-700 mt-0.5">{value}</p>
       </div>
     </div>
+// ── Add User Drawer ───────────────────────────────────────────────────────────
+
+function AddUserDrawer({ onClose }: { onClose: () => void }) {
+  const mutation = useCreateAdminUser();
+  const [formData, setFormData] = useState<AdminUserCreatePayload>({
+    email: "",
+    password: "",
+    role: "buyer",
+    admin_permissions: [],
+  });
+
+  const [isSuperuser, setIsSuperuser] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload = { ...formData };
+    
+    // If they are not superuser but role is admin, ensure we pass selected permissions
+    if (formData.role === 'admin' && !isSuperuser) {
+      // Keep whatever permissions are selected
+    } else {
+      payload.admin_permissions = []; // clear if not an admin or if superuser
+    }
+
+    mutation.mutate(payload, {
+      onSuccess: () => {
+        toast.success("User created successfully");
+        onClose();
+      },
+      onError: (err: any) => {
+        toast.error("Failed to create user: " + (err?.message || "Unknown error"));
+      }
+    });
+  };
+
+  const togglePermission = (perm: string) => {
+    setFormData(prev => ({
+      ...prev,
+      admin_permissions: prev.admin_permissions?.includes(perm)
+        ? prev.admin_permissions.filter(p => p !== perm)
+        : [...(prev.admin_permissions || []), perm]
+    }));
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex">
+      {/* backdrop */}
+      <div className="flex-1 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      {/* panel */}
+      <div className="w-full max-w-md bg-white h-full shadow-2xl overflow-y-auto flex flex-col animate-slide-in-right">
+        <div className="flex items-center gap-3 p-6 border-b border-slate-100">
+          <button onClick={onClose} disabled={mutation.isPending} className="h-9 w-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
+            <X size={16} className="text-slate-600" />
+          </button>
+          <h2 className="font-bold text-slate-900 text-lg">Add User</h2>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-6 flex-1">
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Email Address</label>
+              <Input type="email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Initial Password</label>
+              <Input type="password" required minLength={8} value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Account Role</label>
+              <div className="flex gap-2">
+                {(['buyer', 'seller', 'admin'] as const).map(r => (
+                  <button
+                    key={r} type="button"
+                    onClick={() => setFormData({ ...formData, role: r })}
+                    className={`flex-1 py-2 text-sm font-bold border rounded-xl transition-all ${formData.role === r ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+                  >
+                    {r.charAt(0).toUpperCase() + r.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* RBAC Options for Admin */}
+            {formData.role === 'admin' && (
+              <div className="mt-6 bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 pb-2">Admin Permissions</p>
+                
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input type="checkbox" checked={isSuperuser} onChange={e => setIsSuperuser(e.target.checked)} className="mt-1 accent-violet-600 w-4 h-4 rounded" />
+                  <div>
+                    <p className="font-semibold text-slate-900 text-sm">Super Admin</p>
+                    <p className="text-xs text-slate-500 leading-snug">Full access to everything. Can create other admins.</p>
+                  </div>
+                </label>
+
+                {!isSuperuser && (
+                  <div className="pl-7 space-y-3 pt-2">
+                    {[
+                      { id: 'manage_buyers', label: 'Manage Buyers' },
+                      { id: 'manage_sellers', label: 'Manage Sellers & Stores' },
+                      { id: 'manage_products', label: 'Manage Products & Orders' }
+                    ].map(perm => (
+                      <label key={perm.id} className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" checked={formData.admin_permissions?.includes(perm.id)} onChange={() => togglePermission(perm.id)} className="accent-violet-600 w-4 h-4 rounded" />
+                        <span className="font-medium text-slate-700 text-sm">{perm.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-auto pt-6">
+            <Button type="submit" disabled={mutation.isPending} className="w-full h-12 bg-slate-900 text-white rounded-xl font-bold text-sm">
+              {mutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : null}
+              Create User
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
 
@@ -159,6 +292,7 @@ export default function AdminPage() {
   const [filters, setFilters] = useState<AdminUserFilters>({ role: "", search: "" });
   const [search, setSearch] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
 
   // Gate: redirect non-admins
   if (!meLoading && me && me.role !== "admin") {
@@ -185,53 +319,77 @@ export default function AdminPage() {
       <div className="container max-w-6xl mx-auto px-4 py-10 flex-1">
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-9 w-9 rounded-xl bg-violet-100 flex items-center justify-center">
-              <Shield size={18} className="text-violet-600" />
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-9 w-9 rounded-xl bg-violet-100 flex items-center justify-center">
+                <Shield size={18} className="text-violet-600" />
+              </div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Platform Management</p>
             </div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Platform Management</p>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Admin Dashboard</h1>
+            <p className="text-slate-500 mt-1">Manage all users, sellers, and buyer accounts.</p>
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Admin Dashboard</h1>
-          <p className="text-slate-500 mt-1">Manage all users, sellers, and buyer accounts.</p>
+
+          {hasPermission(me, 'is_superuser') && (
+            <Button onClick={() => setIsAddUserOpen(true)} className="h-10 bg-slate-900 text-white rounded-xl font-bold text-sm px-4 gap-2">
+              <Plus size={16} /> Add User
+            </Button>
+          )}
         </div>
 
         {/* Stat cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {[
-            { label: "Total Users",  value: meLoading || isLoading ? "…" : String(totalCount), icon: Users,       color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-100" },
-            { label: "Sellers",      value: meLoading || isLoading ? "…" : String(sellerCount), icon: Store,       color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
-            { label: "Buyers",       value: meLoading || isLoading ? "…" : String(buyerCount),  icon: ShoppingBag, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
-          ].map(stat => (
-            <div key={stat.label} className={`bg-white rounded-2xl p-5 border ${stat.border} shadow-sm flex items-center gap-4`}>
-              <div className={`h-11 w-11 rounded-xl ${stat.bg} flex items-center justify-center flex-shrink-0`}>
-                <stat.icon size={20} className={stat.color} />
+          <div className="bg-white rounded-2xl p-5 border border-violet-100 shadow-sm flex items-center gap-4">
+            <div className="h-11 w-11 rounded-xl bg-violet-50 flex items-center justify-center flex-shrink-0">
+              <Users size={20} className="text-violet-600" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-slate-900">{meLoading || isLoading ? "…" : totalCount}</div>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Users</div>
+            </div>
+          </div>
+
+          {hasPermission(me, 'manage_sellers') && (
+            <div className="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm flex items-center gap-4">
+              <div className="h-11 w-11 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                <Store size={20} className="text-emerald-600" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-slate-900">{stat.value}</div>
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{stat.label}</div>
+                <div className="text-2xl font-bold text-slate-900">{meLoading || isLoading ? "…" : sellerCount}</div>
+                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Sellers</div>
               </div>
             </div>
-          ))}
+          )}
+
+          {hasPermission(me, 'manage_buyers') && (
+            <div className="bg-white rounded-2xl p-5 border border-blue-100 shadow-sm flex items-center gap-4">
+              <div className="h-11 w-11 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <ShoppingBag size={20} className="text-blue-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-slate-900">{meLoading || isLoading ? "…" : buyerCount}</div>
+                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Buyers</div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Filters + search */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
           {/* Role filter tabs */}
           <div className="flex gap-1 flex-shrink-0">
-            {(["", "seller", "buyer", "admin"] as const).map(r => (
-              <button
-                key={r}
-                onClick={() => setFilters(f => ({ ...f, role: r }))}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  filters.role === r
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-500 hover:bg-slate-100"
-                }`}
-              >
-                {r === "" ? "All" : r.charAt(0).toUpperCase() + r.slice(1)}
-              </button>
-            ))}
+            <button onClick={() => setFilters(f => ({ ...f, role: "" }))} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filters.role === "" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100"}`}>All</button>
+            
+            {hasPermission(me, 'manage_sellers') && (
+              <button onClick={() => setFilters(f => ({ ...f, role: "seller" }))} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filters.role === "seller" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100"}`}>Seller</button>
+            )}
+            
+            {hasPermission(me, 'manage_buyers') && (
+              <button onClick={() => setFilters(f => ({ ...f, role: "buyer" }))} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filters.role === "buyer" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100"}`}>Buyer</button>
+            )}
+
+            <button onClick={() => setFilters(f => ({ ...f, role: "admin" }))} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filters.role === "admin" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100"}`}>Admin</button>
           </div>
 
           {/* Search */}
@@ -287,7 +445,12 @@ export default function AdminPage() {
                 <span />
               </div>
 
-              {users.map((user: AdminUser) => (
+              {users.filter(u => {
+                // Front-end RBAC masking (hide rows if no permission)
+                if (u.role === 'seller' && !hasPermission(me, 'manage_sellers')) return false;
+                if (u.role === 'buyer' && !hasPermission(me, 'manage_buyers')) return false;
+                return true;
+              }).map((user: AdminUser) => (
                 <button
                   key={user.id}
                   onClick={() => setSelectedUserId(user.id)}
@@ -340,6 +503,11 @@ export default function AdminPage() {
       {/* User detail drawer */}
       {selectedUserId && (
         <UserDrawer userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
+      )}
+
+      {/* Add user drawer */}
+      {isAddUserOpen && (
+        <AddUserDrawer onClose={() => setIsAddUserOpen(false)} />
       )}
     </div>
   );

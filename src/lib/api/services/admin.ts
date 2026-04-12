@@ -17,9 +17,19 @@ export interface AdminUser {
   phone_number?: string | null;
   is_active: boolean;
   is_staff: boolean;
+  is_superuser: boolean;
+  admin_permissions: string[];
   date_joined: string;
   last_login?: string | null;
   store?: AdminStore | null;
+}
+
+export interface AdminUserCreatePayload {
+  email: string;
+  password?: string;
+  role: 'admin' | 'seller' | 'buyer';
+  phone_number?: string;
+  admin_permissions?: string[];
 }
 
 export type AdminUsersResponse = AdminUser[]; // Backend currently returns a raw unpaginated list
@@ -45,4 +55,8 @@ export const getAdminUsers = async (filters: AdminUserFilters = {}): Promise<Adm
 
 export const getAdminUserDetail = async (id: number): Promise<AdminUser> => {
   return apiClient.get<AdminUser>(API_ENDPOINTS.ADMIN.USER_DETAIL(id));
+};
+
+export const createAdminUser = async (data: AdminUserCreatePayload): Promise<AdminUser> => {
+  return apiClient.post<AdminUser>(API_ENDPOINTS.ADMIN.USERS, data);
 };
