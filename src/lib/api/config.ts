@@ -69,7 +69,14 @@ export const API_ENDPOINTS = {
     PATCH: (id: number) => `/products/categories/${id}/`,
     DELETE: (id: number) => `/products/categories/${id}/`,
   },
+
+  // Admin
+  ADMIN: {
+    USERS: '/users/admin/users/',
+    USER_DETAIL: (id: number) => `/users/admin/users/${id}/`,
+  },
 } as const;
+
 
 // Request timeout (in milliseconds)
 export const API_TIMEOUT = 60000; // 60 seconds

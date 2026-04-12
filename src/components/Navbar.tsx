@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, X, ShoppingBag, Bell, Search, User, LogOut } from "lucide-react";
+import { Menu, X, ShoppingBag, Bell, Search, User, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLogout } from "@/lib/api/hooks/useAuth";
 import { useCartStore } from "@/lib/store/cartStore";
@@ -85,6 +85,13 @@ const Navbar = () => {
           <div className="w-px h-5 bg-border mx-1" />
           {isLoggedIn ? (
             <>
+              {userRole === 'admin' && (
+                <Link href="/admin">
+                  <Button variant="ghost" size="sm" className="text-sm font-medium gap-1.5 text-violet-600 hover:text-violet-700 hover:bg-violet-50">
+                    <Shield size={16} /> Admin
+                  </Button>
+                </Link>
+              )}
               {userRole === 'seller' && (
                 <Link href="/dashboard">
                   <Button variant="ghost" size="sm" className="text-sm font-medium gap-1.5">
@@ -138,6 +145,13 @@ const Navbar = () => {
             <div className="mt-3 pt-3 border-t border-border flex flex-col gap-2">
               {isLoggedIn ? (
                 <>
+                  {userRole === 'admin' && (
+                    <Link href="/admin" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full gap-1.5 border-violet-200 text-violet-700">
+                        <Shield size={16} /> Admin Panel
+                      </Button>
+                    </Link>
+                  )}
                   {userRole === 'seller' && (
                     <Link href="/dashboard" onClick={() => setIsOpen(false)}>
                       <Button variant="outline" className="w-full gap-1.5"><User size={16} /> Dashboard</Button>
