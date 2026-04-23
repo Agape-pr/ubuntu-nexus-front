@@ -26,6 +26,7 @@
 
     /* Dark Palette */
     --dark: 60 3% 6%;
+    --dark-surface: 60 4% 11%;
     --dark-mid: 60 2% 26%;
     --muted: 52 5% 52%;
     --warm-gray: 47 25% 93%;
@@ -68,21 +69,20 @@
   }
 
   .dark {
-    /* No strict dark mode defined in brand guidelines beyond Near Black backgrounds,
-       we map back to dark mode standard for graceful fallback */
     --background: var(--dark);
     --foreground: var(--cream);
-    --card: var(--dark-mid);
+    --card: var(--dark-surface);
     --card-foreground: var(--cream);
-    --popover: var(--dark-mid);
+    --popover: var(--dark-surface);
     --popover-foreground: var(--cream);
     --primary: var(--gold-bright);
     --primary-foreground: var(--white);
-    --secondary: var(--muted);
-    --secondary-foreground: var(--white);
+    --secondary: var(--dark-mid);
+    --secondary-foreground: var(--cream);
     --border: var(--dark-mid);
     --input: var(--dark-mid);
     --ring: var(--gold-bright);
+    --muted-foreground: var(--muted);
   }
 }
 

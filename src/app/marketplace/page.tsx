@@ -44,13 +44,13 @@ const MarketplaceContent = () => {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F5F5F5] dark:bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <div className="hidden md:block">
         <Navbar />
       </div>
 
       {/* Mobile Top Header */}
-      <div className="md:hidden sticky top-0 z-40 bg-[#F5F5F5] dark:bg-background pt-10 pb-2 px-3">
+      <div className="md:hidden sticky top-0 z-40 bg-background pt-10 pb-2 px-3">
         <div className="flex items-center gap-2 mb-2">
           <span className="font-bold text-xl font-display text-foreground">Home</span>
           <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Free Delivery</span>
@@ -138,7 +138,7 @@ const MarketplaceContent = () => {
               <div className={`w-12 h-12 md:w-auto md:h-auto md:px-4 md:py-2 flex items-center justify-center transition-all duration-200 ${
                   selectedCategory === cat
                   ? "bg-primary text-primary-foreground md:rounded-full rounded-2xl shadow-sm"
-                  : "bg-white text-muted-foreground md:rounded-full rounded-2xl shadow-sm hover:bg-primary/5 border border-border"
+                  : "bg-card text-muted-foreground md:rounded-full rounded-2xl shadow-sm hover:bg-primary/5 border border-border"
                 }`}>
                 <span className="md:block hidden text-sm font-medium">{cat}</span>
                 <div className="md:hidden text-lg">
