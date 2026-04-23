@@ -23,8 +23,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        display: ["DM Serif Display", "Georgia", "serif"],
+        sans: ["DM Sans", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        display: ["Nunito", "sans-serif"],
+        mono: ["DM Mono", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",

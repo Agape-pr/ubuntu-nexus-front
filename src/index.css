@@ -1,99 +1,88 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=DM+Mono&family=Nunito:wght@800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* UbuntuNow Design System
-   Human · Warm · Trustworthy · Community-driven
-   All colors are HSL.
+/* UbuntuNow Brand Design System
+   "Always on. Always yours."
 */
 
 @layer base {
   :root {
-    /* Core Surfaces */
-    --background: 40 20% 98%;
-    --foreground: 215 35% 14%;
+    /* Gold Palette */
+    --gold-primary: 39 100% 24%;
+    --gold-bright: 39 100% 36%;
+    --gold-deep: 36 100% 18%;
+    --gold-accent: 46 100% 47%;
+    --gold-tint: 42 100% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 35% 14%;
+    /* Neutrals - Cream Family */
+    --cream: 40 43% 96%;
+    --cream-mid: 44 38% 94%;
+    --cream-dark: 42 28% 91%;
+    --border: 40 24% 88%;
+    --white: 0 0% 100%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 35% 14%;
+    /* Dark Palette */
+    --dark: 60 3% 6%;
+    --dark-mid: 60 2% 26%;
+    --muted: 52 5% 52%;
+    --warm-gray: 47 25% 93%;
 
-    /* Primary — Deep Slate Blue (Trust & Professionalism) */
-    --primary: 215 40% 16%;
-    --primary-foreground: 40 20% 98%;
+    /* Semantic */
+    --success: 142 76% 36%;
+    --error: 0 72% 51%;
+    --warning: 32 95% 44%;
+    --info: 221 83% 53%;
 
-    /* Secondary — Warm Soft Sand (Human & Approchable) */
-    --secondary: 35 30% 95%;
-    --secondary-foreground: 215 40% 20%;
+    /* Core Shadcn Maps */
+    --background: var(--cream);
+    --foreground: var(--dark);
+    --card: var(--white);
+    --card-foreground: var(--dark);
+    --popover: var(--white);
+    --popover-foreground: var(--dark);
+    
+    --primary: var(--gold-bright);
+    --primary-foreground: var(--white);
+    
+    --secondary: var(--cream-mid);
+    --secondary-foreground: var(--dark);
+    
+    --muted-foreground: var(--muted);
+    
+    --accent: var(--gold-accent);
+    --accent-foreground: var(--dark);
+    
+    --destructive: var(--error);
+    --destructive-foreground: var(--white);
+    
+    --input: var(--border);
+    --ring: var(--gold-bright);
+    --radius: 0.5rem;
 
-    /* Muted */
-    --muted: 35 20% 95%;
-    --muted-foreground: 215 15% 45%;
-
-    /* Accent — Warm Terra-cotta / Honeycomb */
-    --accent: 28 85% 55%;
-    --accent-foreground: 0 0% 100%;
-
-    /* Emerald — Community green */
-    --emerald: 155 58% 42%;
-    --emerald-foreground: 0 0% 100%;
-
-    /* Destructive */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    /* Borders & Inputs */
-    --border: 35 25% 90%;
-    --input: 35 25% 90%;
-    --ring: 215 40% 30%;
-
-    --radius: 0.75rem;
-
-    /* Brand gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(215, 40%, 14%) 0%, hsl(215, 30%, 24%) 100%);
-    --gradient-amber: linear-gradient(135deg, hsl(28, 85%, 55%) 0%, hsl(20, 85%, 58%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%) 0%, hsl(40, 20%, 99%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(40, 20%, 98%) 0%, hsl(40, 15%, 96%) 100%);
-
-    /* Shadows — soft, organic */
-    --shadow-sm: 0 2px 4px hsl(215 30% 14% / 0.03), 0 1px 2px hsl(215 30% 14% / 0.02);
-    --shadow-md: 0 6px 16px hsl(215 30% 14% / 0.05), 0 3px 6px hsl(215 30% 14% / 0.03);
-    --shadow-lg: 0 16px 40px hsl(215 30% 14% / 0.08), 0 6px 12px hsl(215 30% 14% / 0.04);
-    --shadow-amber: 0 8px 24px hsl(28, 85%, 55%, 0.2);
-    --shadow-card: 0 4px 14px hsl(215 30% 14% / 0.04), 0 1px 4px hsl(215 30% 14% / 0.02);
-
-    /* Sidebar */
-    --sidebar-background: 220 58% 18%;
-    --sidebar-foreground: 40 30% 95%;
-    --sidebar-primary: 36 90% 52%;
-    --sidebar-primary-foreground: 220 55% 10%;
-    --sidebar-accent: 220 50% 24%;
-    --sidebar-accent-foreground: 40 30% 95%;
-    --sidebar-border: 220 45% 25%;
-    --sidebar-ring: 36 90% 52%;
+    /* Legacy shadows map to something appropriate */
+    --shadow-card: 0 2px 8px rgba(17, 17, 16, 0.05);
+    --shadow-amber: 0 4px 12px rgba(184, 120, 0, 0.2);
   }
 
   .dark {
-    --background: 220 55% 8%;
-    --foreground: 40 30% 95%;
-    --card: 220 50% 11%;
-    --card-foreground: 40 30% 95%;
-    --popover: 220 50% 11%;
-    --popover-foreground: 40 30% 95%;
-    --primary: 36 90% 52%;
-    --primary-foreground: 220 55% 10%;
-    --secondary: 220 45% 16%;
-    --secondary-foreground: 40 30% 90%;
-    --muted: 220 45% 14%;
-    --muted-foreground: 220 20% 60%;
-    --accent: 36 90% 52%;
-    --accent-foreground: 220 55% 10%;
-    --border: 220 40% 18%;
-    --input: 220 40% 18%;
-    --ring: 36 90% 52%;
+    /* No strict dark mode defined in brand guidelines beyond Near Black backgrounds,
+       we map back to dark mode standard for graceful fallback */
+    --background: var(--dark);
+    --foreground: var(--cream);
+    --card: var(--dark-mid);
+    --card-foreground: var(--cream);
+    --popover: var(--dark-mid);
+    --popover-foreground: var(--cream);
+    --primary: var(--gold-bright);
+    --primary-foreground: var(--white);
+    --secondary: var(--muted);
+    --secondary-foreground: var(--white);
+    --border: var(--dark-mid);
+    --input: var(--dark-mid);
+    --ring: var(--gold-bright);
   }
 }
 
@@ -104,18 +93,31 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3 {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
   }
 
+  /* Display/Hero mapping to Nunito ExtraBold */
   .font-display {
-    font-family: 'DM Serif Display', Georgia, serif;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+  }
+  
+  /* Wordmark mapping to Nunito Black */
+  .font-wordmark {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+  }
+
+  /* Code mapping to DM Mono */
+  .font-mono {
+    font-family: 'DM Mono', monospace;
   }
 }
 

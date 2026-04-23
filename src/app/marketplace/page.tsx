@@ -52,23 +52,23 @@ const MarketplaceContent = () => {
       {/* Mobile Top Header */}
       <div className="md:hidden sticky top-0 z-40 bg-[#F5F5F5] dark:bg-background pt-10 pb-2 px-3">
         <div className="flex items-center gap-2 mb-2">
-          <span className="font-bold text-xl text-foreground">首页</span>
-          <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">¥ 888免运</span>
+          <span className="font-bold text-xl font-display text-foreground">Home</span>
+          <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Free Delivery</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex flex-col items-center justify-center shrink-0 w-8">
-             <div className="text-[10px] text-muted-foreground whitespace-nowrap">US</div>
+             <div className="text-[10px] font-bold text-muted-foreground whitespace-nowrap">RW</div>
           </div>
-          <div className="flex-1 relative flex items-center h-9 rounded-full border-2 border-rose-500 bg-card overflow-hidden">
-             <Search size={14} className="ml-3 text-rose-500 shrink-0" />
+          <div className="flex-1 relative flex items-center h-10 rounded-full border-2 border-primary bg-card overflow-hidden shadow-sm">
+             <Search size={14} className="ml-3 text-primary shrink-0" />
              <input
                 className="flex-1 h-full bg-transparent border-none text-xs px-2 focus:outline-none text-foreground placeholder:text-muted-foreground"
-                placeholder="搜索京东商品/店铺"
+                placeholder="Search products or stores..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
              />
-             <div className="h-full bg-rose-500 text-white text-xs font-bold px-4 flex items-center justify-center cursor-pointer">
-                搜索
+             <div className="h-full bg-primary text-primary-foreground text-xs font-bold px-4 flex items-center justify-center cursor-pointer transition-colors hover:bg-primary/90">
+                Search
              </div>
           </div>
         </div>
@@ -77,7 +77,7 @@ const MarketplaceContent = () => {
       {/* Desktop Header */}
       <div className="hidden md:block bg-card border-b border-border">
         <div className="container py-8">
-          <h1 className="text-3xl font-bold text-foreground mb-1">Marketplace</h1>
+          <h1 className="text-3xl font-display font-bold text-foreground mb-1">Marketplace</h1>
           <p className="text-muted-foreground">
             {allProducts.length} products from Kigali's finest sellers
           </p>
@@ -137,8 +137,8 @@ const MarketplaceContent = () => {
             >
               <div className={`w-12 h-12 md:w-auto md:h-auto md:px-4 md:py-2 flex items-center justify-center transition-all duration-200 ${
                   selectedCategory === cat
-                  ? "bg-rose-500 text-white md:rounded-full rounded-2xl shadow-sm"
-                  : "bg-white text-muted-foreground md:rounded-full rounded-2xl shadow-sm hover:bg-rose-50"
+                  ? "bg-primary text-primary-foreground md:rounded-full rounded-2xl shadow-sm"
+                  : "bg-white text-muted-foreground md:rounded-full rounded-2xl shadow-sm hover:bg-primary/5 border border-border"
                 }`}>
                 <span className="md:block hidden text-sm font-medium">{cat}</span>
                 <div className="md:hidden text-lg">

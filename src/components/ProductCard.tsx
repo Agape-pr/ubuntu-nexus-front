@@ -134,7 +134,7 @@ const ProductCard = ({
 
         {/* Price + Cart */}
         <div className="flex items-center justify-between mt-1">
-          <div className="flex items-end text-rose-500">
+          <div className="flex items-end text-primary">
             <span className="text-xs font-semibold mb-0.5">{currency}</span>
             <span className="text-lg font-bold leading-none">{formattedPrice}</span>
           </div>
@@ -142,7 +142,7 @@ const ProductCard = ({
             aria-label="Add to cart"
             onClick={handleAddToCart}
             disabled={!inStock}
-            className="h-6 w-6 rounded-full border border-rose-500 text-rose-500 flex items-center justify-center hover:bg-rose-50 hover:border-rose-600 hover:text-rose-600 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="h-6 w-6 rounded-full border border-primary text-primary flex items-center justify-center hover:bg-primary/10 hover:border-primary hover:text-primary transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Plus size={14} strokeWidth={2.5} />
           </button>

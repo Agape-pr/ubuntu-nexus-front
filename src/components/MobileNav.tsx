@@ -16,11 +16,11 @@ const MobileNav = () => {
   }, []);
 
   const navItems = [
-    { label: "首页", icon: Home, href: "/" },
-    { label: "分类", icon: LayoutGrid, href: "/marketplace" },
-    { label: "消息", icon: MessageSquare, href: "/messages" },
-    { label: "购物车", icon: ShoppingCart, href: "/cart", badge: true },
-    { label: "我的", icon: User, href: "/dashboard" },
+    { label: "Home", icon: Home, href: "/" },
+    { label: "Categories", icon: LayoutGrid, href: "/marketplace" },
+    { label: "Messages", icon: MessageSquare, href: "/messages" },
+    { label: "Cart", icon: ShoppingCart, href: "/cart", badge: true },
+    { label: "Profile", icon: User, href: "/dashboard" },
   ];
 
   return (
@@ -35,13 +35,13 @@ const MobileNav = () => {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
-                isActive ? "text-rose-500" : "text-muted-foreground"
+                isActive ? "text-primary" : "text-muted-foreground"
               }`}
             >
               <div className="relative">
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
                 {item.badge && mounted && totalItems > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-rose-500 text-white text-[9px] font-bold h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full border-2 border-white">
+                  <span className="absolute -top-1.5 -right-2 bg-primary text-white text-[9px] font-bold h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full border-2 border-white">
                     {totalItems}
                   </span>
                 )}
