@@ -156,6 +156,9 @@ function DetailRow({ icon: Icon, label, value }: { icon: any; label: string; val
         <p className="text-sm font-medium text-slate-700 mt-0.5">{value}</p>
       </div>
     </div>
+  );
+}
+
 // ── Add User Drawer ───────────────────────────────────────────────────────────
 
 function AddUserDrawer({ onClose, user }: { onClose: () => void, user: any }) {

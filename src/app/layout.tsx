@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "UbuntuNow is Rwanda's trusted marketplace. Buy unique local products and sell online in minutes with escrow-protected payments.",
 };
 
+import MobileNav from "@/components/MobileNav";
+
 export default function RootLayout({
   children,
 }: {
@@ -26,8 +28,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${plusJakartaSans.variable} ${dmSerifDisplay.variable} font-sans antialiased`}>
-        <Providers>{children}</Providers>
+      <body className={`${plusJakartaSans.variable} ${dmSerifDisplay.variable} font-sans antialiased md:pb-0 pb-14`}>
+        <Providers>
+          {children}
+          <MobileNav />
+        </Providers>
       </body>
     </html>
   );

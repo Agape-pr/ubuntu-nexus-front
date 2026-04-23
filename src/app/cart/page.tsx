@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/store/cartStore";
 import { PaymentOptions } from "@/components/ui/PaymentOptions";
-import { Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Trash2, ShoppingBag, ArrowRight, Plus, Minus } from "lucide-react";
 
 export default function CartPage() {
   const { items, removeItem, getTotalPrice, updateQuantity } = useCartStore();
@@ -48,15 +48,29 @@ export default function CartPage() {
                       <div className="font-bold text-foreground">
                         {new Intl.NumberFormat('en-RW').format(item.price)} RWF
                       </div>
-                      <div className="flex items-center gap-3">
-                        <select 
-                          className="bg-secondary border-none rounded-lg text-sm px-2 py-1"
-                          value={item.quantity}
-                          onChange={(e) => updateQuantity(item.id, Number(e.target.value))}
-                        >
-                          {[1,2,3,4,5].map(q => <option key={q} value={q}>Qty: {q}</option>)}
-                        </select>
-                        <button 
+                      <div className="flex items-center gap-2">
+                        {/* Qty stepper */}
+                        <div className="flex items-center h-8 bg-secondary rounded-lg border border-border overflow-hidden">
+                          <button
+                            aria-label="Decrease quantity"
+                            onClick={() => item.quantity > 1 ? updateQuantity(item.id, item.quantity - 1) : removeItem(item.id)}
+                            className="w-8 h-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-border/60 transition-colors"
+                          >
+                            <Minus size={13} />
+                          </button>
+                          <span className="w-8 text-center text-sm font-semibold text-foreground select-none">
+                            {item.quantity}
+                          </span>
+                          <button
+                            aria-label="Increase quantity"
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            className="w-8 h-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-border/60 transition-colors"
+                          >
+                            <Plus size={13} />
+                          </button>
+                        </div>
+                        <button
+                          aria-label="Remove item"
                           onClick={() => removeItem(item.id)}
                           className="p-1.5 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
                         >

@@ -1,15 +1,85 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, ArrowRight, Upload } from "lucide-react";
-import { useLogin, useRegister, useSendOTP, useVerifyOTP, useResendOTP } from "@/lib/api/hooks/useAuth";
+import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, Timer } from "lucide-react";
+import { useLogin, useRegister, useVerifyOTP, useResendOTP } from "@/lib/api/hooks/useAuth";
 import { toast } from "sonner";
+
+// ── OTP_EXPIRY and RESEND_COOLDOWN match auth-service/apps/authentication/services/otp_service.py
+const OTP_EXPIRY_SECONDS = 5 * 60; // 5 minutes
+const RESEND_COOLDOWN_SECONDS = 60;
+
+/** 6-box OTP input with auto-advance, backspace, and paste support */
+const OtpBoxes = ({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+}) => {
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleKey = (e: React.KeyboardEvent<HTMLInputElement>, idx: number) => {
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      const next = value.split("");
+      if (next[idx]) {
+        next[idx] = "";
+        onChange(next.join(""));
+      } else if (idx > 0) {
+        next[idx - 1] = "";
+        onChange(next.join(""));
+        inputRefs.current[idx - 1]?.focus();
+      }
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
+    const digit = e.target.value.replace(/\D/g, "").slice(-1);
+    if (!digit) return;
+    const next = value.split("").slice(0, 6);
+    next[idx] = digit;
+    const joined = next.join("").slice(0, 6);
+    onChange(joined);
+    if (idx < 5) inputRefs.current[idx + 1]?.focus();
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    onChange(pasted);
+    const nextIdx = Math.min(pasted.length, 5);
+    inputRefs.current[nextIdx]?.focus();
+  };
+
+  return (
+    <div className="flex gap-2 justify-center" onPaste={handlePaste}>
+      {[0, 1, 2, 3, 4, 5].map((idx) => (
+        <input
+          key={idx}
+          ref={(el) => { inputRefs.current[idx] = el; }}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
+          value={value[idx] ?? ""}
+          onChange={(e) => handleChange(e, idx)}
+          onKeyDown={(e) => handleKey(e, idx)}
+          autoFocus={idx === 0}
+          className={`w-12 h-14 text-center text-xl font-bold rounded-xl border-2 bg-card text-foreground outline-none transition-all duration-150
+            ${value[idx] ? "border-primary shadow-sm" : "border-border"}
+            focus:border-primary focus:ring-2 focus:ring-primary/20
+            caret-transparent`}
+        />
+      ))}
+    </div>
+  );
+};
 
 type Role = "buyer" | "seller";
 type Tab = "login" | "register";
@@ -46,9 +116,27 @@ const AuthContent = () => {
     store?: { store_name: string; store_description?: string };
   } | null>(null);
 
+  // Countdown timers — mirror backend constants
+  const [expiryCountdown, setExpiryCountdown] = useState(OTP_EXPIRY_SECONDS);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (registrationStep !== "otp") return;
+    setExpiryCountdown(OTP_EXPIRY_SECONDS);
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
+
+    const tick = setInterval(() => {
+      setExpiryCountdown((s) => Math.max(0, s - 1));
+      setResendCooldown((s) => Math.max(0, s - 1));
+    }, 1000);
+    return () => clearInterval(tick);
+  }, [registrationStep]);
+
+  const fmtTime = (s: number) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
   const loginMutation = useLogin();
   const registerMutation = useRegister();
-  const sendOTPMutation = useSendOTP();
   const verifyOTPMutation = useVerifyOTP();
   const resendOTPMutation = useResendOTP();
 
@@ -102,26 +190,26 @@ const AuthContent = () => {
     if (!registrationData) return;
     if (otp.length !== 6) return;
 
-    // Step 3: Verify OTP - backend activates user and returns tokens (user is logged in)
     verifyOTPMutation.mutate(
-      {
-        email: registrationData.email,
-        purpose: "register",
-        otp: otp,
-      },
-      {
-        onError: () => setOtp(""),
-      }
+      { email: registrationData.email, purpose: "register", otp },
+      { onError: () => setOtp("") }
     );
   };
 
   const handleResendOTP = () => {
     if (!registrationData) return;
 
-    resendOTPMutation.mutate({
-      email: registrationData.email,
-      purpose: "register",
-    });
+    resendOTPMutation.mutate(
+      { email: registrationData.email, purpose: "register" },
+      {
+        onSuccess: () => {
+          setOtp("");
+          // Reset both timers — new OTP is fresh
+          setExpiryCountdown(OTP_EXPIRY_SECONDS);
+          setResendCooldown(RESEND_COOLDOWN_SECONDS);
+        },
+      }
+    );
   };
 
   const handleBackToForm = () => {
@@ -213,59 +301,67 @@ const AuthContent = () => {
 
           {/* OTP Verification Step */}
           {registrationStep === "otp" && (
-            <form onSubmit={handleOTPVerify} className="space-y-4">
-              <div className="flex items-center justify-center mb-6">
+            <form onSubmit={handleOTPVerify} className="space-y-6">
+              {/* Icon + email */}
+              <div className="flex flex-col items-center gap-3">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                   <Mail className="h-8 w-8 text-primary" />
                 </div>
+                <p className="text-sm text-muted-foreground text-center">
+                  Code sent to <span className="font-semibold text-foreground">{registrationData?.email}</span>
+                </p>
               </div>
 
-              <div>
-                <Label htmlFor="otp">Enter verification code</Label>
-                <Input
-                  id="otp"
-                  type="text"
-                  placeholder="000000"
-                  className="mt-1.5 h-11 rounded-xl text-center text-2xl tracking-widest font-mono"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  maxLength={6}
-                  autoFocus
-                />
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Enter the 6-digit code sent to your email
-                </p>
+              {/* 6-box OTP input */}
+              <OtpBoxes value={otp} onChange={setOtp} />
+
+              {/* Expiry + progress bar */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Timer size={12} />
+                    Code expires in
+                  </span>
+                  <span className={`font-mono font-semibold ${expiryCountdown < 60 ? "text-rose-500" : "text-foreground"}`}>
+                    {fmtTime(expiryCountdown)}
+                  </span>
+                </div>
+                <div className="h-1 rounded-full bg-border overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-1000 ${expiryCountdown < 60 ? "bg-rose-500" : "bg-primary"}`}
+                    style={{ width: `${(expiryCountdown / OTP_EXPIRY_SECONDS) * 100}%` }}
+                  />
+                </div>
               </div>
 
               <Button
                 type="submit"
                 size="lg"
-                className="w-full h-12 rounded-xl text-base font-semibold mt-2"
-                disabled={otp.length !== 6 || verifyOTPMutation.isPending || registerMutation.isPending}
+                className="w-full h-12 rounded-xl text-base font-semibold"
+                disabled={otp.length !== 6 || verifyOTPMutation.isPending || expiryCountdown === 0}
               >
-                {verifyOTPMutation.isPending
-                  ? "Verifying code..."
-                  : registerMutation.isPending
-                    ? "Creating account..."
-                    : "Verify & Create Account"}
+                {verifyOTPMutation.isPending ? "Verifying…" : expiryCountdown === 0 ? "Code expired" : "Verify & create account"}
               </Button>
 
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center justify-between">
                 <button
                   type="button"
                   onClick={handleBackToForm}
-                  className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+                  className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1.5"
                 >
-                  <ArrowLeft size={14} />
-                  Back to form
+                  <ArrowLeft size={14} /> Back
                 </button>
                 <button
                   type="button"
                   onClick={handleResendOTP}
-                  disabled={resendOTPMutation.isPending}
-                  className="text-sm text-accent hover:underline"
+                  disabled={resendCooldown > 0 || resendOTPMutation.isPending}
+                  className="text-sm text-accent hover:underline disabled:text-muted-foreground disabled:no-underline disabled:cursor-not-allowed"
                 >
-                  {resendOTPMutation.isPending ? "Sending..." : "Resend code"}
+                  {resendOTPMutation.isPending
+                    ? "Sending…"
+                    : resendCooldown > 0
+                      ? `Resend in ${resendCooldown}s`
+                      : "Resend code"}
                 </button>
               </div>
             </form>

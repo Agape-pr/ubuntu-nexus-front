@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 import { Menu, X, ShoppingBag, Bell, Search, User, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLogout } from "@/lib/api/hooks/useAuth";
@@ -13,7 +13,11 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
   const logoutMutation = useLogout();
   
   const totalItems = useCartStore((state) => state.getTotalItems());
@@ -28,6 +32,19 @@ const Navbar = () => {
     window.addEventListener('storage', checkAuth);
     return () => window.removeEventListener('storage', checkAuth);
   }, [pathname]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    router.push(`/marketplace?search=${encodeURIComponent(searchQuery.trim())}`);
+    setSearchOpen(false);
+    setSearchQuery("");
+  };
+
+  const openSearch = () => {
+    setSearchOpen(true);
+    setTimeout(() => searchRef.current?.focus(), 50);
+  };
 
   const navLinks = [
     { label: "Marketplace", to: "/marketplace" },
@@ -66,10 +83,18 @@ const Navbar = () => {
 
         {/* Right Actions */}
         <div className="hidden md:flex items-center gap-2">
-          <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200">
+          <button
+            aria-label="Search"
+            onClick={openSearch}
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200"
+          >
             <Search size={18} />
           </button>
-          <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200">
+          <button
+            aria-label="Notifications"
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 cursor-not-allowed opacity-50"
+            title="Notifications coming soon"
+          >
             <Bell size={18} />
           </button>
           <Link href="/cart">
@@ -142,6 +167,12 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+                <Link href="/cart" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all flex items-center justify-between">
+              <span className="flex items-center gap-2"><ShoppingBag size={16} /> Cart</span>
+              {mounted && totalItems > 0 && (
+                <span className="h-5 min-w-5 rounded-full bg-accent flex items-center justify-center px-1 text-[10px] font-bold text-white">{totalItems}</span>
+              )}
+            </Link>
             <div className="mt-3 pt-3 border-t border-border flex flex-col gap-2">
               {isLoggedIn ? (
                 <>
@@ -173,6 +204,37 @@ const Navbar = () => {
               )}
             </div>
           </div>
+        </div>
+      )}
+      {/* Search Overlay */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-[100] bg-foreground/40 backdrop-blur-sm flex items-start justify-center pt-24 px-4" onClick={() => setSearchOpen(false)}>
+          <form
+            onSubmit={handleSearchSubmit}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-xl bg-card border border-border rounded-2xl shadow-lift overflow-hidden"
+          >
+            <div className="flex items-center gap-3 px-4 py-3">
+              <Search size={18} className="text-muted-foreground shrink-0" />
+              <input
+                ref={searchRef}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products or stores…"
+                className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground text-base outline-none"
+              />
+              <button type="button" onClick={() => setSearchOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X size={18} />
+              </button>
+            </div>
+            {searchQuery.trim() && (
+              <div className="border-t border-border px-4 py-3">
+                <button type="submit" className="text-sm text-accent font-medium hover:underline">
+                  Search for &ldquo;{searchQuery}&rdquo; in Marketplace →
+                </button>
+              </div>
+            )}
+          </form>
         </div>
       )}
     </header>

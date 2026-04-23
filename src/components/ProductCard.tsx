@@ -1,6 +1,9 @@
+import { useState } from "react";
 import Link from "next/link";
-import { Star, ShoppingCart, Heart, Store } from "lucide-react";
+import { Star, ShoppingCart, Heart, Store, Plus } from "lucide-react";
 import { CloudImage } from "@/components/ui/CloudImage";
+import { useCartStore } from "@/lib/store/cartStore";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   id: string;
@@ -26,12 +29,29 @@ const ProductCard = ({
   image,
   storeName,
   storeSlug,
-  rating = 4.5,
-  reviewCount = 12,
+  rating,
+  reviewCount,
   category,
   inStock = true,
 }: ProductCardProps) => {
   const formattedPrice = new Intl.NumberFormat("en-RW").format(price);
+  const addItem = useCartStore((state) => state.addItem);
+  const [wishlisted, setWishlisted] = useState(false);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!inStock) return;
+    addItem({ id, name, price, image, storeName, quantity: 1 });
+    toast.success(`${name} added to cart!`);
+  };
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWishlisted((prev) => !prev);
+    toast(wishlisted ? "Removed from wishlist" : "Added to wishlist");
+  };
 
   return (
     <div className="group bg-card rounded-2xl shadow-card hover:shadow-lift transition-all duration-300 overflow-hidden border border-border/50 hover:border-border">
@@ -51,8 +71,12 @@ const ProductCard = ({
           </div>
         )}
         {/* Wishlist */}
-        <button className="absolute top-3 right-3 h-8 w-8 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-destructive transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-card">
-          <Heart size={14} />
+        <button
+          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          onClick={handleWishlist}
+          className={`absolute top-3 right-3 h-8 w-8 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-card ${wishlisted ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"}`}
+        >
+          <Heart size={14} className={wishlisted ? "fill-rose-500" : ""} />
         </button>
         {/* Category */}
         {category && (
@@ -88,35 +112,39 @@ const ProductCard = ({
           </h3>
         </Link>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1.5 mb-3">
-          <div className="flex items-center gap-0.5">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                size={11}
-                className={
-                  i < Math.floor(rating)
-                    ? "fill-accent text-accent"
-                    : "fill-muted text-muted-foreground"
-                }
-              />
-            ))}
+        {/* Rating — only shown when real data is provided */}
+        {rating !== undefined && reviewCount !== undefined && (
+          <div className="flex items-center gap-1.5 mb-3">
+            <div className="flex items-center gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  size={11}
+                  className={
+                    i < Math.floor(rating)
+                      ? "fill-accent text-accent"
+                      : "fill-muted text-muted-foreground"
+                  }
+                />
+              ))}
+            </div>
+            <span className="text-xs text-muted-foreground">({reviewCount})</span>
           </div>
-          <span className="text-xs text-muted-foreground">({reviewCount})</span>
-        </div>
+        )}
 
         {/* Price + Cart */}
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-lg font-bold text-foreground">{formattedPrice}</span>
-            <span className="text-xs text-muted-foreground ml-1">{currency}</span>
+        <div className="flex items-center justify-between mt-1">
+          <div className="flex items-end text-rose-500">
+            <span className="text-xs font-semibold mb-0.5">{currency}</span>
+            <span className="text-lg font-bold leading-none">{formattedPrice}</span>
           </div>
           <button
+            aria-label="Add to cart"
+            onClick={handleAddToCart}
             disabled={!inStock}
-            className="h-9 w-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/80 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed shadow-card hover:shadow-ambient"
+            className="h-6 w-6 rounded-full border border-rose-500 text-rose-500 flex items-center justify-center hover:bg-rose-50 hover:border-rose-600 hover:text-rose-600 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <ShoppingCart size={15} />
+            <Plus size={14} strokeWidth={2.5} />
           </button>
         </div>
       </div>
