@@ -31,7 +31,9 @@ const MarketplaceContent = () => {
   const { data: allProducts = [], isLoading } = useProducts();
 
   const filtered = allProducts.filter((p) => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.store_name?.toLowerCase().includes(search.toLowerCase());
+    const searchLower = search.toLowerCase();
+    const matchSearch = (p.name || "").toLowerCase().includes(searchLower) || 
+                        (p.store_name || "").toLowerCase().includes(searchLower);
     const matchCategory = selectedCategory === "All" || p.category_name === selectedCategory;
     return matchSearch && matchCategory;
   });
@@ -186,7 +188,7 @@ const MarketplaceContent = () => {
                   price={Number(product.price)}
                   image={product.images?.[0]?.image}
                   storeName={product.store_name}
-                  storeSlug={product.store_name?.toLowerCase().replace(/\s+/g, '-')}
+                  storeSlug={product.store_name ? product.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
                   category={product.category_name}
                   inStock={product.stock_quantity > 0}
                 />
