@@ -57,19 +57,21 @@ const ProductCard = ({
     <div className="group bg-card rounded-2xl shadow-card hover:shadow-lift transition-all duration-300 overflow-hidden border border-border/50 hover:border-border">
       {/* Image */}
       <div className="relative h-52 bg-secondary overflow-hidden">
-        {image ? (
-          <CloudImage
-            publicId={image}
-            alt={name}
-            width={400}
-            crop="fill"
-            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-4xl opacity-20">🛍️</div>
-          </div>
-        )}
+        <Link href={`/product/${encodeURIComponent(slug || id)}`} className="block w-full h-full">
+          {image ? (
+            <CloudImage
+              publicId={image}
+              alt={name}
+              width={400}
+              crop="fill"
+              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="text-4xl opacity-20">🛍️</div>
+            </div>
+          )}
+        </Link>
         {/* Wishlist */}
         <button
           aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
