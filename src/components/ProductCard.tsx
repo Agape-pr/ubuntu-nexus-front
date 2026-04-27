@@ -36,7 +36,6 @@ const ProductCard = ({
 }: ProductCardProps) => {
   const formattedPrice = new Intl.NumberFormat("en-RW").format(price);
   const addItem = useCartStore((state) => state.addItem);
-  const [wishlisted, setWishlisted] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,107 +45,78 @@ const ProductCard = ({
     toast.success(`${name} added to cart!`);
   };
 
-  const handleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setWishlisted((prev) => !prev);
-    toast(wishlisted ? "Removed from wishlist" : "Added to wishlist");
-  };
-
   return (
-    <div className="group bg-card rounded-2xl shadow-card hover:shadow-lift transition-all duration-300 overflow-hidden border border-border/50 hover:border-border">
+    <div className="group bg-[#1C1C1A] rounded-[10px] shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden break-inside-avoid">
       {/* Image */}
-      <div className="relative h-52 bg-secondary overflow-hidden">
-        <Link href={`/product/${encodeURIComponent(slug || id)}`} className="block w-full h-full">
+      <div className="relative bg-secondary/20 overflow-hidden">
+        <Link href={`/product/${encodeURIComponent(slug || id)}`} className="block w-full h-full relative">
           {image ? (
             <CloudImage
               publicId={image}
               alt={name}
               width={400}
-              crop="fill"
-              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+              className="w-full h-auto min-h-[160px] object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
+            <div className="w-full aspect-[4/5] flex items-center justify-center bg-white/5">
               <div className="text-4xl opacity-20">🛍️</div>
             </div>
           )}
-        </Link>
-        {/* Wishlist */}
-        <button
-          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          onClick={handleWishlist}
-          className={`absolute top-3 right-3 h-8 w-8 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-card ${wishlisted ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"}`}
-        >
-          <Heart size={14} className={wishlisted ? "fill-rose-500" : ""} />
-        </button>
-        {/* Category */}
-        {category && (
-          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-primary/90 text-primary-foreground text-xs font-medium backdrop-blur-sm">
-            {category}
-          </span>
-        )}
-        {!inStock && (
-          <div className="absolute inset-0 bg-foreground/40 flex items-center justify-center">
-            <span className="bg-card text-foreground text-xs font-semibold px-3 py-1.5 rounded-full">
-              Out of stock
+          
+          {/* Category Tag on Image (Optional, JD uses it sometimes for "New") */}
+          {category && (
+            <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-gradient-to-r from-primary to-amber-600 text-white shadow-sm">
+              {category}
             </span>
-          </div>
-        )}
+          )}
+
+          {!inStock && (
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+              <span className="bg-card text-foreground text-[10px] font-semibold px-2 py-1 rounded-full">
+                Out of stock
+              </span>
+            </div>
+          )}
+        </Link>
       </div>
 
       {/* Content */}
-      <div className="p-3.5">
-        {/* Store link */}
-        {storeName && storeSlug && (
-          <Link
-            href={`/store/${storeSlug}`}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-accent transition-colors mb-2"
-          >
-            <Store size={11} />
-            <span>{storeName}</span>
-          </Link>
-        )}
-
+      <div className="p-2.5 pb-3">
         <Link href={`/product/${encodeURIComponent(slug || id)}`}>
-          <h3 className="font-semibold text-sm text-foreground line-clamp-2 hover:text-accent transition-colors leading-tight mb-2">
+          <h3 className="font-semibold text-[13px] text-foreground/90 line-clamp-2 hover:text-primary transition-colors leading-[18px]">
             {name}
           </h3>
         </Link>
 
-        {/* Rating — only shown when real data is provided */}
-        {rating !== undefined && reviewCount !== undefined && (
-          <div className="flex items-center gap-1.5 mb-3">
-            <div className="flex items-center gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  size={11}
-                  className={
-                    i < Math.floor(rating)
-                      ? "fill-accent text-accent"
-                      : "fill-muted text-muted-foreground"
-                  }
-                />
-              ))}
-            </div>
-            <span className="text-xs text-muted-foreground">({reviewCount})</span>
-          </div>
+        {/* Tags Row */}
+        <div className="flex flex-wrap gap-1 mt-1.5 mb-1">
+          <span className="text-[10px] font-medium text-primary bg-primary/10 px-1 py-0.5 rounded-sm">Official</span>
+          <span className="text-[10px] font-medium text-primary bg-primary/10 px-1 py-0.5 rounded-sm">Free Delivery</span>
+        </div>
+
+        {/* Store link (if any) */}
+        {storeName && storeSlug && (
+          <Link
+            href={`/store/${storeSlug}`}
+            className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-accent transition-colors mb-1.5 mt-1"
+          >
+            <span>{storeName}</span>
+          </Link>
         )}
 
         {/* Price + Cart */}
-        <div className="flex items-center justify-between mt-1">
-          <div className="flex items-end text-primary">
-            <span className="text-xs font-semibold mb-0.5">{currency}</span>
-            <span className="text-lg font-bold leading-none">{formattedPrice}</span>
+        <div className="flex items-end justify-between mt-1.5">
+          <div className="flex items-baseline text-primary">
+            <span className="text-[11px] font-bold mr-[2px]">{currency}</span>
+            <span className="text-base font-bold leading-none tracking-tight">{formattedPrice}</span>
           </div>
           <button
             aria-label="Add to cart"
             onClick={handleAddToCart}
             disabled={!inStock}
-            className="h-6 w-6 rounded-full border border-primary text-primary flex items-center justify-center hover:bg-primary/10 hover:border-primary hover:text-primary transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="h-[22px] w-[22px] rounded-full border border-primary text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
           >
-            <Plus size={14} strokeWidth={2.5} />
+            <Plus size={14} strokeWidth={3} />
           </button>
         </div>
       </div>

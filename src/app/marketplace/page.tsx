@@ -178,20 +178,21 @@ const MarketplaceContent = () => {
             <p className="hidden md:block text-sm text-muted-foreground mb-4">
               {sorted.length} product{sorted.length !== 1 ? "s" : ""} found
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-6">
+            <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-2 md:gap-4 space-y-2 md:space-y-4">
               {sorted.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={String(product.id)}
-                  slug={product.name}
-                  name={product.name}
-                  price={Number(product.price)}
-                  image={product.images?.[0]?.image}
-                  storeName={product.store_name}
-                  storeSlug={product.store_name ? product.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
-                  category={product.category_name}
-                  inStock={product.stock_quantity > 0}
-                />
+                <div key={product.id} className="break-inside-avoid">
+                  <ProductCard
+                    id={String(product.id)}
+                    slug={product.name}
+                    name={product.name}
+                    price={Number(product.price)}
+                    image={product.images?.[0]?.image}
+                    storeName={product.store_name}
+                    storeSlug={product.store_name ? product.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
+                    category={product.category_name}
+                    inStock={product.stock_quantity > 0}
+                  />
+                </div>
               ))}
             </div>
           </>
