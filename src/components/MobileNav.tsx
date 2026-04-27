@@ -15,6 +15,10 @@ const MobileNav = () => {
     setMounted(true);
   }, []);
 
+  if (pathname === "/") {
+    return null;
+  }
+
   const navItems = [
     { label: "Home", icon: Home, href: "/" },
     { label: "Categories", icon: LayoutGrid, href: "/marketplace" },
