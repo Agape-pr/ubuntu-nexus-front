@@ -5,7 +5,14 @@
  * The API base URL is read from environment variables.
  */
 
-let BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+let BASE_API_URL: string;
+
+if (process.env.NODE_ENV === 'production') {
+  // Confirmed live Railway URL — backend is reachable and CORS is open
+  BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-gatewayubuntunow-platform-be-production.up.railway.app/api/v1';
+} else {
+  BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+}
 
 // Auto-fix misconfigured production environment variables (e.g. Vercel)
 // If the URL starts with a domain name instead of a protocol or a slash, prepend https://

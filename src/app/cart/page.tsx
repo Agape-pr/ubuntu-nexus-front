@@ -8,9 +8,78 @@ import { useCartStore } from "@/lib/store/cartStore";
 import { PaymentOptions } from "@/components/ui/PaymentOptions";
 import { Trash2, ShoppingBag, ArrowRight, Plus, Minus } from "lucide-react";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 export default function CartPage() {
-  const { items, removeItem, getTotalPrice, updateQuantity } = useCartStore();
+  const { items, removeItem, getTotalPrice, updateQuantity, clearCart } = useCartStore();
   const totalPrice = getTotalPrice();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const router = useRouter();
+
+  const handleCheckout = async () => {
+    if (items.length === 0) return;
+    setIsProcessing(true);
+    
+    try {
+      // Get authentication token
+      const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+      if (!token) {
+        alert("Please log in to proceed with checkout.");
+        router.push("/auth/login");
+        return;
+      }
+
+      // 1. Create the order
+      const orderPayload = {
+        items: items.map(item => ({ 
+          product_id: parseInt(item.id.toString(), 10), 
+          quantity: item.quantity 
+        }))
+      };
+      
+      const orderRes = await fetch('http://localhost:8000/api/v1/orders/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderPayload)
+      });
+      
+      if (!orderRes.ok) {
+        const errorData = await orderRes.json();
+        throw new Error(errorData.error || 'Failed to create order');
+      }
+      
+      const orders = await orderRes.json();
+      
+      // We process the first order in the batch (assuming single store for simple testing)
+      if (orders && orders.length > 0) {
+        const orderId = orders[0].id;
+        
+        // 2. Trigger mock payment
+        const paymentRes = await fetch(`http://localhost:8000/api/v1/orders/${orderId}/mock-payment/`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!paymentRes.ok) throw new Error('Payment simulation failed');
+        
+        // Success
+        clearCart();
+        alert('Order placed successfully! The mock payment has been held in escrow and notifications have been triggered.');
+        router.push('/'); // Or redirect to an orders dashboard
+      }
+    } catch (error: any) {
+      console.error("Checkout Error:", error);
+      alert(`Checkout failed: ${error.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -102,8 +171,15 @@ export default function CartPage() {
                   </div>
                 </div>
                 
-                <Button size="lg" className="w-full gradient-amber text-primary hover:scale-[1.02] transition-transform rounded-xl font-bold shadow-amber border-0 mb-6">
-                  Proceed to Checkout <ArrowRight size={16} className="ml-2" />
+                <Button 
+                  size="lg" 
+                  className="w-full gradient-amber text-primary hover:scale-[1.02] transition-transform rounded-xl font-bold shadow-amber border-0 mb-6"
+                  onClick={handleCheckout}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? "Processing..." : (
+                    <>Proceed to Checkout <ArrowRight size={16} className="ml-2" /></>
+                  )}
                 </Button>
                 
                 <PaymentOptions />
