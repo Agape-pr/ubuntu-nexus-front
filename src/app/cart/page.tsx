@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/store/cartStore";
 import { PaymentOptions } from "@/components/ui/PaymentOptions";
 import { Trash2, ShoppingBag, ArrowRight, Plus, Minus } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api/config";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -38,7 +39,7 @@ export default function CartPage() {
         }))
       };
       
-      const orderRes = await fetch('http://localhost:8000/api/v1/orders/', {
+      const orderRes = await fetch(`${API_BASE_URL}/orders/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +60,7 @@ export default function CartPage() {
         const orderId = orders[0].id;
         
         // 2. Trigger mock payment
-        const paymentRes = await fetch(`http://localhost:8000/api/v1/orders/${orderId}/mock-payment/`, {
+        const paymentRes = await fetch(`${API_BASE_URL}/orders/${orderId}/mock-payment/`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
