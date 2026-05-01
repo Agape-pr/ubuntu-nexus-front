@@ -7,21 +7,31 @@ import { useCartStore } from "@/lib/store/cartStore";
 import { useSellerOrders } from "@/lib/api/hooks/useOrders";
 import { useEffect, useState } from "react";
 
+const SEEN_ORDERS_KEY = "seen_order_ids";
+const getSeenOrderIds = (): number[] => {
+  try { const r = localStorage.getItem(SEEN_ORDERS_KEY); return r ? JSON.parse(r) : []; }
+  catch { return []; }
+};
+
 const MobileNav = () => {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [seenIds, setSeenIds] = useState<number[]>([]);
   const totalItems = useCartStore((state) => state.getTotalItems());
 
   useEffect(() => {
     setUserRole(localStorage.getItem('user_role'));
+    setSeenIds(getSeenOrderIds());
     setMounted(true);
   }, [pathname]);
 
   const { data: sellerOrders } = useSellerOrders(mounted && userRole === 'seller');
   
-  // Calculate unread/pending orders
-  const pendingOrdersCount = sellerOrders?.filter((order: any) => order.status === 'pending').length || 0;
+  // Count orders that are 'pending' AND have not been viewed yet (not in seenIds)
+  const pendingOrdersCount = sellerOrders?.filter(
+    (order: any) => order.status === 'pending' && !seenIds.includes(order.id)
+  ).length || 0;
 
   if (pathname === "/") {
     return null;
