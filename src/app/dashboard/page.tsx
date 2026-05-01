@@ -12,9 +12,10 @@ import {
   Store, Package, TrendingUp, Settings, Plus, Copy, ExternalLink,
   CheckCircle, Edit3, Trash2, ShoppingBag, AlertCircle, Loader2,
   Eye, LayoutDashboard, Wallet, LogOut, ChevronRight, Search,
-  Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star,
+  Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star, Truck,
 } from "lucide-react";
 import { useCreateProduct, useUpdateProduct, useCategories, useSellerProducts } from "@/lib/api/hooks/useProducts";
+import { useSellerOrders, useUpdateOrderStatus } from "@/lib/api/hooks/useOrders";
 import { createCategory } from "@/lib/api/services/products";
 import { useCurrentUser, useUpdateStore } from "@/lib/api/hooks/useUsers";
 import { toast } from "sonner";
@@ -22,8 +23,7 @@ import { CloudImage } from "@/components/ui/CloudImage";
 
 type DashView = "overview" | "products" | "orders" | "store-settings";
 
-// Orders will come from the API in the future
-const REAL_ORDERS: never[] = [];
+// Removed dummy REAL_ORDERS constant
 
 // Curated category suggestions for African marketplace sellers
 const CATEGORY_SUGGESTIONS = [
@@ -58,7 +58,10 @@ export default function SellerDashboard() {
   const { data: userProfile, isLoading: isUserLoading } = useCurrentUser();
   const { data: categories } = useCategories();
   const { data: sellerProducts, isLoading: isProductsLoading } = useSellerProducts();
-
+  const { data: realOrdersData, isLoading: isOrdersLoading } = useSellerOrders();
+  const { mutate: updateStatus, isPending: isUpdatingOrder } = useUpdateOrderStatus();
+  const REAL_ORDERS = realOrdersData || [];
+  
   const [productForm, setProductForm] = useState({
     name: "", price: "", stock_quantity: "", category: "", description: "",
   });
@@ -222,7 +225,7 @@ export default function SellerDashboard() {
     { id: "store-settings" as DashView, label: "Store Settings", icon: Settings },
   ];
 
-  const totalRevenue = REAL_ORDERS.reduce((sum: number, order: any) => sum + (order?.amount || 0), 0);
+  const totalRevenue = REAL_ORDERS.reduce((sum: number, order: any) => sum + (parseFloat(order?.total_amount) || 0), 0);
 
   const STATS = [
     { label: "Active Listings", value: isProductsLoading ? "…" : String(activeProductsCount), sub: "Across your store", icon: Package, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
@@ -409,17 +412,19 @@ export default function SellerDashboard() {
                       const statusEmoji: Record<string, string> = { completed: "✅", shipped: "🚚", pending: "📦" };
                       const statusBg: Record<string, string> = { completed: "bg-emerald-50", shipped: "bg-blue-50", pending: "bg-amber-50" };
                       return (
-                        <div key={order.id} className="px-6 py-4 flex items-center gap-4 hover:bg-slate-50/60 transition-colors">
-                          <div className={`h-8 w-8 rounded-xl flex items-center justify-center text-sm ${statusBg[order.status] || "bg-slate-100"}`}>
-                            {statusEmoji[order.status] || "📦"}
+                        <div key={order.id} className="px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-slate-50/60 transition-colors">
+                          <div className={`h-8 w-8 rounded-xl flex items-center justify-center text-sm flex-shrink-0 ${statusBg[order.status?.toLowerCase()] || "bg-slate-100"}`}>
+                            {statusEmoji[order.status?.toLowerCase()] || "📦"}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-sm text-slate-900">{order.customer}</div>
-                            <div className="text-xs text-slate-400 truncate">{order.product}</div>
+                            <div className="font-semibold text-sm text-slate-900">Order #{order.id}</div>
+                            <div className="text-xs text-slate-400 truncate">
+                              {order.items?.map((i: any) => i.product_name).join(', ')}
+                            </div>
                           </div>
-                          <div className="text-right flex-shrink-0">
-                            <div className="font-bold text-sm text-slate-900">{order.amount.toLocaleString()} RWF</div>
-                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s.color}`}>{s.label}</span>
+                          <div className="text-left sm:text-right flex-shrink-0">
+                            <div className="font-bold text-sm text-slate-900">{parseFloat(order.total_amount).toLocaleString()} RWF</div>
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s?.color || 'bg-slate-100 text-slate-500'}`}>{order.status?.replace('_', ' ')}</span>
                           </div>
                         </div>
                       );
@@ -640,10 +645,10 @@ export default function SellerDashboard() {
                             </div>
                           )}
                           {/* Edit button */}
-                          <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <div className="absolute bottom-3 right-3 flex items-center gap-2">
                             <button onClick={() => handleEditClick(product)}
-                              className="h-10 w-10 bg-white rounded-2xl flex items-center justify-center shadow-lg hover:bg-amber-50 transition-colors">
-                              <Edit3 size={15} className="text-slate-700" />
+                              className="h-10 w-10 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm hover:bg-white transition-colors">
+                              <Edit3 size={16} className="text-slate-800" />
                             </button>
                           </div>
                         </div>
@@ -651,7 +656,7 @@ export default function SellerDashboard() {
                           <h4 className="font-bold text-slate-900 truncate mb-1">{product.name}</h4>
                           <div className="flex items-center justify-between">
                             <span className="text-amber-600 font-black text-lg">{Number(product.price).toLocaleString()} <span className="text-xs font-bold text-slate-400">RWF</span></span>
-                            <span className="text-xs text-slate-400">{product.stock_quantity} in stock</span>
+                            <span className="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded-lg">{product.stock_quantity} in stock</span>
                           </div>
                         </div>
                       </div>
@@ -699,23 +704,22 @@ export default function SellerDashboard() {
                         <div key={order.id} className="px-6 py-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-slate-50/60 transition-colors">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-1">
-                              <span className="text-xs text-slate-400 font-mono">{order.id}</span>
-                              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${s.color}`}>{s.label}</span>
+                              <span className="text-xs text-slate-400 font-mono">#{order.id}</span>
+                              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${s?.color || 'bg-slate-100 text-slate-500'}`}>{order.status?.replace('_', ' ')}</span>
                             </div>
-                            <div className="font-bold text-slate-900">{order.customer}</div>
-                            <div className="text-sm text-slate-500">{order.product}</div>
-                            <div className="text-xs text-slate-400 mt-1">{order.date}</div>
+                            <div className="text-sm text-slate-500">{order.items?.map((i: any) => i.product_name).join(', ')}</div>
+                            <div className="text-xs text-slate-400 mt-1">{new Date(order.created_at).toLocaleDateString()}</div>
                           </div>
                           <div className="flex items-center gap-4 flex-shrink-0">
-                            <span className="font-black text-slate-900 text-lg">{order.amount.toLocaleString()} <span className="text-xs font-bold text-slate-400">RWF</span></span>
-                            {order.status === "pending" && (
-                              <Button size="sm" className="bg-slate-900 text-white rounded-2xl text-xs gap-1 h-9 px-4">
-                                Mark Shipped <ArrowRight size={12} />
+                            <span className="font-black text-slate-900 text-lg">{parseFloat(order.total_amount).toLocaleString()} <span className="text-xs font-bold text-slate-400">RWF</span></span>
+                            {order.status === "PENDING" && (
+                              <Button size="sm" onClick={() => updateStatus({ id: order.id, status: 'PROCESSING' })} disabled={isUpdatingOrder} className="bg-slate-900 text-white rounded-2xl text-xs gap-1 h-9 px-4">
+                                Mark Processing <ArrowRight size={12} />
                               </Button>
                             )}
-                            {order.status === "shipped" && (
-                              <Button size="sm" variant="outline" className="rounded-2xl text-xs gap-1 h-9 px-4 border-emerald-200 text-emerald-700">
-                                Mark Complete <CheckCircle size={12} />
+                            {order.status === "PROCESSING" && (
+                              <Button size="sm" variant="outline" onClick={() => updateStatus({ id: order.id, status: 'SHIPPED' })} disabled={isUpdatingOrder} className="rounded-2xl text-xs gap-1 h-9 px-4 border-blue-200 text-blue-700 hover:bg-blue-50">
+                                Mark Shipped <Truck size={12} />
                               </Button>
                             )}
                           </div>

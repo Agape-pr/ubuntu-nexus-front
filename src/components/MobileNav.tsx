@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, LayoutGrid, MessageSquare, ShoppingCart, User, Package, LayoutDashboard } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
+import { useSellerOrders } from "@/lib/api/hooks/useOrders";
 import { useEffect, useState } from "react";
 
 const MobileNav = () => {
@@ -17,6 +18,11 @@ const MobileNav = () => {
     setMounted(true);
   }, [pathname]);
 
+  const { data: sellerOrders } = useSellerOrders(mounted && userRole === 'seller');
+  
+  // Calculate unread/pending orders
+  const pendingOrdersCount = sellerOrders?.filter((order: any) => order.status === 'PENDING').length || 0;
+
   if (pathname === "/") {
     return null;
   }
@@ -25,7 +31,7 @@ const MobileNav = () => {
     { label: "Home", icon: Home, href: "/" },
     { label: "Categories", icon: LayoutGrid, href: "/marketplace" },
     { label: "Messages", icon: MessageSquare, href: "/messages" },
-    { label: "Orders", icon: Package, href: "/dashboard/orders", badgeCount: 1 }, // 1 is a placeholder for unread notifications
+    { label: "Orders", icon: Package, href: "/dashboard/orders", badgeCount: pendingOrdersCount },
     { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
   ] : [
     { label: "Home", icon: Home, href: "/" },

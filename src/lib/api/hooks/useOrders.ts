@@ -9,10 +9,11 @@ export const useBuyerOrders = () => {
   });
 };
 
-export const useSellerOrders = () => {
+export const useSellerOrders = (enabled: boolean = true) => {
   return useQuery({
     queryKey: ['orders', 'seller'],
     queryFn: () => ordersService.getSellerOrders(),
+    enabled,
   });
 };
 
