@@ -14,6 +14,8 @@ export const useSellerOrders = (enabled: boolean = true) => {
     queryKey: ['orders', 'seller'],
     queryFn: () => ordersService.getSellerOrders(),
     enabled,
+    refetchInterval: enabled ? 60_000 : false, // poll every 60s when active
+    staleTime: 30_000,
   });
 };
 

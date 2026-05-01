@@ -58,12 +58,13 @@ export default function SellerOrdersPage() {
   const [lastSeenAt, setLastSeenAt] = useState<number>(0);
 
   useEffect(() => {
-    // Read the previous last-seen timestamp first (so we can highlight new cards)
-    const prev = getOrdersLastSeen();
-    setLastSeenAt(prev);
-    // Then mark current visit time so badge clears on next navigation
-    markOrdersAsSeen();
-  }, []);
+    if (!orders) return;
+    const pendingCount = orders.filter((o: any) => o.status === 'pending').length;
+    // Capture PREVIOUS acked count first for highlighting new cards
+    setLastSeenAt(getOrdersLastSeen());
+    // Then acknowledge current pending count so badge clears
+    markOrdersAsSeen(pendingCount);
+  }, [orders]);
 
   const handleUpdateStatus = (e: React.MouseEvent, id: number, newStatus: string) => {
     e.stopPropagation();
@@ -112,11 +113,16 @@ export default function SellerOrdersPage() {
     );
   }
 
-  // isNew = created AFTER the last time the seller visited this page AND status is still pending
-  const isOrderNew = (order: any) =>
-    new Date(order.created_at).getTime() > lastSeenAt && order.status === 'pending';
+  // lastSeenAt now stores the previously-acknowledged pending count (from localStorage)
+  // We mark the MOST RECENT (last N) pending orders as "new" where N = currentPending - ackedCount
+  const pendingOrders = orders.filter((o) => o.status === 'pending');
+  const ackedCount = lastSeenAt; // reused state — now stores acked count, not timestamp
+  const unackedCount = Math.max(0, pendingOrders.length - ackedCount);
+  // The first `unackedCount` pending orders (sorted newest first by API) are "new"
+  const newOrderIds = new Set(pendingOrders.slice(0, unackedCount).map((o) => o.id));
+  const isOrderNew = (order: any) => newOrderIds.has(order.id);
 
-  const newCount = orders.filter(isOrderNew).length;
+  const newCount = unackedCount;
   const shippingCount = orders.filter((o) => o.status === 'shipped').length;
   const completedCount = orders.filter((o) => o.status === 'completed').length;
 
