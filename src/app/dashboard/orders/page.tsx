@@ -57,12 +57,16 @@ export default function SellerOrdersPage() {
   // The max order ID seen BEFORE this visit — used to highlight new cards
   const [prevLastSeenId, setPrevLastSeenId] = useState<number>(0);
 
+  // Read the previous last-seen ID ONCE on mount only — never changes during the session
   useEffect(() => {
-    if (!orders) return;
-    // 1. Capture what the seller had seen BEFORE opening this page
     setPrevLastSeenId(getLastSeenOrderId());
-    // 2. Now mark ALL current orders as seen (clears the badge)
-    markOrdersAsSeen(orders);
+  }, []); // intentionally empty — must only run on mount
+
+  // Every time orders data loads/refreshes, update localStorage so badge clears after visit
+  useEffect(() => {
+    if (orders && orders.length > 0) {
+      markOrdersAsSeen(orders);
+    }
   }, [orders]);
 
   const handleUpdateStatus = (e: React.MouseEvent, id: number, newStatus: string) => {
