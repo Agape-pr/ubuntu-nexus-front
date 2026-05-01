@@ -8,7 +8,7 @@ import {
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { markOrdersAsSeen, getOrdersLastSeen } from "@/components/MobileNav";
+import { markOrdersAsSeen, getLastSeenOrderId } from "@/components/MobileNav";
 
 const STATUS_CONFIG: Record<string, {
   label: string;
@@ -54,16 +54,15 @@ export default function SellerOrdersPage() {
   const { data: orders, isLoading, isError } = useSellerOrders();
   const { mutate: updateStatus, isPending: isUpdating } = useUpdateOrderStatus();
   const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
-  // Capture the timestamp BEFORE marking as seen so we can correctly highlight new orders
-  const [lastSeenAt, setLastSeenAt] = useState<number>(0);
+  // The max order ID seen BEFORE this visit — used to highlight new cards
+  const [prevLastSeenId, setPrevLastSeenId] = useState<number>(0);
 
   useEffect(() => {
     if (!orders) return;
-    const pendingCount = orders.filter((o: any) => o.status === 'pending').length;
-    // Capture PREVIOUS acked count first for highlighting new cards
-    setLastSeenAt(getOrdersLastSeen());
-    // Then acknowledge current pending count so badge clears
-    markOrdersAsSeen(pendingCount);
+    // 1. Capture what the seller had seen BEFORE opening this page
+    setPrevLastSeenId(getLastSeenOrderId());
+    // 2. Now mark ALL current orders as seen (clears the badge)
+    markOrdersAsSeen(orders);
   }, [orders]);
 
   const handleUpdateStatus = (e: React.MouseEvent, id: number, newStatus: string) => {
@@ -75,7 +74,7 @@ export default function SellerOrdersPage() {
     setExpandedOrder(expandedOrder === id ? null : id);
   };
 
-  // --- Loading State ---
+  // --- Loading ---
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] space-y-3">
@@ -85,7 +84,7 @@ export default function SellerOrdersPage() {
     );
   }
 
-  // --- Error State ---
+  // --- Error ---
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-center max-w-xs mx-auto">
@@ -98,11 +97,11 @@ export default function SellerOrdersPage() {
     );
   }
 
-  // --- Empty State ---
+  // --- Empty ---
   if (!orders || orders.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-center max-w-sm mx-auto">
-        <div className="w-24 h-24 bg-gradient-to-br from-orange-50 to-amber-50 rounded-3xl flex items-center justify-center mb-6 shadow-sm border border-orange-100">
+        <div className="w-24 h-24 bg-gradient-to-br from-orange-50 to-amber-50 rounded-3xl flex items-center justify-center mb-6 border border-orange-100">
           <Package size={36} className="text-orange-300" />
         </div>
         <h2 className="text-xl font-bold text-foreground mb-2">No orders yet</h2>
@@ -113,23 +112,19 @@ export default function SellerOrdersPage() {
     );
   }
 
-  // lastSeenAt now stores the previously-acknowledged pending count (from localStorage)
-  // We mark the MOST RECENT (last N) pending orders as "new" where N = currentPending - ackedCount
-  const pendingOrders = orders.filter((o) => o.status === 'pending');
-  const ackedCount = lastSeenAt; // reused state — now stores acked count, not timestamp
-  const unackedCount = Math.max(0, pendingOrders.length - ackedCount);
-  // The first `unackedCount` pending orders (sorted newest first by API) are "new"
-  const newOrderIds = new Set(pendingOrders.slice(0, unackedCount).map((o) => o.id));
-  const isOrderNew = (order: any) => newOrderIds.has(order.id);
+  // A card is "new" if its ID is higher than what the seller had seen before this visit
+  // AND the status is pending (hasn't been actioned yet)
+  const isOrderNew = (order: any) =>
+    order.id > prevLastSeenId && order.status === "pending";
 
-  const newCount = unackedCount;
-  const shippingCount = orders.filter((o) => o.status === 'shipped').length;
-  const completedCount = orders.filter((o) => o.status === 'completed').length;
+  const newCount = orders.filter(isOrderNew).length;
+  const shippingCount = orders.filter((o) => o.status === "shipped").length;
+  const completedCount = orders.filter((o) => o.status === "completed").length;
 
   return (
     <div className="space-y-5 pb-10 animate-in fade-in slide-in-from-bottom-2 duration-400">
 
-      {/* ── Page Header ── */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Sales Activity</p>
@@ -152,7 +147,7 @@ export default function SellerOrdersPage() {
         </div>
       </div>
 
-      {/* ── Order Cards ── */}
+      {/* Order Cards */}
       <div className="space-y-3">
         {orders.map((order) => {
           const isExpanded = expandedOrder === order.id;
@@ -170,42 +165,38 @@ export default function SellerOrdersPage() {
               key={order.id}
               className={`rounded-2xl border overflow-hidden transition-all duration-200 ${
                 isNew
-                  ? // Distinct glowing orange style for genuinely NEW orders
-                    "bg-gradient-to-br from-orange-500/10 via-amber-400/5 to-card border-orange-400/50 shadow-[0_0_0_1px_rgba(251,146,60,0.2),0_4px_20px_rgba(251,146,60,0.12)]"
+                  ? // ── NEW ORDER: strong amber/orange glow ──
+                    "border-amber-400 shadow-[0_0_0_1px_rgba(251,191,36,0.4),0_6px_24px_rgba(251,146,60,0.18)] bg-gradient-to-br from-amber-50/80 via-orange-50/60 to-card dark:from-amber-950/40 dark:via-orange-950/20 dark:to-card"
                   : isExpanded
                   ? "border-primary/20 bg-card shadow-md"
                   : "border-border/50 bg-card hover:border-border hover:shadow-sm"
               }`}
             >
-              {/* ── Card Header ── */}
+              {/* Thick top accent stripe for new orders */}
+              {isNew && <div className="h-1 w-full bg-gradient-to-r from-amber-400 via-orange-400 to-amber-300" />}
+
+              {/* Card Header */}
               <div
                 className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 cursor-pointer select-none"
                 onClick={() => toggleExpand(order.id)}
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  {/* Icon */}
                   <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
-                    isNew ? "bg-orange-100" : "bg-secondary"
+                    isNew ? "bg-amber-100 dark:bg-amber-900/40" : "bg-secondary"
                   }`}>
                     {isNew
-                      ? <Sparkles size={18} className="text-orange-500" />
+                      ? <Sparkles size={18} className="text-amber-500" />
                       : <Package size={18} className="text-muted-foreground" />
                     }
                   </div>
-
-                  {/* Title row */}
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-foreground text-sm">Order #{order.id}</span>
-
-                      {/* NEW pill — only for genuinely new orders */}
                       {isNew && (
-                        <span className="text-[10px] font-black uppercase tracking-widest bg-orange-500 text-white px-2 py-0.5 rounded-full animate-pulse">
-                          NEW
+                        <span className="text-[9px] font-black uppercase tracking-widest bg-amber-500 text-white px-2 py-0.5 rounded-full">
+                          ✦ NEW
                         </span>
                       )}
-
-                      {/* Status badge */}
                       <span className={`flex items-center text-[11px] font-bold px-2 py-0.5 rounded-full ${config.badgeClass}`}>
                         {config.icon}
                         {config.label}
@@ -217,34 +208,31 @@ export default function SellerOrdersPage() {
                   </div>
                 </div>
 
-                {/* Amount + chevron */}
                 <div className="flex items-center justify-between sm:justify-end gap-4 sm:flex-shrink-0">
                   <div className="sm:text-right">
-                    <p className="font-black text-foreground text-base leading-none">
-                      {new Intl.NumberFormat('en-RW').format(parseFloat(order.total_amount))}
+                    <p className={`font-black text-base leading-none ${isNew ? "text-amber-700 dark:text-amber-400" : "text-foreground"}`}>
+                      {new Intl.NumberFormat("en-RW").format(parseFloat(order.total_amount))}
                       <span className="text-xs font-bold text-muted-foreground ml-1">RWF</span>
                     </p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
-                      {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
+                      {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? "s" : ""}
                     </p>
                   </div>
                   <ChevronDown
                     size={18}
-                    className={`text-muted-foreground flex-shrink-0 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}
+                    className={`flex-shrink-0 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""} ${isNew ? "text-amber-500" : "text-muted-foreground"}`}
                   />
                 </div>
               </div>
 
-              {/* ── Expanded Details ── */}
+              {/* Expanded Details */}
               <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
                 <div className="overflow-hidden">
-                  <div className={`border-t p-4 sm:p-5 space-y-5 ${
-                    isNew ? "border-orange-200/60 bg-orange-50/20" : "border-border/40 bg-background/50"
-                  }`}>
+                  <div className={`border-t p-4 sm:p-5 space-y-5 ${isNew ? "border-amber-200/60 bg-amber-50/30 dark:bg-amber-950/20" : "border-border/40 bg-background/50"}`}>
 
-                    {/* Progress Steps */}
-                    {order.status !== 'cancelled' && (
-                      <div className="flex items-center">
+                    {/* Progress tracker */}
+                    {order.status !== "cancelled" && (
+                      <div className="flex items-start">
                         {STEPS.map((step, i) => {
                           const isDone = stepIndex > i;
                           const isCurrent = stepIndex === i;
@@ -255,19 +243,19 @@ export default function SellerOrdersPage() {
                                   isDone
                                     ? "bg-emerald-500 border-emerald-500 text-white"
                                     : isCurrent
-                                    ? "bg-orange-400 border-orange-400 text-white"
+                                    ? "bg-amber-400 border-amber-400 text-white"
                                     : "bg-background border-border text-muted-foreground"
                                 }`}>
                                   {isDone ? <CheckCircle2 size={13} /> : i + 1}
                                 </div>
-                                <span className={`text-[9px] font-bold mt-1 text-center leading-tight ${
-                                  isCurrent ? "text-orange-500" : isDone ? "text-emerald-600" : "text-muted-foreground"
+                                <span className={`text-[9px] font-bold mt-1 text-center max-w-[48px] leading-tight ${
+                                  isCurrent ? "text-amber-500" : isDone ? "text-emerald-600" : "text-muted-foreground"
                                 }`}>
-                                  {step.split(' ').join('\n')}
+                                  {step}
                                 </span>
                               </div>
                               {i < STEPS.length - 1 && (
-                                <div className={`flex-1 h-0.5 mx-1 mb-4 transition-all ${stepIndex > i ? "bg-emerald-400" : "bg-border"}`} />
+                                <div className={`flex-1 h-0.5 mx-1 mb-5 ${stepIndex > i ? "bg-emerald-400" : "bg-border"}`} />
                               )}
                             </div>
                           );
@@ -286,69 +274,71 @@ export default function SellerOrdersPage() {
                                 <Package size={14} className="text-muted-foreground" />
                               </div>
                               <div>
-                                <p className="font-semibold text-foreground text-sm leading-tight">{item.product_name}</p>
+                                <p className="font-semibold text-foreground text-sm">{item.product_name}</p>
                                 <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
                               </div>
                             </div>
                             <p className="font-bold text-sm">
-                              {new Intl.NumberFormat('en-RW').format(parseFloat(item.price) * item.quantity)} RWF
+                              {new Intl.NumberFormat("en-RW").format(parseFloat(item.price) * item.quantity)} RWF
                             </p>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    {/* Payment + Action buttons */}
+                    {/* Payment + Actions */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-border/40">
                       <div>
                         <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">Payment</p>
                         <p className={`text-sm font-bold mt-0.5 ${
-                          order.payment_status === 'held' ? 'text-amber-500' :
-                          order.payment_status === 'released' ? 'text-emerald-500' :
-                          'text-muted-foreground'
+                          order.payment_status === "held"
+                            ? "text-amber-500"
+                            : order.payment_status === "released"
+                            ? "text-emerald-500"
+                            : "text-muted-foreground"
                         }`}>
-                          {order.payment_status === 'held' ? '🔒 Held in Escrow' :
-                           order.payment_status === 'released' ? '✅ Released to Seller' :
-                           order.payment_status}
+                          {order.payment_status === "held"
+                            ? "🔒 Held in Escrow"
+                            : order.payment_status === "released"
+                            ? "✅ Released to Seller"
+                            : order.payment_status}
                         </p>
                       </div>
 
                       <div className="flex flex-wrap gap-2">
-                        {order.status === 'pending' && (
+                        {order.status === "pending" && (
                           <Button
                             size="sm"
                             disabled={isUpdating}
-                            onClick={(e) => handleUpdateStatus(e, order.id, 'shipped')}
+                            onClick={(e) => handleUpdateStatus(e, order.id, "shipped")}
                             className="bg-purple-500 hover:bg-purple-600 text-white rounded-xl gap-1.5 text-xs h-9 px-4"
                           >
-                            <Truck size={13} />
-                            Ready to Ship
+                            <Truck size={13} /> Ready to Ship
                           </Button>
                         )}
-                        {order.status === 'shipped' && (
+                        {order.status === "shipped" && (
                           <Button
                             size="sm"
                             disabled={isUpdating}
-                            onClick={(e) => handleUpdateStatus(e, order.id, 'ready_for_pickup')}
+                            onClick={(e) => handleUpdateStatus(e, order.id, "ready_for_pickup")}
                             className="bg-teal-500 hover:bg-teal-600 text-white rounded-xl gap-1.5 text-xs h-9 px-4"
                           >
-                            <PackageCheck size={13} />
-                            Ready for Pickup
+                            <PackageCheck size={13} /> Ready for Pickup
                           </Button>
                         )}
-                        {order.status === 'ready_for_pickup' && (
+                        {order.status === "ready_for_pickup" && (
                           <Button
                             size="sm"
                             disabled={isUpdating}
-                            onClick={(e) => handleUpdateStatus(e, order.id, 'completed')}
+                            onClick={(e) => handleUpdateStatus(e, order.id, "completed")}
                             className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl gap-1.5 text-xs h-9 px-4"
                           >
-                            <CheckCircle2 size={13} />
-                            Mark Complete
+                            <CheckCircle2 size={13} /> Mark Complete
                           </Button>
                         )}
                       </div>
                     </div>
+
                   </div>
                 </div>
               </div>
