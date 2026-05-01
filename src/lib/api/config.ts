@@ -75,6 +75,15 @@ export const API_ENDPOINTS = {
     USERS: '/users/admin/users/',
     USER_DETAIL: (id: number) => `/users/admin/users/${id}/`,
   },
+
+  // Orders
+  ORDERS: {
+    CHECKOUT: '/orders/checkout/',
+    BUYER_LIST: '/orders/orders/',
+    SELLER_LIST: '/orders/seller/orders/',
+    UPDATE_STATUS: (id: number | string) => `/orders/seller/orders/${id}/update-status/`,
+    CONFIRM_RECEIPT: (id: number | string) => `/orders/orders/${id}/confirm-receipt/`,
+  },
 } as const;
 
 
