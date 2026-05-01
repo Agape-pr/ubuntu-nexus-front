@@ -7,31 +7,44 @@ import { useCartStore } from "@/lib/store/cartStore";
 import { useSellerOrders } from "@/lib/api/hooks/useOrders";
 import { useEffect, useState } from "react";
 
-const SEEN_ORDERS_KEY = "seen_order_ids";
-const getSeenOrderIds = (): number[] => {
-  try { const r = localStorage.getItem(SEEN_ORDERS_KEY); return r ? JSON.parse(r) : []; }
-  catch { return []; }
+// Timestamp key: stores when the seller last visited the Orders page
+const ORDERS_LAST_SEEN_KEY = "orders_last_seen_at";
+
+export const getOrdersLastSeen = (): number => {
+  try {
+    const raw = localStorage.getItem(ORDERS_LAST_SEEN_KEY);
+    return raw ? parseInt(raw, 10) : 0;
+  } catch {
+    return 0;
+  }
+};
+
+export const markOrdersAsSeen = () => {
+  try {
+    localStorage.setItem(ORDERS_LAST_SEEN_KEY, Date.now().toString());
+  } catch {}
 };
 
 const MobileNav = () => {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [seenIds, setSeenIds] = useState<number[]>([]);
+  const [lastSeenAt, setLastSeenAt] = useState<number>(0);
   const totalItems = useCartStore((state) => state.getTotalItems());
 
   useEffect(() => {
     setUserRole(localStorage.getItem('user_role'));
-    setSeenIds(getSeenOrderIds());
+    setLastSeenAt(getOrdersLastSeen());
     setMounted(true);
-  }, [pathname]);
+  }, [pathname]); // Re-read on every navigation so badge updates after leaving orders page
 
   const { data: sellerOrders } = useSellerOrders(mounted && userRole === 'seller');
-  
-  // Count orders that are 'pending' AND have not been viewed yet (not in seenIds)
-  const pendingOrdersCount = sellerOrders?.filter(
-    (order: any) => order.status === 'pending' && !seenIds.includes(order.id)
-  ).length || 0;
+
+  // Count orders created AFTER the last time the seller visited the orders page
+  const newOrdersCount = sellerOrders?.filter((order: any) => {
+    const orderTime = new Date(order.created_at).getTime();
+    return orderTime > lastSeenAt && order.status === 'pending';
+  }).length || 0;
 
   if (pathname === "/") {
     return null;
@@ -41,7 +54,7 @@ const MobileNav = () => {
     { label: "Home", icon: Home, href: "/" },
     { label: "Categories", icon: LayoutGrid, href: "/marketplace" },
     { label: "Messages", icon: MessageSquare, href: "/messages" },
-    { label: "Orders", icon: Package, href: "/dashboard/orders", badgeCount: pendingOrdersCount },
+    { label: "Orders", icon: Package, href: "/dashboard/orders", badgeCount: newOrdersCount },
     { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
   ] : [
     { label: "Home", icon: Home, href: "/" },
@@ -55,7 +68,7 @@ const MobileNav = () => {
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border/40 pb-safe z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
       <div className="flex items-center justify-around h-14">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
           const Icon = item.icon;
 
           return (
