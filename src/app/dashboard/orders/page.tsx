@@ -171,24 +171,24 @@ export default function SellerOrdersPage() {
                       </div>
 
                       <div className="flex flex-wrap gap-2">
-                        {order.status === 'PENDING' && (
-                          <Button 
-                            size="sm" 
-                            className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg"
-                            disabled={isUpdating}
-                            onClick={(e) => { e.stopPropagation(); handleUpdateStatus(order.id, 'PROCESSING'); }}
-                          >
-                            Mark Processing
-                          </Button>
-                        )}
-                        {(order.status === 'PENDING' || order.status === 'PROCESSING') && (
+                        {order.status === 'pending' && (
                           <Button 
                             size="sm" 
                             className="bg-purple-500 hover:bg-purple-600 text-white rounded-lg"
                             disabled={isUpdating}
-                            onClick={(e) => { e.stopPropagation(); handleUpdateStatus(order.id, 'SHIPPED'); }}
+                            onClick={(e) => { e.stopPropagation(); handleUpdateStatus(order.id, 'shipped'); }}
                           >
                             Mark Shipped
+                          </Button>
+                        )}
+                        {order.status === 'shipped' && (
+                          <Button 
+                            size="sm" 
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg"
+                            disabled={isUpdating}
+                            onClick={(e) => { e.stopPropagation(); handleUpdateStatus(order.id, 'completed'); }}
+                          >
+                            Mark Completed
                           </Button>
                         )}
                       </div>

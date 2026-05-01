@@ -21,7 +21,7 @@ const MobileNav = () => {
   const { data: sellerOrders } = useSellerOrders(mounted && userRole === 'seller');
   
   // Calculate unread/pending orders
-  const pendingOrdersCount = sellerOrders?.filter((order: any) => order.status === 'PENDING').length || 0;
+  const pendingOrdersCount = sellerOrders?.filter((order: any) => order.status === 'pending').length || 0;
 
   if (pathname === "/") {
     return null;

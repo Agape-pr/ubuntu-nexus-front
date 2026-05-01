@@ -712,14 +712,14 @@ export default function SellerDashboard() {
                           </div>
                           <div className="flex items-center gap-4 flex-shrink-0">
                             <span className="font-black text-slate-900 text-lg">{parseFloat(order.total_amount).toLocaleString()} <span className="text-xs font-bold text-slate-400">RWF</span></span>
-                            {order.status === "PENDING" && (
-                              <Button size="sm" onClick={() => updateStatus({ id: order.id, status: 'PROCESSING' })} disabled={isUpdatingOrder} className="bg-slate-900 text-white rounded-2xl text-xs gap-1 h-9 px-4">
-                                Mark Processing <ArrowRight size={12} />
+                            {order.status === "pending" && (
+                              <Button size="sm" onClick={() => updateStatus({ id: order.id, status: 'shipped' })} disabled={isUpdatingOrder} className="bg-slate-900 text-white rounded-2xl text-xs gap-1 h-9 px-4">
+                                Mark Shipped <Truck size={12} />
                               </Button>
                             )}
-                            {order.status === "PROCESSING" && (
-                              <Button size="sm" variant="outline" onClick={() => updateStatus({ id: order.id, status: 'SHIPPED' })} disabled={isUpdatingOrder} className="rounded-2xl text-xs gap-1 h-9 px-4 border-blue-200 text-blue-700 hover:bg-blue-50">
-                                Mark Shipped <Truck size={12} />
+                            {order.status === "shipped" && (
+                              <Button size="sm" variant="outline" onClick={() => updateStatus({ id: order.id, status: 'completed' })} disabled={isUpdatingOrder} className="rounded-2xl text-xs gap-1 h-9 px-4 border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                                Mark Complete <CheckCircle size={12} />
                               </Button>
                             )}
                           </div>
