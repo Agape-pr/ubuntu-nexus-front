@@ -97,16 +97,18 @@ const Navbar = () => {
           >
             <Bell size={18} />
           </button>
-          <Link href="/cart">
-            <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 relative">
-              <ShoppingBag size={18} />
-              {mounted && totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full bg-accent flex items-center justify-center px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-card">
-                  {totalItems}
-                </span>
-              )}
-            </button>
-          </Link>
+          {userRole !== 'seller' && (
+            <Link href="/cart">
+              <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 relative">
+                <ShoppingBag size={18} />
+                {mounted && totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full bg-accent flex items-center justify-center px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-card">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
+            </Link>
+          )}
           <div className="w-px h-5 bg-border mx-1" />
           {isLoggedIn ? (
             <>
@@ -167,12 +169,14 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-                <Link href="/cart" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all flex items-center justify-between">
-              <span className="flex items-center gap-2"><ShoppingBag size={16} /> Cart</span>
-              {mounted && totalItems > 0 && (
-                <span className="h-5 min-w-5 rounded-full bg-accent flex items-center justify-center px-1 text-[10px] font-bold text-white">{totalItems}</span>
-              )}
-            </Link>
+            {userRole !== 'seller' && (
+              <Link href="/cart" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all flex items-center justify-between">
+                <span className="flex items-center gap-2"><ShoppingBag size={16} /> Cart</span>
+                {mounted && totalItems > 0 && (
+                  <span className="h-5 min-w-5 rounded-full bg-accent flex items-center justify-center px-1 text-[10px] font-bold text-white">{totalItems}</span>
+                )}
+              </Link>
+            )}
             <div className="mt-3 pt-3 border-t border-border flex flex-col gap-2">
               {isLoggedIn ? (
                 <>

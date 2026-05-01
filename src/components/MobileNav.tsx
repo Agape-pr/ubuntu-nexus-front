@@ -2,28 +2,36 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, MessageSquare, ShoppingCart, User } from "lucide-react";
+import { Home, LayoutGrid, MessageSquare, ShoppingCart, User, Package, LayoutDashboard } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useEffect, useState } from "react";
 
 const MobileNav = () => {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const totalItems = useCartStore((state) => state.getTotalItems());
 
   useEffect(() => {
+    setUserRole(localStorage.getItem('user_role'));
     setMounted(true);
-  }, []);
+  }, [pathname]);
 
   if (pathname === "/") {
     return null;
   }
 
-  const navItems = [
+  const navItems = userRole === 'seller' ? [
     { label: "Home", icon: Home, href: "/" },
     { label: "Categories", icon: LayoutGrid, href: "/marketplace" },
     { label: "Messages", icon: MessageSquare, href: "/messages" },
-    { label: "Cart", icon: ShoppingCart, href: "/cart", badge: true },
+    { label: "Orders", icon: Package, href: "/dashboard/orders", badgeCount: 1 }, // 1 is a placeholder for unread notifications
+    { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+  ] : [
+    { label: "Home", icon: Home, href: "/" },
+    { label: "Categories", icon: LayoutGrid, href: "/marketplace" },
+    { label: "Messages", icon: MessageSquare, href: "/messages" },
+    { label: "Cart", icon: ShoppingCart, href: "/cart", badgeCount: totalItems },
     { label: "Profile", icon: User, href: "/dashboard" },
   ];
 
@@ -44,9 +52,9 @@ const MobileNav = () => {
             >
               <div className="relative">
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                {item.badge && mounted && totalItems > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-primary text-white text-[9px] font-bold h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full border-2 border-white">
-                    {totalItems}
+                {item.badgeCount !== undefined && mounted && item.badgeCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2 bg-rose-500 text-white text-[9px] font-bold h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full border-2 border-card">
+                    {item.badgeCount}
                   </span>
                 )}
               </div>

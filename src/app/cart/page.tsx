@@ -8,6 +8,7 @@ import { useCartStore } from "@/lib/store/cartStore";
 import { PaymentOptions } from "@/components/ui/PaymentOptions";
 import { Trash2, ShoppingBag, ArrowRight, Plus, Minus } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api/config";
+import { toast } from "sonner";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -26,7 +27,7 @@ export default function CartPage() {
       // Get authentication token
       const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
       if (!token) {
-        alert("Please log in to proceed with checkout.");
+        toast.error("Please log in to proceed with checkout.");
         router.push("/auth/login");
         return;
       }
@@ -71,12 +72,14 @@ export default function CartPage() {
         
         // Success
         clearCart();
-        alert('Order placed successfully! The mock payment has been held in escrow and notifications have been triggered.');
+        toast.success('Order placed successfully! The payment has been held in escrow.', {
+          duration: 5000,
+        });
         router.push('/'); // Or redirect to an orders dashboard
       }
     } catch (error: any) {
       console.error("Checkout Error:", error);
-      alert(`Checkout failed: ${error.message}`);
+      toast.error(error.message || "Failed to complete checkout");
     } finally {
       setIsProcessing(false);
     }
