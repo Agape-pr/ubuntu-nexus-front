@@ -121,8 +121,9 @@ export default function ProductPage() {
   const coverImage = isSeed ? imageObj?.image : imageObj?.image;
 
   const handleAddToCart = () => {
+    const actualId = isSeed ? idStr : String(product.id);
     addItem({
-      id: idStr,
+      id: actualId,
       name,
       price,
       image: coverImage,
