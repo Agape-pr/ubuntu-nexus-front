@@ -14,11 +14,12 @@ interface ProductCardProps {
   image?: string;
   storeName?: string;
   storeSlug?: string;
+  storeId?: string;
   rating?: number;
   reviewCount?: number;
   category?: string;
-  inStock?: boolean;
-  // true = seller owns stock; false = sources on order
+  inStock?: boolean;        // stock_quantity > 0 (still exists)
+  /** true = seller holds it now (quick). false = confirm & deliver same day. */
   sellerHasStock?: boolean;
 }
 
@@ -31,6 +32,7 @@ const ProductCard = ({
   image,
   storeName,
   storeSlug,
+  storeId,
   rating,
   reviewCount,
   category,
@@ -44,7 +46,7 @@ const ProductCard = ({
     e.preventDefault();
     e.stopPropagation();
     if (!inStock) return;
-    addItem({ id, name, price, image, storeName, quantity: 1 });
+    addItem({ id, name, price, image, storeName, storeId, in_stock: sellerHasStock, quantity: 1 });
     toast.success(`${name} added to cart!`);
   };
 
@@ -91,14 +93,20 @@ const ProductCard = ({
           </h3>
         </Link>
 
-        {/* Delivery label — set by seller per product */}
+        {/* Tags Row */}
         <div className="flex flex-wrap gap-1 mt-1.5 mb-1">
-          {sellerHasStock === false ? (
-            <span className="text-[10px] font-semibold text-sky-500 bg-sky-500/10 px-1.5 py-0.5 rounded-sm">⚡ Confirm &amp; deliver same day</span>
-          ) : sellerHasStock === true ? (
-            <span className="text-[10px] font-semibold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-sm">✦ Ready for quick delivery</span>
-          ) : (
-            // Legacy products without the field yet — neutral fallback
+          {/* Delivery expectation label — based on seller's in_stock answer */}
+          {sellerHasStock === true && (
+            <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded-sm border border-emerald-500/20">
+              ⚡ Quick delivery
+            </span>
+          )}
+          {sellerHasStock === false && (
+            <span className="text-[10px] font-semibold text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded-sm border border-blue-500/20">
+              📦 Confirm &amp; deliver same day
+            </span>
+          )}
+          {sellerHasStock === undefined && (
             <span className="text-[10px] font-medium text-primary bg-primary/10 px-1 py-0.5 rounded-sm">Free Delivery</span>
           )}
         </div>

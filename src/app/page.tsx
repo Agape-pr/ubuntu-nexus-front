@@ -356,6 +356,7 @@ export default function Index() {
                           storeSlug={(product as any).store_name?.toLowerCase().replace(/\s+/g, "-")}
                           category={(product as any).category_name}
                           inStock={(product as any).stock_quantity > 0}
+                          sellerHasStock={(product as any).in_stock}
                         />
                       )}
                       {isSeed && (

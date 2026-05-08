@@ -2,12 +2,15 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export interface CartItem {
-  id: string; // product id (or string ID for seeded data)
+  id: string;
   name: string;
   price: number;
   image?: string;
   storeName?: string;
+  storeId?: string;
   quantity: number;
+  /** true = seller holds stock (quick delivery), false = confirm & deliver same day */
+  in_stock?: boolean;
 }
 
 interface CartStore {

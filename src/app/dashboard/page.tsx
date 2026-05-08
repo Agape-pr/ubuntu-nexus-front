@@ -62,13 +62,9 @@ export default function SellerDashboard() {
   const { mutate: updateStatus, isPending: isUpdatingOrder } = useUpdateOrderStatus();
   const REAL_ORDERS = realOrdersData || [];
   
-  const [productForm, setProductForm] = useState<{
-    name: string; price: string; stock_quantity: string;
-    category: string; description: string;
-    in_stock: boolean | null; // null = not answered yet (required)
-  }>({
+  const [productForm, setProductForm] = useState({
     name: "", price: "", stock_quantity: "", category: "", description: "",
-    in_stock: null,
+    in_stock: null as boolean | null,  // null = unanswered (required)
   });
   const [storeForm, setStoreForm] = useState({ name: "", description: "" });
   const [isSavingProduct, setIsSavingProduct] = useState(false);
@@ -136,7 +132,7 @@ export default function SellerDashboard() {
       return toast.error("Please fill in all required fields.");
     }
     if (productForm.in_stock === null) {
-      return toast.error("Please answer whether you currently have this item in stock.");
+      return toast.error("Please answer: do you currently have this item in stock?");
     }
 
     setIsSavingProduct(true);
@@ -549,64 +545,46 @@ export default function SellerDashboard() {
                       </div>
                     </div>
 
-                    {/* Stock Quantity */}
+                    {/* Stock */}
                     <div className="space-y-2">
                       <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Stock Quantity *</Label>
                       <Input type="number" value={productForm.stock_quantity} onChange={e => setProductForm({ ...productForm, stock_quantity: e.target.value })}
                         placeholder="e.g. 10" className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white" />
                     </div>
 
-                    {/* In Stock — required delivery expectation field */}
-                    <div className={`md:col-span-2 space-y-3 p-4 rounded-2xl border-2 transition-colors ${
-                      productForm.in_stock === null
-                        ? "border-amber-300 bg-amber-50"
-                        : "border-slate-100 bg-slate-50"
-                    }`}>
-                      <Label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                    {/* In Stock — required Yes/No */}
+                    <div className="md:col-span-2 space-y-3">
+                      <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
                         Do you currently have this item in stock? *
                       </Label>
-                      <p className="text-[11px] text-slate-400 -mt-1">
-                        This sets the delivery label buyers see on your product card.
+                      <p className="text-xs text-slate-400 -mt-1">
+                        This sets the delivery label buyers see on your listing.
                       </p>
                       <div className="flex gap-3">
                         <button
                           type="button"
                           onClick={() => setProductForm({ ...productForm, in_stock: true })}
-                          className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all font-semibold text-sm ${
+                          className={`flex-1 flex items-center justify-center gap-2 h-11 rounded-2xl border-2 text-sm font-semibold transition-all ${
                             productForm.in_stock === true
-                              ? "border-emerald-400 bg-emerald-50 text-emerald-700"
-                              : "border-slate-200 bg-white text-slate-500 hover:border-emerald-200"
+                              ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                              : "border-slate-200 bg-slate-50 text-slate-500 hover:border-emerald-300"
                           }`}
                         >
-                          <span className={`h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 ${productForm.in_stock === true ? "border-emerald-500 bg-emerald-500" : "border-slate-300"}`}>
-                            {productForm.in_stock === true && <span className="text-white text-[10px] font-black">✓</span>}
-                          </span>
-                          <div className="text-left">
-                            <div>Yes — I have it ready</div>
-                            <div className="text-[10px] font-normal text-slate-400">Shows "✦ Ready for quick delivery"</div>
-                          </div>
+                          ✅ Yes — Ready for quick delivery
                         </button>
                         <button
                           type="button"
                           onClick={() => setProductForm({ ...productForm, in_stock: false })}
-                          className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all font-semibold text-sm ${
+                          className={`flex-1 flex items-center justify-center gap-2 h-11 rounded-2xl border-2 text-sm font-semibold transition-all ${
                             productForm.in_stock === false
-                              ? "border-sky-400 bg-sky-50 text-sky-700"
-                              : "border-slate-200 bg-white text-slate-500 hover:border-sky-200"
+                              ? "border-blue-500 bg-blue-50 text-blue-700"
+                              : "border-slate-200 bg-slate-50 text-slate-500 hover:border-blue-300"
                           }`}
                         >
-                          <span className={`h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 ${productForm.in_stock === false ? "border-sky-500 bg-sky-500" : "border-slate-300"}`}>
-                            {productForm.in_stock === false && <span className="text-white text-[10px] font-black">✓</span>}
-                          </span>
-                          <div className="text-left">
-                            <div>No — I source on order</div>
-                            <div className="text-[10px] font-normal text-slate-400">Shows "⚡ Confirm & deliver same day"</div>
-                          </div>
+                          📦 No — Confirm &amp; deliver same day
                         </button>
                       </div>
                     </div>
-
-                    {/* Description */}
                     <div className="md:col-span-2 space-y-2">
                       <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Description</Label>
                       <Textarea value={productForm.description} onChange={e => setProductForm({ ...productForm, description: e.target.value })}

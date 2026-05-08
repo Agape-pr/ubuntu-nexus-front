@@ -191,7 +191,7 @@ const MarketplaceContent = () => {
                     storeSlug={product.store_name ? product.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
                     category={product.category_name}
                     inStock={product.stock_quantity > 0}
-                    sellerHasStock={product.in_stock}
+                    sellerHasStock={(product as any).in_stock}
                   />
                 </div>
               ))}

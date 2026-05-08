@@ -116,6 +116,17 @@ export default function CartPage() {
                     <div>
                       <h3 className="font-semibold text-foreground line-clamp-1">{item.name}</h3>
                       <p className="text-sm text-muted-foreground">{item.storeName || "Unknown store"}</p>
+                      {/* Delivery expectation label */}
+                      {item.in_stock === true && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full mt-1">
+                          ⚡ Ready for quick delivery
+                        </span>
+                      )}
+                      {item.in_stock === false && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-500 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full mt-1">
+                          📦 Confirm &amp; deliver same day
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center justify-between mt-2">
                       <div className="font-bold text-foreground">

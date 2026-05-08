@@ -324,6 +324,7 @@ const StorePage = () => {
                 <ProductCard
                   key={product.id}
                   id={String(product.id)}
+                  slug={product.slug || String(product.id)}
                   name={product.name}
                   price={Number(product.price)}
                   category={product.category_name}
