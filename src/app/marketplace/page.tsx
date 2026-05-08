@@ -57,32 +57,23 @@ const MarketplaceContent = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <div className="hidden md:block">
-        <Navbar />
-      </div>
+      <Navbar />
 
-      {/* Mobile Top Header */}
-      <div className="md:hidden sticky top-0 z-40 bg-background pt-10 pb-2 px-3">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="font-bold text-xl font-display text-foreground">Home</span>
-          <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Free Delivery</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col items-center justify-center shrink-0 w-8">
-             <div className="text-[10px] font-bold text-muted-foreground whitespace-nowrap">RW</div>
-          </div>
-          <div className="flex-1 relative flex items-center h-10 rounded-full border-2 border-primary bg-card overflow-hidden shadow-sm">
-             <Search size={14} className="ml-3 text-primary shrink-0" />
-             <input
-                className="flex-1 h-full bg-transparent border-none text-xs px-2 focus:outline-none text-foreground placeholder:text-muted-foreground"
-                placeholder="Search products or stores..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-             />
-             <div className="h-full bg-primary text-primary-foreground text-xs font-bold px-4 flex items-center justify-center cursor-pointer transition-colors hover:bg-primary/90">
-                Search
-             </div>
-          </div>
+      {/* Mobile inline search bar */}
+      <div className="md:hidden sticky top-14 z-30 bg-background/95 backdrop-blur border-b border-border/40 px-3 py-2.5">
+        <div className="flex items-center h-10 rounded-full border-2 border-primary/30 bg-card overflow-hidden shadow-sm focus-within:border-primary transition-colors">
+          <Search size={14} className="ml-3 text-muted-foreground shrink-0" />
+          <input
+            className="flex-1 h-full bg-transparent border-none text-xs px-2.5 focus:outline-none text-foreground placeholder:text-muted-foreground"
+            placeholder="Search products or stores..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="mr-2 text-muted-foreground hover:text-foreground">
+              <X size={13} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -91,10 +82,11 @@ const MarketplaceContent = () => {
         <div className="container py-8">
           <h1 className="text-3xl font-display font-bold text-foreground mb-1">Marketplace</h1>
           <p className="text-muted-foreground">
-            {allProducts.length} products from Kigali's finest sellers
+            {allProducts.length} products from Kigali&apos;s finest sellers
           </p>
         </div>
       </div>
+
 
       <div className="container md:py-8 pb-4 flex-1 px-2 sm:px-4">
         {/* Desktop Search & Controls */}
@@ -210,9 +202,7 @@ const MarketplaceContent = () => {
         )}
       </div>
 
-      <div className="hidden md:block">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 };
