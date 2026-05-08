@@ -331,6 +331,7 @@ const StorePage = () => {
                   storeName={store.store_name}
                   storeSlug={store.slug}
                   inStock={product.stock_quantity > 0}
+                  sellerHasStock={product.in_stock}
                 />
               );
             })}

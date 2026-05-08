@@ -18,6 +18,8 @@ interface ProductCardProps {
   reviewCount?: number;
   category?: string;
   inStock?: boolean;
+  // true = seller owns stock; false = sources on order
+  sellerHasStock?: boolean;
 }
 
 const ProductCard = ({
@@ -33,6 +35,7 @@ const ProductCard = ({
   reviewCount,
   category,
   inStock = true,
+  sellerHasStock,
 }: ProductCardProps) => {
   const formattedPrice = new Intl.NumberFormat("en-RW").format(price);
   const addItem = useCartStore((state) => state.addItem);
@@ -88,10 +91,16 @@ const ProductCard = ({
           </h3>
         </Link>
 
-        {/* Tags Row */}
+        {/* Delivery label — set by seller per product */}
         <div className="flex flex-wrap gap-1 mt-1.5 mb-1">
-          <span className="text-[10px] font-medium text-primary bg-primary/10 px-1 py-0.5 rounded-sm">Official</span>
-          <span className="text-[10px] font-medium text-primary bg-primary/10 px-1 py-0.5 rounded-sm">Free Delivery</span>
+          {sellerHasStock === false ? (
+            <span className="text-[10px] font-semibold text-sky-500 bg-sky-500/10 px-1.5 py-0.5 rounded-sm">⚡ Confirm &amp; deliver same day</span>
+          ) : sellerHasStock === true ? (
+            <span className="text-[10px] font-semibold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-sm">✦ Ready for quick delivery</span>
+          ) : (
+            // Legacy products without the field yet — neutral fallback
+            <span className="text-[10px] font-medium text-primary bg-primary/10 px-1 py-0.5 rounded-sm">Free Delivery</span>
+          )}
         </div>
 
         {/* Store link (if any) */}

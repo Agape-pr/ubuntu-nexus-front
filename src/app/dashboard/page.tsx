@@ -62,8 +62,13 @@ export default function SellerDashboard() {
   const { mutate: updateStatus, isPending: isUpdatingOrder } = useUpdateOrderStatus();
   const REAL_ORDERS = realOrdersData || [];
   
-  const [productForm, setProductForm] = useState({
+  const [productForm, setProductForm] = useState<{
+    name: string; price: string; stock_quantity: string;
+    category: string; description: string;
+    in_stock: boolean | null; // null = not answered yet (required)
+  }>({
     name: "", price: "", stock_quantity: "", category: "", description: "",
+    in_stock: null,
   });
   const [storeForm, setStoreForm] = useState({ name: "", description: "" });
   const [isSavingProduct, setIsSavingProduct] = useState(false);
@@ -130,6 +135,9 @@ export default function SellerDashboard() {
     if (!productForm.name || !productForm.price || !productForm.stock_quantity || !productForm.category) {
       return toast.error("Please fill in all required fields.");
     }
+    if (productForm.in_stock === null) {
+      return toast.error("Please answer whether you currently have this item in stock.");
+    }
 
     setIsSavingProduct(true);
     let categoryId = Number(productForm.category);
@@ -153,6 +161,7 @@ export default function SellerDashboard() {
         category: categoryId,
         description: productForm.description,
         is_active: true,
+        in_stock: productForm.in_stock,
         uploaded_images: productImages.length > 0 ? productImages : undefined,
       };
 
@@ -160,7 +169,7 @@ export default function SellerDashboard() {
         onSuccess: () => {
           setShowAddProduct(false);
           setEditingProductId(null);
-          setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "" });
+          setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "", in_stock: null });
           setProductImages([]);
           setProductImagePreviews([]);
           setIsSavingProduct(false);
@@ -190,6 +199,7 @@ export default function SellerDashboard() {
       stock_quantity: product.stock_quantity.toString(),
       category: product.category.toString(),
       description: product.description || "",
+      in_stock: typeof product.in_stock === 'boolean' ? product.in_stock : null,
     });
     setProductImages([]);
     setProductImagePreviews([]);
@@ -444,7 +454,7 @@ export default function SellerDashboard() {
                   <h1 className="text-3xl font-bold text-slate-900">{sellerProducts?.length || 0} Products</h1>
                 </div>
                 {!showAddProduct && (
-                  <Button onClick={() => { setEditingProductId(null); setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "" }); setProductImages([]); setProductImagePreviews([]); setShowAddProduct(true); }}
+                  <Button onClick={() => { setEditingProductId(null); setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "", in_stock: null }); setProductImages([]); setProductImagePreviews([]); setShowAddProduct(true); }}
                     className="bg-slate-900 text-white rounded-2xl px-6 h-11 gap-2 font-semibold shadow-md hover:-translate-y-0.5 transition-all">
                     <Plus size={16} /> Add Product
                   </Button>
@@ -539,11 +549,61 @@ export default function SellerDashboard() {
                       </div>
                     </div>
 
-                    {/* Stock */}
+                    {/* Stock Quantity */}
                     <div className="space-y-2">
                       <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Stock Quantity *</Label>
                       <Input type="number" value={productForm.stock_quantity} onChange={e => setProductForm({ ...productForm, stock_quantity: e.target.value })}
                         placeholder="e.g. 10" className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white" />
+                    </div>
+
+                    {/* In Stock — required delivery expectation field */}
+                    <div className={`md:col-span-2 space-y-3 p-4 rounded-2xl border-2 transition-colors ${
+                      productForm.in_stock === null
+                        ? "border-amber-300 bg-amber-50"
+                        : "border-slate-100 bg-slate-50"
+                    }`}>
+                      <Label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                        Do you currently have this item in stock? *
+                      </Label>
+                      <p className="text-[11px] text-slate-400 -mt-1">
+                        This sets the delivery label buyers see on your product card.
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setProductForm({ ...productForm, in_stock: true })}
+                          className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all font-semibold text-sm ${
+                            productForm.in_stock === true
+                              ? "border-emerald-400 bg-emerald-50 text-emerald-700"
+                              : "border-slate-200 bg-white text-slate-500 hover:border-emerald-200"
+                          }`}
+                        >
+                          <span className={`h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 ${productForm.in_stock === true ? "border-emerald-500 bg-emerald-500" : "border-slate-300"}`}>
+                            {productForm.in_stock === true && <span className="text-white text-[10px] font-black">✓</span>}
+                          </span>
+                          <div className="text-left">
+                            <div>Yes — I have it ready</div>
+                            <div className="text-[10px] font-normal text-slate-400">Shows "✦ Ready for quick delivery"</div>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setProductForm({ ...productForm, in_stock: false })}
+                          className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all font-semibold text-sm ${
+                            productForm.in_stock === false
+                              ? "border-sky-400 bg-sky-50 text-sky-700"
+                              : "border-slate-200 bg-white text-slate-500 hover:border-sky-200"
+                          }`}
+                        >
+                          <span className={`h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 ${productForm.in_stock === false ? "border-sky-500 bg-sky-500" : "border-slate-300"}`}>
+                            {productForm.in_stock === false && <span className="text-white text-[10px] font-black">✓</span>}
+                          </span>
+                          <div className="text-left">
+                            <div>No — I source on order</div>
+                            <div className="text-[10px] font-normal text-slate-400">Shows "⚡ Confirm & deliver same day"</div>
+                          </div>
+                        </button>
+                      </div>
                     </div>
 
                     {/* Description */}
