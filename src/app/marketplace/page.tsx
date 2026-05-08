@@ -183,7 +183,7 @@ const MarketplaceContent = () => {
                 <div key={product.id} className="break-inside-avoid">
                   <ProductCard
                     id={String(product.id)}
-                    slug={product.name}
+                    slug={product.slug || String(product.id)}
                     name={product.name}
                     price={Number(product.price)}
                     image={product.images?.[0]?.image}

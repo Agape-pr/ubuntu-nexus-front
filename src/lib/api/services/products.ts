@@ -31,6 +31,7 @@ export interface Product {
   category: number;
   category_name: string;
   name: string;
+  slug: string;
   description?: string;
   price: string; // API returns as string
   stock_quantity: number;
