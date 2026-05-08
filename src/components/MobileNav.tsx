@@ -44,23 +44,23 @@ const MobileNav = () => {
       (o: any) => o.id > lastSeenId && o.status === "pending"
     ).length ?? 0;
 
-  if (pathname === "/") return null;
+  if (pathname.startsWith("/auth")) return null;
 
   const navItems =
     userRole === "seller"
       ? [
-          { label: "Home", icon: Home, href: "/" },
-          { label: "Categories", icon: LayoutGrid, href: "/marketplace" },
-          { label: "Messages", icon: MessageSquare, href: "/messages" },
-          { label: "Orders", icon: Package, href: "/dashboard/orders", badgeCount },
-          { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+          { label: "Home",       icon: Home,            href: "/" },
+          { label: "Categories", icon: LayoutGrid,      href: "/" },
+          { label: "Messages",   icon: MessageSquare,   href: "/messages" },
+          { label: "Orders",     icon: Package,         href: "/dashboard/orders", badgeCount },
+          { label: "Dashboard",  icon: LayoutDashboard, href: "/dashboard" },
         ]
       : [
-          { label: "Home", icon: Home, href: "/" },
-          { label: "Categories", icon: LayoutGrid, href: "/marketplace" },
-          { label: "Messages", icon: MessageSquare, href: "/messages" },
-          { label: "Cart", icon: ShoppingCart, href: "/cart", badgeCount: totalItems },
-          { label: "Profile", icon: User, href: "/dashboard" },
+          { label: "Home",       icon: Home,         href: "/" },
+          { label: "Categories", icon: LayoutGrid,   href: "/" },
+          { label: "Messages",   icon: MessageSquare,href: "/messages" },
+          { label: "Cart",       icon: ShoppingCart, href: "/cart", badgeCount: totalItems },
+          { label: "Profile",    icon: User,         href: "/dashboard" },
         ];
 
   return (

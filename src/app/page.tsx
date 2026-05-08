@@ -1,443 +1,223 @@
 "use client";
 
-import kigaliSkyline from "@/assets/kigali-skyline.jpg";
-import kigaliMarket from "@/assets/kigali-market.jpg";
-import kigaliSeller from "@/assets/kigali-seller.jpg";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProducts } from "@/lib/api/hooks/useProducts";
-import {
-  ArrowRight, Store, ShieldCheck, Zap, Star, MapPin, 
-  CheckCircle, ThumbsUp, CreditCard, PackageCheck, Sparkles,
-  Heart, ShoppingCart,
-} from "lucide-react";
 
-// ── Seeded Kigali market products (shown when API returns nothing) ──────────
-const SEED_PRODUCTS = [
-  {
-    id: "seed-1",
-    name: "Ankara Print Tote Bag",
-    price: 12500,
-    category: "Bags & Leather",
-    image: "/products/ankara-bag.png",
-    storeName: "Kigali Crafts",
-    storeSlug: "kigali-crafts",
-    inStock: true,
-  },
-  {
-    id: "seed-2",
-    name: "Handmade Beaded Necklace Set",
-    price: 8500,
-    category: "Jewelry & Accessories",
-    image: "/products/beaded-necklace.png",
-    storeName: "Umucyo Jewels",
-    storeSlug: "umucyo-jewels",
-    inStock: true,
-  },
-  {
-    id: "seed-3",
-    name: "Organic Shea Butter Cream",
-    price: 5500,
-    category: "Beauty & Skincare",
-    image: "/products/shea-butter.png",
-    storeName: "Uruto Organics",
-    storeSlug: "uruto-organics",
-    inStock: true,
-  },
-  {
-    id: "seed-4",
-    name: "Rwanda Single-Origin Coffee",
-    price: 7000,
-    category: "Food & Spices",
-    image: "/products/coffee.png",
-    storeName: "Akagera Roasters",
-    storeSlug: "akagera-roasters",
-    inStock: true,
-  },
-  {
-    id: "seed-5",
-    name: "Traditional Peace Basket",
-    price: 15000,
-    category: "Handmade Crafts",
-    image: "/products/basket.png",
-    storeName: "Inzozi Baskets",
-    storeSlug: "inzozi-baskets",
-    inStock: true,
-  },
-  {
-    id: "seed-6",
-    name: "Hand-Carved Wood Sculpture",
-    price: 22000,
-    category: "Art & Paintings",
-    image: "/products/wood-carving.png",
-    storeName: "Ubumuntu Arts",
-    storeSlug: "ubumuntu-arts",
-    inStock: true,
-  },
+const CATEGORIES = [
+  "All",
+  "Clothing & Fashion",
+  "Electronics & Gadgets",
+  "Beauty & Personal Care",
+  "Bags & Accessories",
+  "Home & Living",
+  "Jewelry",
+  "Books",
+  "Other"
 ];
 
-export default function Index() {
-  const { data: products = [], isLoading } = useProducts();
+const SORT_OPTIONS = ["Most popular", "Newest", "Price: Low to High", "Price: High to Low"];
 
-  // Show API products if available, fall back to seeded data
-  const displayProducts = products.length > 0 ? products.slice(0, 6) : SEED_PRODUCTS;
-  const isSeeded = products.length === 0 && !isLoading;
+const HomeContent = () => {
+  const searchParams = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("search") ?? "");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
+  useEffect(() => {
+    setSearch(searchParams.get("search") ?? "");
+  }, [searchParams]);
+
+  const [sortBy, setSortBy] = useState("Most popular");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const { data: allProducts = [], isLoading } = useProducts();
+
+  const filtered = allProducts.filter((p) => {
+    const searchLower = search.toLowerCase();
+    const matchSearch = (p.name || "").toLowerCase().includes(searchLower) ||
+                        (p.store_name || "").toLowerCase().includes(searchLower);
+    const matchCategory = selectedCategory === "All" || p.category === selectedCategory;
+    return matchSearch && matchCategory;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === "Price: Low to High") return Number(a.price) - Number(b.price);
+    if (sortBy === "Price: High to Low") return Number(b.price) - Number(a.price);
+    if (sortBy === "Newest") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    return 0;
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Navbar />
+      <div className="hidden md:block">
+        <Navbar />
+      </div>
 
-      {/* 1. HERO - Split Layout */}
-      <section className="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-32">
-        {/* Subtle background glow */}
-        <div className="absolute top-0 right-0 -m-32 h-[800px] w-[800px] rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-        
-        <div className="container relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-            {/* Left Content */}
-            <div className="max-w-2xl animate-fade-up">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary border border-border text-xs font-medium text-muted-foreground mb-6">
-                <Sparkles size={14} className="text-accent" />
-                <span>The new era of local commerce</span>
-              </div>
-              
-              <h1 className="text-5xl md:text-6xl lg:text-[4.5rem] font-bold tracking-tight text-foreground leading-[1.05] mb-6 text-balance">
-                Buy and sell with{" "}
-                <span className="relative inline-block text-primary">
-                  people you trust
-                  <svg className="absolute -bottom-2 left-0 w-full text-accent/40" viewBox="0 0 200 9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.00049 6.84039C50.0005 1.84039 120.501 -2.15961 198.001 6.84039" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/></svg>
-                </span>
-              </h1>
-              
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 max-w-xl">
-                Start selling online in minutes. Discover unique products from your neighbors, and shop securely with our 2-hour escrow guarantee.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                <Link href="/auth?tab=register&role=seller">
-                  <Button size="lg" className="w-full sm:w-auto gradient-amber text-white font-semibold px-8 h-14 rounded-2xl shadow-amber hover:-translate-y-1 hover:shadow-lg transition-all duration-300 border-0">
-                    Start your store <ArrowRight size={18} className="ml-2" />
-                  </Button>
-                </Link>
-                <Link href="/marketplace">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 rounded-2xl border-border bg-card hover:bg-secondary hover:-translate-y-1 transition-all duration-300">
-                    Explore marketplace
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Trust bar */}
-              <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck size={18} className="text-emerald" />
-                  <span className="font-medium text-foreground">100% Secure</span>
-                </div>
-                <div className="hidden sm:block w-1 h-1 rounded-full bg-border" />
-                <div className="flex items-center gap-1.5">
-                  <div className="flex -space-x-1.5">
-                    {["🧑🏿", "👩🏾", "👨🏿"].map((emoji, i) => (
-                      <div key={i} className="h-6 w-6 rounded-full bg-secondary border border-background flex items-center justify-center text-[10px] z-10 shadow-sm">{emoji}</div>
-                    ))}
-                  </div>
-                  <span className="ml-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald/10 border border-emerald/20 text-xs font-semibold text-emerald-700">🌱 Early Access — Be a founding seller</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Images Collage */}
-            <div className="relative h-[450px] lg:h-[600px] w-full lg:w-[110%] animate-slide-in-right hidden md:block">
-              {/* Main abstract backdrop */}
-              <div className="absolute inset-0 rounded-3xl bg-secondary transform rotate-3" />
-              
-              {/* Primary Image */}
-              <div className="absolute top-4 left-4 right-12 bottom-12 rounded-3xl overflow-hidden shadow-lift border-4 border-card group bg-secondary">
-                <img src={kigaliMarket.src} alt="Kigali Market" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
-                <div className="absolute bottom-6 left-6 text-white">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="flex h-2 w-2 rounded-full bg-emerald animate-pulse" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-white/80">Live</span>
-                  </div>
-                  <p className="text-xl font-bold">Kigali local vendors</p>
-                </div>
-              </div>
-
-              {/* Floating Element 1 - Small Image */}
-              <div className="absolute -bottom-6 -left-6 h-48 w-40 rounded-2xl overflow-hidden shadow-ambient border-4 border-card z-20 group bg-secondary">
-                <img src={kigaliSeller.src} alt="Seller" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-              </div>
-
-              {/* Floating Element 2 - Glassmorphism Badge */}
-              <div className="absolute top-12 -right-8 bg-card/90 backdrop-blur-md p-4 rounded-2xl shadow-lift border border-border/50 z-30 animate-float flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-emerald/10 flex items-center justify-center text-emerald">
-                  <Zap size={20} />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-foreground">Fast Delivery</p>
-                  <p className="text-xs text-muted-foreground">Within 2 hours</p>
-                </div>
-              </div>
-              
-              {/* Floating Element 3 - Rating Card */}
-              <div className="absolute bottom-24 -right-2 bg-card p-3 rounded-2xl shadow-lift border border-border z-30 animate-float" style={{ animationDelay: "1.5s" }}>
-                <div className="flex items-center gap-1.5 mb-1">
-                  {[1,2,3,4,5].map((i) => <Star key={i} size={12} className="fill-accent text-accent" />)}
-                </div>
-                <p className="text-xs font-medium text-foreground">"Best platform ever!"</p>
-              </div>
-            </div>
+      {/* Mobile Top Header */}
+      <div className="md:hidden sticky top-0 z-40 bg-background pt-10 pb-2 px-3">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="font-bold text-xl font-display text-foreground">Home</span>
+          <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Free Delivery</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col items-center justify-center shrink-0 w-8">
+             <div className="text-[10px] font-bold text-muted-foreground whitespace-nowrap">RW</div>
+          </div>
+          <div className="flex-1 relative flex items-center h-10 rounded-full border-2 border-primary bg-card overflow-hidden shadow-sm">
+             <Search size={14} className="ml-3 text-primary shrink-0" />
+             <input
+                className="flex-1 h-full bg-transparent border-none text-xs px-2 focus:outline-none text-foreground placeholder:text-muted-foreground"
+                placeholder="Search products or stores..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+             />
+             <div className="h-full bg-primary text-primary-foreground text-xs font-bold px-4 flex items-center justify-center cursor-pointer transition-colors hover:bg-primary/90">
+                Search
+             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* 2. BENTO BOX FEATURES & MOSAIC */}
-      <section className="py-20 bg-secondary/30 relative">
-        <div className="container">
-          <div className="mb-12 md:mb-16">
-            <h2 className="text-4xl font-bold tracking-tight text-foreground mb-4">Why we're different</h2>
-            <p className="text-muted-foreground text-lg max-w-xl">Everything you need to buy and sell confidently, built into one cohesive experience designed for the African market.</p>
+      {/* Desktop Header */}
+      <div className="hidden md:block bg-card border-b border-border">
+        <div className="container py-8">
+          <h1 className="text-3xl font-display font-bold text-foreground mb-1">Marketplace</h1>
+          <p className="text-muted-foreground">
+            {allProducts.length} products from Kigali&apos;s finest sellers
+          </p>
+        </div>
+      </div>
+
+      <div className="container md:py-8 pb-4 flex-1 px-2 sm:px-4">
+        {/* Desktop Search & Controls */}
+        <div className="hidden md:flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search products or stores..."
+              className="pl-10 h-11 rounded-xl"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-[250px]">
-            
-            {/* Bento 1: Large Image (Community) - spans 2 cols, 2 rows */}
-            <div className="md:col-span-2 lg:col-span-2 row-span-2 rounded-3xl relative overflow-hidden group shadow-card bg-secondary">
-              <img src={kigaliSkyline.src} alt="Kigali Skyline" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs font-semibold mb-3">
-                  <MapPin size={12} /> Kigali, Rwanda
-                </div>
-                <h3 className="text-3xl font-bold text-white mb-2">Built for our community</h3>
-                <p className="text-white/80 line-clamp-2 max-w-md">Connect with sellers in your neighborhood. Support local businesses and grow the circular economy effortlessly.</p>
-              </div>
-            </div>
-
-            {/* Bento 2: Buyer Protection - spans 2 cols */}
-            <div className="md:col-span-1 lg:col-span-2 rounded-3xl bg-emerald/10 border border-emerald/20 p-6 md:p-8 flex flex-col justify-end relative shadow-sm group hover:bg-emerald/15 transition-colors">
-              <div className="absolute top-6 right-6 md:top-8 md:right-8 h-12 w-12 rounded-2xl bg-emerald/20 flex items-center justify-center text-emerald group-hover:scale-110 transition-transform">
-                <ShieldCheck size={24} />
-              </div>
-              <h3 className="text-2xl font-bold text-emerald-foreground mb-2">100% Escrow Protection</h3>
-              <p className="text-emerald-foreground/80 max-w-sm">Your money stays in a secure vault until your order arrives perfectly. Not what you ordered? Instant refund.</p>
-            </div>
-
-            {/* Bento 3: Fast Setup */}
-            <div className="rounded-3xl bg-card border border-border p-6 flex flex-col justify-between shadow-sm group hover:shadow-ambient transition-all">
-              <Store size={28} className="text-primary group-hover:-translate-y-1 transition-transform" />
-              <div>
-                <h3 className="text-lg font-bold text-foreground mb-1">Instant Storefront</h3>
-                <p className="text-sm text-muted-foreground">Sign up, add products, get a shareable link in exactly 2 minutes.</p>
-              </div>
-            </div>
-
-            {/* Bento 4: Pesapal */}
-            <div className="rounded-3xl bg-primary border-transparent p-6 flex flex-col justify-between shadow-lift group z-10 relative overflow-hidden">
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-accent/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-              <Zap size={28} className="text-accent group-hover:scale-110 transition-transform relative z-10" />
-              <div className="relative z-10">
-                <h3 className="text-lg font-bold text-white mb-1">Mobile Money Ready</h3>
-                <p className="text-sm text-white/70">Powered securely by Pesapal for seamless local transactions.</p>
-              </div>
-            </div>
-
+          <div className="flex gap-2">
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="h-11 w-48 rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SORT_OPTIONS.map((opt) => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Toggle filters"
+              className="h-11 w-11 rounded-xl"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <SlidersHorizontal size={16} />
+            </Button>
           </div>
         </div>
-      </section>
 
-      {/* 3. INTERACTIVE HOW IT WORKS TIMELINE */}
-      <section id="how-it-works" className="py-20 md:py-28 bg-background overflow-hidden relative">
-        {/* Subtle background curved lines */}
-        <svg className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[600px] text-secondary -z-10" viewBox="0 0 1000 600" preserveAspectRatio="none" fill="none">
-          <path d="M0 300C300 300 400 100 700 100C1000 100 1000 300 1200 300" stroke="currentColor" strokeWidth="2" strokeDasharray="8 8" />
-        </svg>
+        {/* Categories */}
+        <div className="flex overflow-x-auto no-scrollbar gap-4 md:mb-8 mb-4 pb-2 pt-2 md:pt-0 snap-x">
+          {CATEGORIES.map((cat, i) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className="flex flex-col items-center justify-center shrink-0 snap-start gap-1"
+            >
+              <div className={`w-12 h-12 md:w-auto md:h-auto md:px-4 md:py-2 flex items-center justify-center transition-all duration-200 ${
+                  selectedCategory === cat
+                  ? "bg-primary text-primary-foreground md:rounded-full rounded-2xl shadow-sm"
+                  : "bg-card text-muted-foreground md:rounded-full rounded-2xl shadow-sm hover:bg-primary/5 border border-border"
+                }`}>
+                <span className="md:block hidden text-sm font-medium">{cat}</span>
+                <div className="md:hidden text-lg">
+                  {i === 0 ? '🌟' : i === 1 ? '👕' : i === 2 ? '💻' : i === 3 ? '💄' : i === 4 ? '👜' : i === 5 ? '🏠' : i === 6 ? '💍' : i === 7 ? '📚' : '✨'}
+                </div>
+              </div>
+              <span className="md:hidden text-[11px] font-medium text-foreground">{cat}</span>
+            </button>
+          ))}
+        </div>
 
-        <div className="container">
-          <div className="text-center mb-16 relative">
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-4">The journey of a sale</h2>
-            <p className="text-muted-foreground text-lg max-w-lg mx-auto">Transparent from click to delivery. No surprises.</p>
+        {/* Results */}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <p className="text-muted-foreground">Loading products...</p>
           </div>
-
-          <div className="relative max-w-4xl mx-auto">
-            {/* Desktop connecting line */}
-            <div className="hidden md:block absolute top-[4.5rem] left-[15%] right-[15%] h-0.5 bg-border -z-0" />
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-6">
-              {[
-                {
-                  step: "01", title: "Order Placed", 
-                  desc: "Buyer pays securely into UbuntuNow's escrow vault.", 
-                  icon: CreditCard, color: "text-primary", bg: "bg-primary/10"
-                },
-                {
-                  step: "02", title: "Order Delivered", 
-                  desc: "Seller delivers the item. The 2-hour inspection clock begins.", 
-                  icon: PackageCheck, color: "text-accent", bg: "bg-accent/10"
-                },
-                {
-                  step: "03", title: "Funds Released", 
-                  desc: "Buyer approves item. Escrow instantly releases funds to seller.", 
-                  icon: ThumbsUp, color: "text-emerald", bg: "bg-emerald/10"
-                }
-              ].map((step, i) => (
-                <div key={i} className="relative z-10 flex flex-col items-center text-center group">
-                  <div className={`w-32 h-32 rounded-full ${step.bg} border-8 border-background flex items-center justify-center relative shadow-sm group-hover:scale-105 transition-transform duration-300`}>
-                    <step.icon size={40} className={step.color} />
-                    <div className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-card border border-border font-bold text-foreground flex items-center justify-center text-sm shadow-sm group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors">
-                      {step.step}
-                    </div>
-                  </div>
-                  <h3 className="mt-8 mb-2 font-bold text-xl text-foreground group-hover:text-primary transition-colors">{step.title}</h3>
-                  <p className="text-muted-foreground text-sm max-w-[250px] leading-relaxed">{step.desc}</p>
+        ) : sorted.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="text-5xl mb-4">🔍</div>
+            <h3 className="font-semibold text-foreground mb-2">No products found</h3>
+            <p className="text-muted-foreground text-sm">Try a different search or category</p>
+            <Button
+              variant="outline"
+              className="mt-4 rounded-xl"
+              onClick={() => { setSearch(""); setSelectedCategory("All"); }}
+            >
+              Clear filters
+            </Button>
+          </div>
+        ) : (
+          <>
+            <p className="hidden md:block text-sm text-muted-foreground mb-4">
+              {sorted.length} product{sorted.length !== 1 ? "s" : ""} found
+            </p>
+            <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-2 md:gap-4 space-y-2 md:space-y-4">
+              {sorted.map((product) => (
+                <div key={product.id} className="break-inside-avoid">
+                  <ProductCard
+                    id={String(product.id)}
+                    slug={product.slug || String(product.id)}
+                    name={product.name}
+                    price={Number(product.price)}
+                    image={product.images?.[0]?.image}
+                    storeName={product.store_name}
+                    storeSlug={product.store_name ? product.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
+                    category={product.category}
+                    inStock={product.stock_quantity > 0}
+                    sellerHasStock={(product as any).in_stock}
+                  />
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
+          </>
+        )}
+      </div>
 
-      {/* 4. FEATURED PRODUCTS */}
-      <section className="py-20 bg-secondary/80">
-        <div className="container">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Fresh from Kigali</h2>
-              <p className="text-muted-foreground mt-2">
-                {isSeeded ? "Curated products from your local community" : "Discover products from Kigali's finest sellers"}
-              </p>
-            </div>
-            <Link href="/marketplace">
-              <Button variant="outline" className="rounded-full bg-card hover:bg-secondary gap-2 transition-all border-border shadow-sm hover:shadow-md">
-                View marketplace <ArrowRight size={15} />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isLoading ? (
-              <>
-                {[1,2,3,4,5,6].map(i => (
-                  <div key={i} className="rounded-3xl bg-card border border-border shadow-sm overflow-hidden animate-pulse">
-                    <div className="h-52 bg-secondary" />
-                    <div className="p-4 space-y-2">
-                      <div className="h-4 bg-secondary rounded-full w-3/4" />
-                      <div className="h-3 bg-secondary rounded-full w-1/2" />
-                      <div className="h-5 bg-secondary rounded-full w-1/3 mt-2" />
-                    </div>
-                  </div>
-                ))}
-              </>
-            ) : (
-              displayProducts.map((product) => {
-                // Seeded products have a plain image path; API products have Cloudinary public IDs
-                const isSeed = product.id.toString().startsWith("seed-");
-                return (
-                  <div key={product.id} className="group bg-card rounded-2xl shadow-card hover:shadow-lift transition-all duration-300 overflow-hidden border border-border/50 hover:border-border">
-                    {/* Image */}
-                    <div className="relative h-56 bg-secondary overflow-hidden">
-                      {isSeed ? (
-                        <img
-                          src={(product as any).image}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                        />
-                      ) : (
-                        <ProductCard
-                          id={String(product.id)}
-                          slug={(product as any).slug || String(product.id)}
-                          name={product.name}
-                          price={Number(product.price)}
-                          image={(product as any).images?.[0]?.image}
-                          storeName={(product as any).store_name}
-                          storeSlug={(product as any).store_name?.toLowerCase().replace(/\s+/g, "-")}
-                          category={(product as any).category}
-                          inStock={(product as any).stock_quantity > 0}
-                          sellerHasStock={(product as any).in_stock}
-                        />
-                      )}
-                      {isSeed && (
-                        <>
-                          {/* Category badge */}
-                          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-primary/90 text-primary-foreground text-xs font-medium backdrop-blur-sm">
-                            {product.category}
-                          </span>
-                          {/* Wishlist btn */}
-                          <button className="absolute top-3 right-3 h-8 w-8 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-rose-500 transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-card">
-                            <Heart size={14} />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                    {isSeed && (
-                      <div className="p-3.5">
-                        {/* Store link */}
-                        <Link href={`/store/${product.storeSlug}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-accent transition-colors mb-2">
-                          <Store size={11} />
-                          <span>{product.storeName}</span>
-                        </Link>
-                        <h3 className="font-semibold text-sm text-foreground line-clamp-2 hover:text-accent transition-colors leading-tight mb-3">
-                          {product.name}
-                        </h3>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="text-lg font-bold text-foreground">{new Intl.NumberFormat("en-RW").format(product.price)}</span>
-                            <span className="text-xs text-muted-foreground ml-1">RWF</span>
-                          </div>
-                          <button className="h-9 w-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/80 transition-all duration-200 shadow-card hover:shadow-ambient">
-                            <ShoppingCart size={15} />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      </section>
-
-
-      {/* 5. SELLER CTA MODAL STYLE */}
-      <section className="py-20 md:py-32 bg-background relative overflow-hidden flex items-center justify-center">
-        {/* Large abstract gradient background */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-background to-background pointer-events-none" />
-
-        <div className="container relative z-10 max-w-5xl mx-auto">
-          <div className="bg-primary rounded-[2.5rem] p-10 md:p-16 text-center shadow-lift relative overflow-hidden group">
-            {/* CTA Decorative lines */}
-            <div className="absolute -top-32 -right-32 w-96 h-96 bg-accent/20 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000 pointer-events-none" />
-            <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-emerald/20 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000 pointer-events-none" />
-
-            <div className="relative z-10">
-              <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6 text-balance">
-                Launch your business<br className="hidden md:block"/> on UbuntuNow.
-              </h2>
-              <p className="text-white/70 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-light">
-                Zero set-up fees. Reach thousands of local buyers. Complete escrow protection. Your storefront awaits.
-              </p>
-              <div className="flex justify-center">
-                <Link href="/auth?tab=register&role=seller">
-                  <Button size="lg" className="gradient-amber text-primary font-bold px-10 h-16 text-lg rounded-full shadow-amber hover:scale-105 transition-transform duration-300 border-0">
-                    Create your free store
-                  </Button>
-                </Link>
-              </div>
-              <p className="mt-8 text-sm text-white/50 flex flex-wrap justify-center gap-6">
-                <span className="flex items-center gap-2"><CheckCircle size={15}/> 2-min setup</span>
-                <span className="flex items-center gap-2"><CheckCircle size={15}/> No hidden fees</span>
-                <span className="flex items-center gap-2"><CheckCircle size={15}/> Local community</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
+      <div className="hidden md:block">
+        <Footer />
+      </div>
     </div>
   );
-}
+};
+
+const Home = () => (
+  <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Loading…</p></div>}>
+    <HomeContent />
+  </Suspense>
+);
+
+export default Home;
