@@ -112,7 +112,7 @@ export default function ProductPage() {
   const formattedPrice = new Intl.NumberFormat("en-RW").format(price);
   const stock = Number(product.stock_quantity);
   const description = product.description || "No description provided.";
-  const catName = isSeed ? product.category : product.category_name;
+  const catName = isSeed ? product.category : product.category;
   
   const storeName = product.store?.store_name || product.store_name || "Unknown Store";
   const storeSlug = product.store?.slug || product.storeSlug || "";

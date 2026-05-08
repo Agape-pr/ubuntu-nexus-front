@@ -16,20 +16,13 @@ export interface ProductImage {
   is_primary: boolean;
 }
 
-// Category
-export interface Category {
-  id: number;
-  name: string;
-  slug: string;
-}
 
 // Public Product (from /products/products/)
 export interface Product {
   id: number;
   store: number;
   store_name: string;
-  category: number;
-  category_name: string;
+  category: string;
   name: string;
   slug: string;
   description?: string;
@@ -43,7 +36,7 @@ export interface Product {
 // Seller Product (from /products/seller/products/)
 export interface SellerProduct {
   id: number;
-  category: number;
+  category: string;
   name: string;
   description?: string;
   price: string; // API returns as string
@@ -64,7 +57,7 @@ export interface ProductsListParams {
 
 // Product Create/Update Request (Seller)
 export interface ProductCreateUpdate {
-  category: number;
+  category: string;
   name: string;
   description?: string;
   price: string | number; // Can be string or number
@@ -115,19 +108,6 @@ export const getSellerProduct = async (id: string): Promise<SellerProduct> => {
   return apiClient.get<SellerProduct>(API_ENDPOINTS.SELLER_PRODUCTS.DETAIL(id));
 };
 
-/**
- * Get all product categories
- */
-export const getCategories = async (): Promise<Category[]> => {
-  return apiClient.get<Category[]>(API_ENDPOINTS.CATEGORIES.LIST);
-};
-
-/**
- * Create a new product category
- */
-export const createCategory = async (name: string): Promise<Category> => {
-  return apiClient.post<Category>(API_ENDPOINTS.CATEGORIES.CREATE, { name, slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-') });
-};
 
 /**
  * Helper to convert product data to FormData if needed

@@ -354,7 +354,7 @@ export default function Index() {
                           image={(product as any).images?.[0]?.image}
                           storeName={(product as any).store_name}
                           storeSlug={(product as any).store_name?.toLowerCase().replace(/\s+/g, "-")}
-                          category={(product as any).category_name}
+                          category={(product as any).category}
                           inStock={(product as any).stock_quantity > 0}
                           sellerHasStock={(product as any).in_stock}
                         />

@@ -14,9 +14,10 @@ import {
   Eye, LayoutDashboard, Wallet, LogOut, ChevronRight, Search,
   Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star, Truck,
 } from "lucide-react";
-import { useCreateProduct, useUpdateProduct, useCategories, useSellerProducts } from "@/lib/api/hooks/useProducts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCreateProduct, useUpdateProduct, useSellerProducts } from "@/lib/api/hooks/useProducts";
 import { useSellerOrders, useUpdateOrderStatus } from "@/lib/api/hooks/useOrders";
-import { createCategory } from "@/lib/api/services/products";
+
 import { useCurrentUser, useUpdateStore } from "@/lib/api/hooks/useUsers";
 import { toast } from "sonner";
 import { CloudImage } from "@/components/ui/CloudImage";
@@ -25,12 +26,15 @@ type DashView = "overview" | "products" | "orders" | "store-settings";
 
 // Removed dummy REAL_ORDERS constant
 
-// Curated category suggestions for African marketplace sellers
-const CATEGORY_SUGGESTIONS = [
-  "Fashion & Clothing", "Handmade Crafts", "Jewelry & Accessories",
-  "Home Décor", "Art & Paintings", "Food & Spices", "Beauty & Skincare",
-  "Bags & Leather", "Fabrics & Textiles", "Electronics", "Books",
-  "Toys & Games", "Sports & Outdoors", "Health & Wellness",
+const PRODUCT_CATEGORIES = [
+  "Clothing & Fashion",
+  "Electronics & Gadgets",
+  "Beauty & Personal Care",
+  "Bags & Accessories",
+  "Home & Living",
+  "Jewelry",
+  "Books",
+  "Other"
 ];
 
 const statusConfig: Record<string, { color: string; dot: string; label: string }> = {
@@ -51,12 +55,7 @@ export default function SellerDashboard() {
   const [productImagePreviews, setProductImagePreviews] = useState<string[]>([]);
   const [storeLogoFile, setStoreLogoFile] = useState<File | null>(null);
   const [storeLogoPreview, setStoreLogoPreview] = useState<string | null>(null);
-  const [categorySearch, setCategorySearch] = useState("");
-  const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
-  const categoryRef = useRef<HTMLDivElement>(null);
-
   const { data: userProfile, isLoading: isUserLoading } = useCurrentUser();
-  const { data: categories } = useCategories();
   const { data: sellerProducts, isLoading: isProductsLoading } = useSellerProducts();
   const { data: realOrdersData, isLoading: isOrdersLoading } = useSellerOrders();
   const { mutate: updateStatus, isPending: isUpdatingOrder } = useUpdateOrderStatus();
@@ -87,16 +86,7 @@ export default function SellerDashboard() {
     }
   }, [userProfile]);
 
-  // Close category dropdown on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
-        setShowCategorySuggestions(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+
 
   const handleImageChange = (files: FileList | null) => {
     if (!files) return;
@@ -136,25 +126,12 @@ export default function SellerDashboard() {
     }
 
     setIsSavingProduct(true);
-    let categoryId = Number(productForm.category);
-
     try {
-      // Check if the selected category actually exists in the backend
-      const isRealCategory = categories?.some(c => c.id === categoryId);
-      
-      if (!isRealCategory) {
-        // It's a fake mock category or typed name, we must create it first to avoid 'Invalid pk' error
-        const fakeSug = CATEGORY_SUGGESTIONS[categoryId - 1];
-        const categoryName = fakeSug || productForm.category;
-        const newCat = await createCategory(categoryName);
-        categoryId = newCat.id;
-      }
-
       const payload = {
         name: productForm.name,
         price: Number(productForm.price),
         stock_quantity: Number(productForm.stock_quantity),
-        category: categoryId,
+        category: productForm.category,
         description: productForm.description,
         is_active: true,
         in_stock: productForm.in_stock,
@@ -184,7 +161,7 @@ export default function SellerDashboard() {
       }
     } catch (e: any) {
       setIsSavingProduct(false);
-      toast.error(e.message || "Failed to resolve category. Please try again.");
+      toast.error(e.message || "Failed to save product. Please try again.");
     }
   };
 
@@ -206,7 +183,7 @@ export default function SellerDashboard() {
 
   const storeName = userProfile?.store?.store_name || "My Store";
   const storeSlug = userProfile?.store?.slug || "";
-  const storeUrl = storeSlug ? `https://www.ubuntunow.rw/store/${storeSlug}` : null;
+  const storeUrl = storeSlug ? `/store/${storeSlug}` : null;
   const storeUrlDisplay = storeSlug
     ? `www.ubuntunow.rw/store/${storeSlug}`
     : isUserLoading
@@ -215,14 +192,7 @@ export default function SellerDashboard() {
   const storeInitials = storeName.substring(0, 2).toUpperCase();
   const activeProductsCount = sellerProducts?.filter(p => p.is_active).length || 0;
 
-  // Filtered category suggestions
-  const filteredSuggestions = (categories && categories.length > 0 ? categories.map(c => ({ id: c.id, name: c.name })) : CATEGORY_SUGGESTIONS.map((name, i) => ({ id: i + 1, name }))).filter(c =>
-    c.name.toLowerCase().includes(categorySearch.toLowerCase())
-  );
 
-  const selectedCategoryName = categories?.find(c => c.id === Number(productForm.category))?.name
-    || CATEGORY_SUGGESTIONS[Number(productForm.category) - 1]
-    || productForm.category;
 
   const navItems = [
     { id: "overview" as DashView, label: "Overview", icon: LayoutDashboard },
@@ -459,174 +429,142 @@ export default function SellerDashboard() {
 
               {/* ── Add/Edit Form ── */}
               {showAddProduct && (
-                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 animate-fade-up">
-                  <div className="flex items-center justify-between mb-7">
-                    <h2 className="text-xl font-bold text-slate-900">
-                      {editingProductId ? "✏️ Edit Product" : "✨ New Product"}
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden animate-fade-up">
+                  <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                    <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                      {editingProductId ? <><Edit3 size={20} className="text-amber-500"/> Edit Product</> : <><Sparkles size={20} className="text-amber-500"/> New Product</>}
                     </h2>
                     <button onClick={() => { setShowAddProduct(false); setEditingProductId(null); }} className="h-8 w-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
                       <X size={15} className="text-slate-500" />
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Product name */}
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Product Name *</Label>
-                      <Input value={productForm.name} onChange={e => setProductForm({ ...productForm, name: e.target.value })}
-                        placeholder="e.g. Ankara Print Tote Bag" className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white" />
+                  <div className="p-6 md:p-8 space-y-10">
+                    {/* Section: Product Info */}
+                    <div>
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2 mb-5">Product Info</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Product Name *</Label>
+                          <Input value={productForm.name} onChange={e => setProductForm({ ...productForm, name: e.target.value })}
+                            placeholder="e.g. Ankara Print Tote Bag" className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white" />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Category *</Label>
+                          <Select value={productForm.category} onValueChange={(val) => setProductForm({ ...productForm, category: val })}>
+                            <SelectTrigger className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white">
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {PRODUCT_CATEGORIES.map(cat => (
+                                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="md:col-span-2 space-y-2">
+                          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Description</Label>
+                          <Textarea value={productForm.description} onChange={e => setProductForm({ ...productForm, description: e.target.value })}
+                            placeholder="Tell buyers what makes this product special — material, origin, size, care instructions…"
+                            className="rounded-2xl border-slate-200 bg-slate-50 focus:bg-white resize-none" rows={4} />
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Category with suggestions */}
-                    <div className="space-y-2" ref={categoryRef}>
-                      <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Category *</Label>
-                      <div className="relative">
-                        <div className="relative">
-                          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                          <Input
-                            value={productForm.category ? selectedCategoryName : categorySearch}
-                            onChange={e => {
-                              setCategorySearch(e.target.value);
-                              setProductForm({ ...productForm, category: "" });
-                              setShowCategorySuggestions(true);
-                            }}
-                            onFocus={() => setShowCategorySuggestions(true)}
-                            placeholder="Search or pick a category..."
-                            className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white pl-9 pr-8"
-                          />
-                          {productForm.category && (
-                            <button onClick={() => { setProductForm({ ...productForm, category: "" }); setCategorySearch(""); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                              <X size={13} />
+                    {/* Section: Pricing & Availability */}
+                    <div>
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2 mb-5">Pricing & Availability</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Price (RWF) *</Label>
+                          <div className="relative">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">RWF</span>
+                            <Input type="number" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })}
+                              placeholder="12,500" className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white pl-12" />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Stock Quantity *</Label>
+                          <Input type="number" value={productForm.stock_quantity} onChange={e => setProductForm({ ...productForm, stock_quantity: e.target.value })}
+                            placeholder="e.g. 10" className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white" />
+                        </div>
+
+                        <div className="md:col-span-2 space-y-3">
+                          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Do you currently have this item in stock? *
+                          </Label>
+                          <p className="text-xs text-slate-400 -mt-1 mb-2">
+                            This sets the delivery label buyers see on your listing.
+                          </p>
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setProductForm({ ...productForm, in_stock: true })}
+                              className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl border-2 text-sm font-semibold transition-all ${
+                                productForm.in_stock === true
+                                  ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                                  : "border-slate-200 bg-slate-50 text-slate-500 hover:border-emerald-300 hover:bg-emerald-50/30"
+                              }`}
+                            >
+                              ✅ Yes — Ready for quick delivery
                             </button>
-                          )}
+                            <button
+                              type="button"
+                              onClick={() => setProductForm({ ...productForm, in_stock: false })}
+                              className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl border-2 text-sm font-semibold transition-all ${
+                                productForm.in_stock === false
+                                  ? "border-blue-500 bg-blue-50 text-blue-700"
+                                  : "border-slate-200 bg-slate-50 text-slate-500 hover:border-blue-300 hover:bg-blue-50/30"
+                              }`}
+                            >
+                              📦 No — Confirm & deliver same day
+                            </button>
+                          </div>
                         </div>
+                      </div>
+                    </div>
 
-                        {/* Dropdown */}
-                        {showCategorySuggestions && !productForm.category && (
-                          <div className="absolute z-50 top-full mt-2 w-full bg-white border border-slate-100 rounded-2xl shadow-xl overflow-hidden max-h-52 overflow-y-auto">
-                            {filteredSuggestions.length === 0 ? (
-                              <div className="px-4 py-3 text-sm text-slate-400">No categories found</div>
-                            ) : (
-                              filteredSuggestions.map(c => (
-                                <button key={c.id} onClick={() => { setProductForm({ ...productForm, category: String(c.id) }); setCategorySearch(c.name); setShowCategorySuggestions(false); }}
-                                  className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
-                                  <Tag size={12} className="text-slate-400" /> {c.name}
-                                </button>
-                              ))
-                            )}
+                    {/* Section: Images */}
+                    <div>
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2 mb-5">Product Photos</h3>
+                      <div className="space-y-3">
+                        <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-amber-400 hover:bg-amber-50/20 transition-all cursor-pointer group">
+                          <input type="file" multiple accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            onChange={e => handleImageChange(e.target.files)} />
+                          <ImagePlus size={28} className="mx-auto text-slate-300 group-hover:text-amber-400 transition-colors mb-3" />
+                          <p className="text-sm font-semibold text-slate-500">
+                            {productImages.length > 0 ? `${productImages.length} image(s) selected — click to change` : "Click to upload product photos"}
+                          </p>
+                          <p className="text-xs text-slate-400 mt-1">PNG, JPG, WEBP up to 10MB each</p>
+                        </div>
+                        {/* Previews */}
+                        {productImagePreviews.length > 0 && (
+                          <div className="flex gap-3 flex-wrap mt-4">
+                            {productImagePreviews.map((src, i) => (
+                              <div key={i} className="h-24 w-24 rounded-2xl overflow-hidden border-2 border-slate-100 bg-slate-50 shadow-sm">
+                                <img src={src} alt="" className="w-full h-full object-cover" />
+                              </div>
+                            ))}
                           </div>
                         )}
-
-                        {/* Quick-pick chips */}
-                        {!productForm.category && (
-                          <div className="flex flex-wrap gap-1.5 mt-2">
-                            {["Fashion & Clothing", "Handmade Crafts", "Jewelry & Accessories", "Home Décor", "Art & Paintings"].map(name => {
-                              const match = filteredSuggestions.find(c => c.name === name);
-                              if (!match) return null;
-                              return (
-                                <button key={name} onClick={() => { setProductForm({ ...productForm, category: String(match.id) }); setCategorySearch(name); setShowCategorySuggestions(false); }}
-                                  className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-amber-100 hover:text-amber-700 text-slate-600 text-[11px] font-semibold transition-colors border border-transparent hover:border-amber-200">
-                                  {name}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
                       </div>
                     </div>
 
-                    {/* Price */}
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Price (RWF) *</Label>
-                      <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">RWF</span>
-                        <Input type="number" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })}
-                          placeholder="12,500" className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white pl-12" />
-                      </div>
-                    </div>
-
-                    {/* Stock */}
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Stock Quantity *</Label>
-                      <Input type="number" value={productForm.stock_quantity} onChange={e => setProductForm({ ...productForm, stock_quantity: e.target.value })}
-                        placeholder="e.g. 10" className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white" />
-                    </div>
-
-                    {/* In Stock — required Yes/No */}
-                    <div className="md:col-span-2 space-y-3">
-                      <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                        Do you currently have this item in stock? *
-                      </Label>
-                      <p className="text-xs text-slate-400 -mt-1">
-                        This sets the delivery label buyers see on your listing.
-                      </p>
-                      <div className="flex gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setProductForm({ ...productForm, in_stock: true })}
-                          className={`flex-1 flex items-center justify-center gap-2 h-11 rounded-2xl border-2 text-sm font-semibold transition-all ${
-                            productForm.in_stock === true
-                              ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                              : "border-slate-200 bg-slate-50 text-slate-500 hover:border-emerald-300"
-                          }`}
-                        >
-                          ✅ Yes — Ready for quick delivery
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setProductForm({ ...productForm, in_stock: false })}
-                          className={`flex-1 flex items-center justify-center gap-2 h-11 rounded-2xl border-2 text-sm font-semibold transition-all ${
-                            productForm.in_stock === false
-                              ? "border-blue-500 bg-blue-50 text-blue-700"
-                              : "border-slate-200 bg-slate-50 text-slate-500 hover:border-blue-300"
-                          }`}
-                        >
-                          📦 No — Confirm &amp; deliver same day
-                        </button>
-                      </div>
-                    </div>
-                    <div className="md:col-span-2 space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Description</Label>
-                      <Textarea value={productForm.description} onChange={e => setProductForm({ ...productForm, description: e.target.value })}
-                        placeholder="Tell buyers what makes this product special — material, origin, size, care instructions…"
-                        className="rounded-2xl border-slate-200 bg-slate-50 focus:bg-white resize-none" rows={4} />
-                    </div>
-
-                    {/* Images */}
-                    <div className="md:col-span-2 space-y-3">
-                      <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Product Photos</Label>
-                      <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-amber-400 hover:bg-amber-50/20 transition-all cursor-pointer group">
-                        <input type="file" multiple accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                          onChange={e => handleImageChange(e.target.files)} />
-                        <ImagePlus size={28} className="mx-auto text-slate-300 group-hover:text-amber-400 transition-colors mb-3" />
-                        <p className="text-sm font-semibold text-slate-500">
-                          {productImages.length > 0 ? `${productImages.length} image(s) selected — click to change` : "Click to upload product photos"}
-                        </p>
-                        <p className="text-xs text-slate-400 mt-1">PNG, JPG, WEBP up to 10MB each</p>
-                      </div>
-                      {/* Previews */}
-                      {productImagePreviews.length > 0 && (
-                        <div className="flex gap-3 flex-wrap">
-                          {productImagePreviews.map((src, i) => (
-                            <div key={i} className="h-20 w-20 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
-                              <img src={src} alt="" className="w-full h-full object-cover" />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-3 mt-8 pt-6 border-t border-slate-100">
+                  <div className="flex gap-3 px-6 py-5 border-t border-slate-100 bg-slate-50/50 mt-4">
                     <Button onClick={handleSaveProduct}
                       disabled={isSavingProduct || createProductMutation.isPending || updateProductMutation.isPending}
-                      className="bg-slate-900 text-white rounded-2xl px-8 h-11 font-semibold gap-2">
+                      className="bg-slate-900 text-white rounded-2xl px-8 h-12 font-semibold gap-2 shadow-sm hover:-translate-y-0.5 transition-all">
                       {(isSavingProduct || createProductMutation.isPending || updateProductMutation.isPending) ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                       {editingProductId ? "Update Product" : "Publish Product"}
                     </Button>
                     <Button variant="ghost" onClick={() => { setShowAddProduct(false); setEditingProductId(null); }}
-                      className="rounded-2xl px-6 h-11 text-slate-500 font-semibold">
+                      className="rounded-2xl px-6 h-12 text-slate-500 font-semibold hover:bg-slate-200">
                       Cancel
                     </Button>
                   </div>

@@ -12,7 +12,17 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProducts } from "@/lib/api/hooks/useProducts";
 
-const CATEGORIES = ["All", "Fashion", "Food", "Crafts", "Beauty", "Tech", "Books", "Home"];
+const CATEGORIES = [
+  "All", 
+  "Clothing & Fashion", 
+  "Electronics & Gadgets", 
+  "Beauty & Personal Care", 
+  "Bags & Accessories", 
+  "Home & Living", 
+  "Jewelry", 
+  "Books", 
+  "Other"
+];
 
 const SORT_OPTIONS = ["Most popular", "Newest", "Price: Low to High", "Price: High to Low"];
 
@@ -34,7 +44,7 @@ const MarketplaceContent = () => {
     const searchLower = search.toLowerCase();
     const matchSearch = (p.name || "").toLowerCase().includes(searchLower) || 
                         (p.store_name || "").toLowerCase().includes(searchLower);
-    const matchCategory = selectedCategory === "All" || p.category_name === selectedCategory;
+    const matchCategory = selectedCategory === "All" || p.category === selectedCategory;
     return matchSearch && matchCategory;
   });
 
@@ -145,7 +155,7 @@ const MarketplaceContent = () => {
                 <span className="md:block hidden text-sm font-medium">{cat}</span>
                 <div className="md:hidden text-lg">
                    {/* Dummy emojis for categories */}
-                   {i === 0 ? '🌟' : i === 1 ? '👕' : i === 2 ? '🍔' : i === 3 ? '🎨' : i === 4 ? '💄' : i === 5 ? '💻' : i === 6 ? '📚' : '🏠'}
+                   {i === 0 ? '🌟' : i === 1 ? '👕' : i === 2 ? '💻' : i === 3 ? '💄' : i === 4 ? '👜' : i === 5 ? '🏠' : i === 6 ? '💍' : i === 7 ? '📚' : '✨'}
                 </div>
               </div>
               <span className="md:hidden text-[11px] font-medium text-foreground">{cat}</span>
@@ -189,7 +199,7 @@ const MarketplaceContent = () => {
                     image={product.images?.[0]?.image}
                     storeName={product.store_name}
                     storeSlug={product.store_name ? product.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
-                    category={product.category_name}
+                    category={product.category}
                     inStock={product.stock_quantity > 0}
                     sellerHasStock={(product as any).in_stock}
                   />

@@ -36,33 +36,7 @@ export const useProduct = (slug: string) => {
   });
 };
 
-/**
- * Hook to get categories
- */
-export const useCategories = () => {
-  return useQuery({
-    queryKey: ['categories'],
-    queryFn: () => productService.getCategories(),
-    staleTime: 10 * 60 * 1000, // 10 minutes
-  });
-};
 
-/**
- * Hook to create a category
- */
-export const useCreateCategory = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (name: string) => productService.createCategory(name),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-    },
-    onError: (error: { message?: string }) => {
-      toast.error(error.message || 'Failed to create category.');
-    },
-  });
-};
 
 /**
  * Hook to get seller's products
