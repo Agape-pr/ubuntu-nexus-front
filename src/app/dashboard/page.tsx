@@ -12,7 +12,7 @@ import {
   Store, Package, TrendingUp, Settings, Plus, Copy, ExternalLink,
   CheckCircle, Edit3, Trash2, ShoppingBag, AlertCircle, Loader2,
   Eye, LayoutDashboard, Wallet, LogOut, ChevronRight, Search,
-  Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star, Truck,
+  Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star, Truck, Bell, Zap, Link2,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateProduct, useUpdateProduct, useSellerProducts, useDeleteProduct } from "@/lib/api/hooks/useProducts";
@@ -195,6 +195,13 @@ export default function SellerDashboard() {
 
 
 
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
   const navItems = [
     { id: "overview" as DashView, label: "Overview", icon: LayoutDashboard },
     { id: "products" as DashView, label: "My Products", icon: Package },
@@ -203,12 +210,13 @@ export default function SellerDashboard() {
   ];
 
   const totalRevenue = REAL_ORDERS.reduce((sum: number, order: any) => sum + (parseFloat(order?.total_amount) || 0), 0);
+  const pendingOrders = REAL_ORDERS.filter((o: any) => o.status === "pending").length;
 
   const STATS = [
-    { label: "Active Listings", value: isProductsLoading ? "…" : String(activeProductsCount), sub: "Across your store", icon: Package, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
-    { label: "Store Views", value: "0", sub: "Analytics coming soon", icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-50", border: "border-emerald-100" },
-    { label: "Orders", value: String(REAL_ORDERS.length), sub: REAL_ORDERS.length === 0 ? "No orders yet" : `${REAL_ORDERS.length} order${REAL_ORDERS.length !== 1 ? "s" : ""}`, icon: ShoppingBag, color: "text-amber-500", bg: "bg-amber-50", border: "border-amber-100" },
-    { label: "Revenue", value: `${totalRevenue.toLocaleString()} RWF`, sub: totalRevenue === 0 ? "No revenue yet" : "All time", icon: Wallet, color: "text-violet-500", bg: "bg-violet-50", border: "border-violet-100" },
+    { label: "Active Listings", value: isProductsLoading ? "…" : String(activeProductsCount), sub: "Products live in your store", icon: Package, accent: "#3b82f6", light: "bg-blue-50", text: "text-blue-600" },
+    { label: "Total Orders", value: String(REAL_ORDERS.length), sub: pendingOrders > 0 ? `${pendingOrders} awaiting action` : "All fulfilled", icon: ShoppingBag, accent: "#f59e0b", light: "bg-amber-50", text: "text-amber-600" },
+    { label: "Revenue Earned", value: totalRevenue > 0 ? `${totalRevenue.toLocaleString()}` : "0", sub: totalRevenue > 0 ? "RWF · All time" : "Start selling today", icon: Wallet, accent: "#8b5cf6", light: "bg-violet-50", text: "text-violet-600" },
+    { label: "Store Status", value: storeSlug ? "Live ✦" : "Setup", sub: storeSlug ? "Accepting orders" : "Complete your store", icon: Zap, accent: "#10b981", light: "bg-emerald-50", text: "text-emerald-600" },
   ];
 
   return (
@@ -321,107 +329,135 @@ export default function SellerDashboard() {
 
           {/* ── OVERVIEW ─────────────────────────────── */}
           {view === "overview" && (
-            <div className="max-w-5xl mx-auto space-y-8 animate-fade-up">
-              {/* Header */}
+            <div className="max-w-5xl mx-auto space-y-6 animate-fade-up">
+
+              {/* ── Greeting ── */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-1">Seller Dashboard</p>
-                  <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-                    Welcome back 👋
+                  <p className="text-xs font-semibold text-slate-400 mb-0.5">{getGreeting()}, {storeName} 👋</p>
+                  <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight leading-tight">
+                    Here's your store at a glance
                   </h1>
-                  <p className="text-slate-500 mt-1">Here's what's happening with your store today.</p>
+                  {pendingOrders > 0 && (
+                    <div className="flex items-center gap-2 mt-2 text-amber-600 text-sm font-semibold">
+                      <Bell size={14} className="animate-pulse" />
+                      {pendingOrders} order{pendingOrders > 1 ? 's' : ''} waiting for your action
+                    </div>
+                  )}
                 </div>
                 <Button onClick={() => { setView("products"); setShowAddProduct(true); }}
-                  className="bg-slate-900 text-white hover:bg-slate-800 rounded-2xl px-6 h-11 gap-2 font-semibold shadow-md transition-all hover:-translate-y-0.5">
+                  className="bg-slate-900 text-white hover:bg-slate-800 rounded-2xl px-6 h-11 gap-2 font-semibold shadow-md transition-all hover:-translate-y-0.5 shrink-0">
                   <Plus size={16} /> List a Product
                 </Button>
               </div>
 
-              {/* Stats */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* ── Stats cards ── */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 {STATS.map(stat => (
-                  <div key={stat.label} className={`bg-white rounded-3xl p-5 border ${stat.border} shadow-sm hover:shadow-md transition-all group`}>
-                    <div className={`h-10 w-10 rounded-2xl ${stat.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                      <stat.icon size={20} className={stat.color} />
+                  <div key={stat.label} className="bg-white rounded-2xl p-4 md:p-5 border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group cursor-default">
+                    <div className={`h-9 w-9 rounded-xl ${stat.light} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200`}>
+                      <stat.icon size={17} className={stat.text} />
                     </div>
-                    <div className="text-2xl font-bold text-slate-900">{stat.value}</div>
-                    <div className="text-xs font-semibold text-slate-500 mt-0.5">{stat.label}</div>
-                    <div className="text-[10px] text-slate-400 mt-2 uppercase tracking-wider font-medium">{stat.sub}</div>
+                    <div className="text-xl md:text-2xl font-black text-slate-900 leading-none mb-1">{stat.value}</div>
+                    <div className="text-[11px] font-bold text-slate-600">{stat.label}</div>
+                    <div className="text-[10px] text-slate-400 mt-1 leading-snug">{stat.sub}</div>
                   </div>
                 ))}
               </div>
 
-              {/* Store link card */}
-              <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-amber-400/10 blur-3xl" />
-                <div className="absolute bottom-0 left-24 h-32 w-32 rounded-full bg-violet-400/10 blur-3xl" />
-                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                  <div>
-                    <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-widest mb-3">
-                      <Store size={13} /> Your Public Store
-                    </div>
-                    <div className="text-white font-mono text-lg mb-1">{storeUrlDisplay}</div>
-                    <p className="text-slate-400 text-sm">Share this link with your customers to drive traffic to your store.</p>
+              {/* ── Store link card ── */}
+              <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 md:p-8">
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="absolute top-0 right-0 h-56 w-56 rounded-full bg-amber-400/10 blur-3xl" />
+                  <div className="absolute bottom-0 left-16 h-40 w-40 rounded-full bg-violet-500/10 blur-3xl" />
+                </div>
+                <div className="relative">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-emerald-400 text-xs font-bold uppercase tracking-widest">Your Store is Live</span>
                   </div>
-                  <div className="flex gap-3 flex-shrink-0">
-                    <Button onClick={() => { if (!storeSlug) return; navigator.clipboard.writeText(`https://${storeUrlDisplay}`); setCopied(true); setTimeout(() => setCopied(false), 2000); toast.success("Link copied!"); }}
-                      disabled={!storeSlug}
-                      className="bg-amber-400 text-slate-900 hover:bg-amber-300 rounded-2xl font-bold gap-2 h-11 px-5 disabled:opacity-50">
-                      {copied ? <CheckCircle size={15} /> : <Copy size={15} />}
-                      {copied ? "Copied!" : "Copy"}
-                    </Button>
-                    {storeUrl ? (
-                      <Link href={storeUrl} target="_blank">
-                        <Button variant="outline" className="rounded-2xl border-white/20 text-white bg-white/5 hover:bg-white/10 h-11 px-5 gap-2">
-                          <Eye size={15} /> Preview
-                        </Button>
-                      </Link>
-                    ) : (
-                      <Button variant="outline" disabled className="rounded-2xl border-white/20 text-white/40 bg-white/5 h-11 px-5 gap-2 cursor-not-allowed">
-                        {isUserLoading ? <Loader2 size={15} className="animate-spin" /> : <Eye size={15} />}
-                        Preview
+                  <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 mt-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Link2 size={13} className="text-slate-400 shrink-0" />
+                        <span className="text-white font-mono text-sm md:text-base truncate">{storeUrlDisplay}</span>
+                      </div>
+                      <p className="text-slate-400 text-xs">Share this link with customers on WhatsApp, Instagram, or anywhere.</p>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <Button
+                        onClick={() => { if (!storeSlug) return; navigator.clipboard.writeText(`https://${storeUrlDisplay}`); setCopied(true); setTimeout(() => setCopied(false), 2000); toast.success("Link copied! 🔗"); }}
+                        disabled={!storeSlug}
+                        className="bg-amber-400 text-slate-900 hover:bg-amber-300 rounded-xl font-bold gap-2 h-10 px-4 text-sm disabled:opacity-50 transition-all">
+                        {copied ? <CheckCircle size={14} /> : <Copy size={14} />}
+                        {copied ? "Copied!" : "Copy link"}
                       </Button>
-                    )}
+                      {storeUrl ? (
+                        <Link href={storeUrl} target="_blank">
+                          <Button variant="outline" className="rounded-xl border-white/20 text-white bg-white/5 hover:bg-white/15 h-10 px-4 gap-2 text-sm">
+                            <Eye size={14} /> Preview
+                          </Button>
+                        </Link>
+                      ) : (
+                        <Button variant="outline" disabled className="rounded-xl border-white/10 text-white/30 bg-white/5 h-10 px-4 gap-2 text-sm cursor-not-allowed">
+                          {isUserLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />} Preview
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Recent orders */}
-              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                  <h2 className="font-bold text-slate-900">Recent Orders</h2>
-                  <button onClick={() => setView("orders")} className="text-xs font-semibold text-slate-500 hover:text-slate-900 flex items-center gap-1">
-                    View all <ChevronRight size={13} />
+              {/* ── Recent Orders ── */}
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <ShoppingBag size={15} className="text-slate-400" />
+                    <h2 className="font-bold text-slate-900 text-sm">Recent Orders</h2>
+                    {REAL_ORDERS.length > 0 && <span className="text-xs font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{REAL_ORDERS.length}</span>}
+                  </div>
+                  <button onClick={() => setView("orders")} className="text-xs font-semibold text-slate-400 hover:text-slate-900 flex items-center gap-1 transition-colors">
+                    View all <ChevronRight size={12} />
                   </button>
                 </div>
+
                 {REAL_ORDERS.length === 0 ? (
-                  <div className="px-6 py-14 flex flex-col items-center text-center">
-                    <div className="h-14 w-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                      <ShoppingBag size={24} className="text-slate-300" />
+                  <div className="px-6 py-12 flex flex-col items-center text-center">
+                    <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center mb-4 shadow-inner">
+                      <ShoppingBag size={22} className="text-slate-300" />
                     </div>
-                    <p className="font-semibold text-slate-700 mb-1">No orders yet</p>
-                    <p className="text-sm text-slate-400 max-w-xs">When customers place orders from your store, they'll show up here.</p>
+                    <p className="font-bold text-slate-700 mb-1">No orders yet — but they're coming!</p>
+                    <p className="text-sm text-slate-400 max-w-xs leading-relaxed">Share your store link on WhatsApp and Instagram to get your first order today.</p>
+                    {storeUrl && (
+                      <button onClick={() => { navigator.clipboard.writeText(`https://${storeUrlDisplay}`); toast.success("Link copied! Share it now 🚀"); }}
+                        className="mt-4 flex items-center gap-2 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors">
+                        <Copy size={12} /> Copy store link
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-50">
-                    {REAL_ORDERS.map((order: any) => {
+                    {REAL_ORDERS.slice(0, 5).map((order: any) => {
                       const s = statusConfig[order.status];
-                      const statusEmoji: Record<string, string> = { completed: "✅", shipped: "🚚", pending: "📦" };
-                      const statusBg: Record<string, string> = { completed: "bg-emerald-50", shipped: "bg-blue-50", pending: "bg-amber-50" };
+                      const isPending = order.status === "pending";
                       return (
-                        <div key={order.id} className="px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-slate-50/60 transition-colors">
-                          <div className={`h-8 w-8 rounded-xl flex items-center justify-center text-sm flex-shrink-0 ${statusBg[order.status?.toLowerCase()] || "bg-slate-100"}`}>
-                            {statusEmoji[order.status?.toLowerCase()] || "📦"}
+                        <div key={order.id} className={`px-5 py-4 flex items-center gap-4 transition-colors ${ isPending ? "bg-amber-50/40" : "hover:bg-slate-50/60" }`}>
+                          <div className={`h-10 w-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${
+                            order.status === "completed" ? "bg-emerald-100" :
+                            order.status === "shipped" ? "bg-blue-100" : "bg-amber-100"
+                          }`}>
+                            {order.status === "completed" ? "✅" : order.status === "shipped" ? "🚚" : "📦"}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-sm text-slate-900">Order #{order.id}</div>
-                            <div className="text-xs text-slate-400 truncate">
-                              {order.items?.map((i: any) => i.product_name).join(', ')}
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-sm text-slate-900">Order #{order.id}</span>
+                              {isPending && <span className="text-[9px] font-black uppercase tracking-wider bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded-full">Action needed</span>}
                             </div>
+                            <div className="text-xs text-slate-400 truncate mt-0.5">{order.items?.map((i: any) => i.product_name).join(', ')}</div>
                           </div>
-                          <div className="text-left sm:text-right flex-shrink-0">
-                            <div className="font-bold text-sm text-slate-900">{parseFloat(order.total_amount).toLocaleString()} RWF</div>
-                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s?.color || 'bg-slate-100 text-slate-500'}`}>{order.status?.replace('_', ' ')}</span>
+                          <div className="text-right shrink-0">
+                            <div className="font-black text-sm text-slate-900">{parseFloat(order.total_amount).toLocaleString()} <span className="text-[10px] font-bold text-slate-400">RWF</span></div>
+                            <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s?.color || 'bg-slate-100 text-slate-500'}`}>{order.status?.replace('_', ' ')}</span>
                           </div>
                         </div>
                       );
@@ -429,6 +465,7 @@ export default function SellerDashboard() {
                   </div>
                 )}
               </div>
+
             </div>
           )}
 
