@@ -73,8 +73,12 @@ export const useCreateProduct = () => {
       queryClient.invalidateQueries({ queryKey: ['seller-products'] });
       toast.success('Product created successfully!');
     },
-    onError: (error: { message?: string }) => {
-      toast.error(error.message || 'Failed to create product. Please try again.');
+    onError: (error: any) => {
+      if (error?.status === 403 || error?.message?.toLowerCase().includes('permission')) {
+        toast.error('Permission denied. Please log out and log back in, then try again.');
+      } else {
+        toast.error(error?.message || 'Failed to create product. Please try again.');
+      }
     },
   });
 };
@@ -93,8 +97,12 @@ export const useUpdateProduct = () => {
       queryClient.invalidateQueries({ queryKey: ['seller-product', variables.id] });
       toast.success('Product updated successfully!');
     },
-    onError: (error: { message?: string }) => {
-      toast.error(error.message || 'Failed to update product. Please try again.');
+    onError: (error: any) => {
+      if (error?.status === 403 || error?.message?.toLowerCase().includes('permission')) {
+        toast.error('Permission denied. Please log out and log back in, then try again.');
+      } else {
+        toast.error(error?.message || 'Failed to update product. Please try again.');
+      }
     },
   });
 };

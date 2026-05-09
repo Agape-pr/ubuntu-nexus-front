@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, ShoppingBag, Bell, Search, User, LogOut, Shield } from "lucide-react";
+import { Menu, X, ShoppingBag, Search, User, LogOut, Shield, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLogout } from "@/lib/api/hooks/useAuth";
 import { useCartStore } from "@/lib/store/cartStore";
@@ -19,18 +19,18 @@ const Navbar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const logoutMutation = useLogout();
-  
+
   const totalItems = useCartStore((state) => state.getTotalItems());
 
   useEffect(() => {
     const checkAuth = () => {
-      setIsLoggedIn(!!localStorage.getItem('access_token'));
-      setUserRole(localStorage.getItem('user_role'));
+      setIsLoggedIn(!!localStorage.getItem("access_token"));
+      setUserRole(localStorage.getItem("user_role"));
     };
     checkAuth();
     setMounted(true);
-    window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
+    window.addEventListener("storage", checkAuth);
+    return () => window.removeEventListener("storage", checkAuth);
   }, [pathname]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -46,61 +46,74 @@ const Navbar = () => {
     setTimeout(() => searchRef.current?.focus(), 50);
   };
 
-  const navLinks = [
-    { label: "Marketplace", to: "/" },
-    // Only show Sell link if user is explicitly a seller
-    ...(userRole === 'seller' ? [{ label: "Sell", to: "/dashboard" }] : []),
-    { label: "How it works", to: "/home" },
-  ];
-
-  const isActive = (to: string) => pathname === to || (to === "/" && pathname === "/");
+  const isActive = (to: string) => pathname === to;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/80 backdrop-blur-md">
-      <div className="container flex h-14 items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <span className="font-bold text-lg text-foreground tracking-tight">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/90 backdrop-blur-md">
+      <div className="container flex h-14 items-center justify-between gap-4">
+
+        {/* ── Logo ── */}
+        <Link href="/" className="flex items-center gap-2 group shrink-0">
+          <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-200">
+            <span className="text-primary-foreground font-black text-xs">UN</span>
+          </div>
+          <span className="font-bold text-[15px] text-foreground tracking-tight">
             Ubuntu<span className="text-accent">Now</span>
           </span>
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
+        {/* ── Desktop Centre Nav ── */}
+        <nav className="hidden md:flex items-center gap-0.5 flex-1 ml-6">
+          <Link
+            href="/home"
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+              isActive("/home")
+                ? "text-foreground bg-secondary"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary/70"
+            }`}
+          >
+            Learn how it works
+          </Link>
+
+          <Link
+            href={userRole === "seller" ? "/dashboard" : "/auth?tab=register&intent=seller"}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+              isActive("/dashboard") && userRole === "seller"
+                ? "text-foreground bg-secondary"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary/70"
+            }`}
+          >
+            <Store size={14} />
+            {userRole === "seller" ? "My Store" : "Start your store"}
+          </Link>
+
+          {userRole === "admin" && (
             <Link
-              key={link.to}
-              href={link.to}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(link.to)
-                ? "bg-secondary text-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-                }`}
+              href="/admin"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-violet-500 hover:text-violet-400 hover:bg-violet-500/10 transition-all duration-200"
             >
-              {link.label}
+              <Shield size={14} />
+              Admin
             </Link>
-          ))}
+          )}
         </nav>
 
-        {/* Right Actions */}
-        <div className="hidden md:flex items-center gap-2">
+        {/* ── Desktop Right Actions ── */}
+        <div className="hidden md:flex items-center gap-1">
+          {/* Search */}
           <button
             aria-label="Search"
             onClick={openSearch}
             className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200"
           >
-            <Search size={18} />
+            <Search size={17} />
           </button>
-          <button
-            aria-label="Notifications"
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 cursor-not-allowed opacity-50"
-            title="Notifications coming soon"
-          >
-            <Bell size={18} />
-          </button>
-          {userRole !== 'seller' && (
+
+          {/* Cart — buyers only */}
+          {userRole !== "seller" && (
             <Link href="/cart">
-              <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 relative">
-                <ShoppingBag size={18} />
+              <button className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200">
+                <ShoppingBag size={17} />
                 {mounted && totalItems > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full bg-accent flex items-center justify-center px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-card">
                     {totalItems}
@@ -109,90 +122,136 @@ const Navbar = () => {
               </button>
             </Link>
           )}
-          <div className="w-px h-5 bg-border mx-1" />
+
+          <div className="w-px h-5 bg-border mx-0.5" />
+
+          {/* Auth zone */}
           {isLoggedIn ? (
-            <>
-              {userRole === 'admin' && (
-                <Link href="/admin">
-                  <Button variant="ghost" size="sm" className="text-sm font-medium gap-1.5 text-violet-600 hover:text-violet-700 hover:bg-violet-50">
-                    <Shield size={16} /> Admin
-                  </Button>
-                </Link>
-              )}
-              {userRole === 'seller' && (
+            <div className="flex items-center gap-1">
+              {userRole === "seller" && (
                 <Link href="/dashboard">
-                  <Button variant="ghost" size="sm" className="text-sm font-medium gap-1.5">
-                    <User size={16} /> Dashboard
+                  <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium gap-1.5">
+                    <User size={14} /> Dashboard
                   </Button>
                 </Link>
               )}
-              <Button variant="ghost" size="sm" className="text-sm font-medium gap-1.5 text-muted-foreground" onClick={() => logoutMutation.mutate()}>
-                <LogOut size={16} /> Sign out
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-9 px-3 text-sm font-medium text-muted-foreground gap-1.5"
+                onClick={() => logoutMutation.mutate()}
+              >
+                <LogOut size={14} /> Sign out
               </Button>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="flex items-center gap-1.5">
               <Link href="/auth">
-                <Button variant="ghost" size="sm" className="text-sm font-medium">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
                   Sign in
                 </Button>
               </Link>
               <Link href="/auth?tab=register">
-                <Button size="sm" className="text-sm font-medium rounded-xl">
+                <Button size="sm" className="h-9 px-4 text-sm font-semibold rounded-xl shadow-sm">
                   Get started
                 </Button>
               </Link>
-            </>
+            </div>
           )}
         </div>
 
-        {/* Mobile menu button */}
-        <button
-          className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {isOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        {/* ── Mobile Right Icons ── */}
+        <div className="md:hidden flex items-center gap-1">
+          <button
+            aria-label="Search"
+            onClick={openSearch}
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+          >
+            <Search size={18} />
+          </button>
+
+          {/* User avatar / sign-in icon */}
+          <Link href={isLoggedIn ? (userRole === "seller" ? "/dashboard" : "/auth") : "/auth"}>
+            <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer">
+              <User size={15} className="text-primary" />
+            </div>
+          </Link>
+
+          {/* Hamburger */}
+          <button
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* ── Mobile Drawer ── */}
       {isOpen && (
         <div className="md:hidden border-t border-border bg-card animate-fade-up">
           <div className="container py-4 flex flex-col gap-1">
-            {navLinks.map((link) => (
+            <Link
+              href="/home"
+              onClick={() => setIsOpen(false)}
+              className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                isActive("/home")
+                  ? "bg-secondary text-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              }`}
+            >
+              💡 Learn how it works
+            </Link>
+
+            <Link
+              href={userRole === "seller" ? "/dashboard" : "/auth?tab=register&intent=seller"}
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+            >
+              <Store size={15} />
+              {userRole === "seller" ? "My Store / Dashboard" : "Start your store"}
+            </Link>
+
+            {userRole !== "seller" && (
               <Link
-                key={link.to}
-                href={link.to}
+                href="/cart"
                 onClick={() => setIsOpen(false)}
-                className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
               >
-                {link.label}
-              </Link>
-            ))}
-            {userRole !== 'seller' && (
-              <Link href="/cart" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all flex items-center justify-between">
-                <span className="flex items-center gap-2"><ShoppingBag size={16} /> Cart</span>
+                <span className="flex items-center gap-2">
+                  <ShoppingBag size={15} /> Cart
+                </span>
                 {mounted && totalItems > 0 && (
-                  <span className="h-5 min-w-5 rounded-full bg-accent flex items-center justify-center px-1 text-[10px] font-bold text-white">{totalItems}</span>
+                  <span className="h-5 min-w-5 rounded-full bg-accent flex items-center justify-center px-1 text-[10px] font-bold text-white">
+                    {totalItems}
+                  </span>
                 )}
               </Link>
             )}
-            <div className="mt-3 pt-3 border-t border-border flex flex-col gap-2">
+
+            <div className="mt-2 pt-3 border-t border-border flex flex-col gap-2">
               {isLoggedIn ? (
                 <>
-                  {userRole === 'admin' && (
+                  {userRole === "admin" && (
                     <Link href="/admin" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" className="w-full gap-1.5 border-violet-200 text-violet-700">
+                      <Button variant="outline" className="w-full gap-1.5 border-violet-200 text-violet-500">
                         <Shield size={16} /> Admin Panel
                       </Button>
                     </Link>
                   )}
-                  {userRole === 'seller' && (
+                  {userRole === "seller" && (
                     <Link href="/dashboard" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" className="w-full gap-1.5"><User size={16} /> Dashboard</Button>
+                      <Button variant="outline" className="w-full gap-1.5">
+                        <User size={16} /> Dashboard
+                      </Button>
                     </Link>
                   )}
-                  <Button className="w-full gap-1.5" variant="ghost" onClick={() => { setIsOpen(false); logoutMutation.mutate(); }}>
+                  <Button
+                    className="w-full gap-1.5"
+                    variant="ghost"
+                    onClick={() => { setIsOpen(false); logoutMutation.mutate(); }}
+                  >
                     <LogOut size={16} /> Sign out
                   </Button>
                 </>
@@ -202,7 +261,7 @@ const Navbar = () => {
                     <Button variant="outline" className="w-full">Sign in</Button>
                   </Link>
                   <Link href="/auth?tab=register" onClick={() => setIsOpen(false)}>
-                    <Button className="w-full">Get started free</Button>
+                    <Button className="w-full font-semibold">Get started free</Button>
                   </Link>
                 </>
               )}
@@ -210,9 +269,13 @@ const Navbar = () => {
           </div>
         </div>
       )}
-      {/* Search Overlay */}
+
+      {/* ── Search Overlay ── */}
       {searchOpen && (
-        <div className="fixed inset-0 z-[100] bg-foreground/40 backdrop-blur-sm flex items-start justify-center pt-24 px-4" onClick={() => setSearchOpen(false)}>
+        <div
+          className="fixed inset-0 z-[100] bg-foreground/40 backdrop-blur-sm flex items-start justify-center pt-24 px-4"
+          onClick={() => setSearchOpen(false)}
+        >
           <form
             onSubmit={handleSearchSubmit}
             onClick={(e) => e.stopPropagation()}
@@ -227,7 +290,11 @@ const Navbar = () => {
                 placeholder="Search products or stores…"
                 className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground text-base outline-none"
               />
-              <button type="button" onClick={() => setSearchOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X size={18} />
               </button>
             </div>
