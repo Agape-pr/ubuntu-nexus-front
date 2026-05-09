@@ -213,10 +213,10 @@ export default function SellerDashboard() {
   const pendingOrders = REAL_ORDERS.filter((o: any) => o.status === "pending").length;
 
   const STATS = [
-    { label: "Active Listings", value: isProductsLoading ? "…" : String(activeProductsCount), sub: "Products live in your store", icon: Package, accent: "#3b82f6", light: "bg-blue-50", text: "text-blue-600" },
-    { label: "Total Orders", value: String(REAL_ORDERS.length), sub: pendingOrders > 0 ? `${pendingOrders} awaiting action` : "All fulfilled", icon: ShoppingBag, accent: "#f59e0b", light: "bg-amber-50", text: "text-amber-600" },
-    { label: "Revenue Earned", value: totalRevenue > 0 ? `${totalRevenue.toLocaleString()}` : "0", sub: totalRevenue > 0 ? "RWF · All time" : "Start selling today", icon: Wallet, accent: "#8b5cf6", light: "bg-violet-50", text: "text-violet-600" },
-    { label: "Store Status", value: storeSlug ? "Live ✦" : "Setup", sub: storeSlug ? "Accepting orders" : "Complete your store", icon: Zap, accent: "#10b981", light: "bg-emerald-50", text: "text-emerald-600" },
+    { label: "Active Listings", value: isProductsLoading ? "…" : String(activeProductsCount), sub: "Products live in your store", icon: Package, iconBg: "bg-blue-500/20", iconColor: "text-blue-400" },
+    { label: "Total Orders", value: String(REAL_ORDERS.length), sub: pendingOrders > 0 ? `${pendingOrders} awaiting action` : "All fulfilled", icon: ShoppingBag, iconBg: "bg-amber-500/20", iconColor: "text-amber-400" },
+    { label: "Revenue Earned", value: totalRevenue > 0 ? `${totalRevenue.toLocaleString()}` : "0", sub: totalRevenue > 0 ? "RWF · All time" : "Start selling today", icon: Wallet, iconBg: "bg-violet-500/20", iconColor: "text-violet-400" },
+    { label: "Store Status", value: storeSlug ? "Live ✦" : "Setup", sub: storeSlug ? "Accepting orders" : "Complete your store", icon: Zap, iconBg: "bg-emerald-500/20", iconColor: "text-emerald-400" },
   ];
 
   return (
@@ -322,10 +322,10 @@ export default function SellerDashboard() {
               <button key={item.id} onClick={() => setView(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
                   view === item.id
-                    ? "bg-slate-900 text-white shadow-md"
-                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                    ? "bg-amber-500 text-black font-bold shadow-md"
+                    : "text-white/50 hover:text-white hover:bg-white/10"
                 }`}>
-                <item.icon size={16} className={view === item.id ? "text-amber-400" : ""} />
+                <item.icon size={16} className={view === item.id ? "text-black" : ""} />
                 {item.label}
                 {view === item.id && <ChevronRight size={14} className="ml-auto" />}
               </button>
@@ -362,19 +362,19 @@ export default function SellerDashboard() {
               {/* ── Greeting ── */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold text-slate-400 mb-0.5">{getGreeting()}, {storeName} 👋</p>
-                  <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight leading-tight">
+                  <p className="text-xs font-semibold text-white/40 mb-0.5">{getGreeting()}, {storeName} 👋</p>
+                  <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight leading-tight">
                     Here's your store at a glance
                   </h1>
                   {pendingOrders > 0 && (
-                    <div className="flex items-center gap-2 mt-2 text-amber-600 text-sm font-semibold">
+                    <div className="flex items-center gap-2 mt-2 text-amber-400 text-sm font-semibold">
                       <Bell size={14} className="animate-pulse" />
                       {pendingOrders} order{pendingOrders > 1 ? 's' : ''} waiting for your action
                     </div>
                   )}
                 </div>
                 <Button onClick={() => { setView("products"); setShowAddProduct(true); }}
-                  className="bg-slate-900 text-white hover:bg-slate-800 rounded-2xl px-6 h-11 gap-2 font-semibold shadow-md transition-all hover:-translate-y-0.5 shrink-0">
+                  className="bg-amber-500 text-black hover:bg-amber-400 rounded-2xl px-6 h-11 gap-2 font-bold shadow-md transition-all hover:-translate-y-0.5 shrink-0">
                   <Plus size={16} /> List a Product
                 </Button>
               </div>
@@ -382,13 +382,13 @@ export default function SellerDashboard() {
               {/* ── Stats cards ── */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 {STATS.map(stat => (
-                  <div key={stat.label} className="bg-card rounded-2xl p-4 md:p-5 border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group cursor-default">
-                    <div className={`h-9 w-9 rounded-xl ${stat.light} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200`}>
-                      <stat.icon size={17} className={stat.text} />
+                  <div key={stat.label} className="bg-white/5 rounded-2xl p-4 md:p-5 border border-white/10 hover:-translate-y-0.5 transition-all group cursor-default">
+                    <div className={`h-9 w-9 rounded-xl ${stat.iconBg} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200`}>
+                      <stat.icon size={17} className={stat.iconColor} />
                     </div>
-                    <div className="text-xl md:text-2xl font-black text-slate-900 leading-none mb-1">{stat.value}</div>
-                    <div className="text-[11px] font-bold text-slate-600">{stat.label}</div>
-                    <div className="text-[10px] text-slate-400 mt-1 leading-snug">{stat.sub}</div>
+                    <div className="text-xl md:text-2xl font-black text-white leading-none mb-1">{stat.value}</div>
+                    <div className="text-[11px] font-bold text-white/60">{stat.label}</div>
+                    <div className="text-[10px] text-white/40 mt-1 leading-snug">{stat.sub}</div>
                   </div>
                 ))}
               </div>
