@@ -220,11 +220,11 @@ export default function SellerDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
       {/* ── Mobile/Tablet Tab Bar ── shown below Navbar, hidden on lg+ ── */}
-      <div className="lg:hidden sticky top-14 z-30 bg-white border-b border-slate-100 shadow-sm">
+      <div className="lg:hidden sticky top-14 z-30 bg-background border-b border-border shadow-sm">
         <div className="flex w-full px-2 py-2 gap-1">
           {navItems.map(item => {
             const isActive = view === item.id;
@@ -275,7 +275,7 @@ export default function SellerDashboard() {
         {/* ── Sidebar ────────────────────────────────── */}
         <aside className="hidden lg:flex w-64 xl:w-72 flex-col bg-white border-r border-slate-100 sticky top-16 h-[calc(100vh-64px)]">
           {/* Store identity */}
-          <div className="p-6 border-b border-slate-100">
+          <div className="p-6 border-b border-border">
             <div className="flex items-center gap-3 mb-4">
               <div className="relative">
                 <div className="h-12 w-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -333,7 +333,7 @@ export default function SellerDashboard() {
           </nav>
 
           {/* View Store CTA */}
-          <div className="p-4 border-t border-slate-100">
+          <div className="p-4 border-t border-border">
             {storeUrl ? (
               <Link href={storeUrl} target="_blank">
                 <Button variant="outline" className="w-full rounded-2xl h-10 text-sm font-semibold gap-2 border-slate-200 hover:border-slate-300">
@@ -353,7 +353,7 @@ export default function SellerDashboard() {
         </aside>
 
         {/* ── Main content ───────────────────────────── */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10 bg-background">
 
           {/* ── OVERVIEW ─────────────────────────────── */}
           {view === "overview" && (
@@ -382,7 +382,7 @@ export default function SellerDashboard() {
               {/* ── Stats cards ── */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 {STATS.map(stat => (
-                  <div key={stat.label} className="bg-white rounded-2xl p-4 md:p-5 border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group cursor-default">
+                  <div key={stat.label} className="bg-card rounded-2xl p-4 md:p-5 border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group cursor-default">
                     <div className={`h-9 w-9 rounded-xl ${stat.light} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200`}>
                       <stat.icon size={17} className={stat.text} />
                     </div>
@@ -422,12 +422,12 @@ export default function SellerDashboard() {
                       </Button>
                       {storeUrl ? (
                         <Link href={storeUrl} target="_blank">
-                          <Button variant="outline" className="rounded-xl border-white/20 text-white bg-white/5 hover:bg-white/15 h-10 px-4 gap-2 text-sm">
+                          <Button variant="outline" className="rounded-xl border-white/20 text-white bg-foreground/5 hover:bg-foreground/15 h-10 px-4 gap-2 text-sm">
                             <Eye size={14} /> Preview
                           </Button>
                         </Link>
                       ) : (
-                        <Button variant="outline" disabled className="rounded-xl border-white/10 text-white/30 bg-white/5 h-10 px-4 gap-2 text-sm cursor-not-allowed">
+                        <Button variant="outline" disabled className="rounded-xl border-white/10 text-white/30 bg-foreground/5 h-10 px-4 gap-2 text-sm cursor-not-allowed">
                           {isUserLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />} Preview
                         </Button>
                       )}
@@ -437,8 +437,8 @@ export default function SellerDashboard() {
               </div>
 
               {/* ── Recent Orders ── */}
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                   <div className="flex items-center gap-2">
                     <ShoppingBag size={15} className="text-slate-400" />
                     <h2 className="font-bold text-slate-900 text-sm">Recent Orders</h2>
@@ -464,12 +464,12 @@ export default function SellerDashboard() {
                     )}
                   </div>
                 ) : (
-                  <div className="divide-y divide-slate-50">
+                  <div className="divide-y divide-border">
                     {REAL_ORDERS.slice(0, 5).map((order: any) => {
                       const s = statusConfig[order.status];
                       const isPending = order.status === "pending";
                       return (
-                        <div key={order.id} className={`px-5 py-4 flex items-center gap-4 transition-colors ${ isPending ? "bg-amber-50/40" : "hover:bg-slate-50/60" }`}>
+                        <div key={order.id} className={`px-5 py-4 flex items-center gap-4 transition-colors ${ isPending ? "bg-amber-50/40" : "hover:bg-card/60" }`}>
                           <div className={`h-10 w-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${
                             order.status === "completed" ? "bg-emerald-100" :
                             order.status === "shipped" ? "bg-blue-100" : "bg-amber-100"
@@ -527,8 +527,8 @@ export default function SellerDashboard() {
 
               {/* ── Add/Edit Form ── */}
               {showAddProduct && (
-                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden animate-fade-up">
-                  <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                <div className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden animate-fade-up">
+                  <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-background/50">
                     <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                       {editingProductId
                         ? <><Edit3 size={20} className="text-amber-500"/> {productForm.name || 'Product'}</>
@@ -542,7 +542,7 @@ export default function SellerDashboard() {
                   <div className="p-6 md:p-8 space-y-10">
                     {/* Section: Product Info */}
                     <div>
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2 mb-5">Product Info</h3>
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-border pb-2 mb-5">Product Info</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Product Name *</Label>
@@ -575,7 +575,7 @@ export default function SellerDashboard() {
 
                     {/* Section: Pricing & Availability */}
                     <div>
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2 mb-5">Pricing & Availability</h3>
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-border pb-2 mb-5">Pricing & Availability</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Price (RWF) *</Label>
@@ -629,7 +629,7 @@ export default function SellerDashboard() {
 
                     {/* Section: Images */}
                     <div>
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2 mb-5">Product Photos</h3>
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-border pb-2 mb-5">Product Photos</h3>
                       <div className="space-y-3">
                         <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-amber-400 hover:bg-amber-50/20 transition-all cursor-pointer group">
                           <input type="file" multiple accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
@@ -654,7 +654,7 @@ export default function SellerDashboard() {
                   </div>
 
                   {/* Form Actions */}
-                  <div className="flex gap-3 px-6 py-5 border-t border-slate-100 bg-slate-50/50">
+                  <div className="flex gap-3 px-6 py-5 border-t border-border bg-background/50">
                     <Button onClick={handleSaveProduct}
                       disabled={isSavingProduct || createProductMutation.isPending || updateProductMutation.isPending}
                       className="bg-slate-900 text-white rounded-2xl px-8 h-12 font-semibold gap-2 shadow-sm hover:-translate-y-0.5 transition-all">
@@ -676,7 +676,7 @@ export default function SellerDashboard() {
                 </div>
               ) : !sellerProducts || sellerProducts.length === 0 ? (
                 !showAddProduct && (
-                  <div className="bg-white rounded-3xl border border-slate-100 p-16 text-center">
+                  <div className="bg-card rounded-3xl border border-border p-16 text-center">
                     <div className="h-20 w-20 rounded-3xl bg-slate-100 flex items-center justify-center mx-auto mb-6">
                       <Package size={32} className="text-slate-300" />
                     </div>
@@ -688,13 +688,13 @@ export default function SellerDashboard() {
                   </div>
                 )
               ) : (
-                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                <div className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border flex items-center gap-3">
                     <Package size={16} className="text-slate-400" />
                     <span className="font-bold text-slate-900 text-sm">All Products</span>
                     <span className="ml-auto text-xs font-bold text-slate-400">{sellerProducts.length} listed</span>
                   </div>
-                  <div className="divide-y divide-slate-50">
+                  <div className="divide-y divide-border">
                     {sellerProducts.map(product => {
                       const img = product.images?.[0]?.image;
                       const inStock = product.stock_quantity > 0;
@@ -702,7 +702,7 @@ export default function SellerDashboard() {
                       const isEditing = editingProductId === String(product.id);
                       return (
                         <div key={product.id} className={`flex items-center gap-4 px-6 py-4 transition-colors ${
-                          isEditing ? "bg-amber-50/60 border-l-4 border-amber-400" : "hover:bg-slate-50/60"
+                          isEditing ? "bg-amber-50/60 border-l-4 border-amber-400" : "hover:bg-card/60"
                         }`}>
                           {/* Thumbnail */}
                           <div className="h-16 w-16 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
@@ -783,8 +783,8 @@ export default function SellerDashboard() {
                 <p className="text-slate-500 mt-1">Track and fulfill your customer orders.</p>
               </div>
 
-              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+              <div className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-border flex items-center gap-3">
                   <BarChart2 size={16} className="text-slate-400" />
                   <span className="font-bold text-slate-900 text-sm">All Orders</span>
                   <span className="ml-auto text-xs font-bold text-slate-400">{REAL_ORDERS.length} order{REAL_ORDERS.length !== 1 ? "s" : ""}</span>
@@ -804,11 +804,11 @@ export default function SellerDashboard() {
                     )}
                   </div>
                 ) : (
-                  <div className="divide-y divide-slate-50">
+                  <div className="divide-y divide-border">
                     {REAL_ORDERS.map((order: any) => {
                       const s = statusConfig[order.status];
                       return (
-                        <div key={order.id} className="px-6 py-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-slate-50/60 transition-colors">
+                        <div key={order.id} className="px-6 py-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-card/60 transition-colors">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-1">
                               <span className="text-xs text-slate-400 font-mono">#{order.id}</span>
@@ -858,9 +858,9 @@ export default function SellerDashboard() {
                 <p className="text-slate-500 mt-1">Manage your store identity and public profile.</p>
               </div>
 
-              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 space-y-8">
+              <div className="bg-card rounded-3xl border border-border shadow-sm p-8 space-y-8">
                 {/* Logo */}
-                <div className="flex items-center gap-6 pb-8 border-b border-slate-100">
+                <div className="flex items-center gap-6 pb-8 border-b border-border">
                   <div className="relative group cursor-pointer flex-shrink-0">
                     <div className="h-24 w-24 rounded-2xl border-2 border-dashed border-slate-200 overflow-hidden bg-slate-50 flex items-center justify-center hover:border-amber-400 transition-colors">
                       {storeLogoPreview ? (
