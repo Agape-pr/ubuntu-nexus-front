@@ -57,34 +57,8 @@ const HomeContent = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <div className="hidden md:block">
-        <Navbar />
-      </div>
-
-      {/* Mobile Top Header */}
-      <div className="md:hidden sticky top-0 z-40 bg-background pt-10 pb-2 px-3">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="font-bold text-xl font-display text-foreground">Home</span>
-          <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Free Delivery</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col items-center justify-center shrink-0 w-8">
-             <div className="text-[10px] font-bold text-muted-foreground whitespace-nowrap">RW</div>
-          </div>
-          <div className="flex-1 relative flex items-center h-10 rounded-full border-2 border-primary bg-card overflow-hidden shadow-sm">
-             <Search size={14} className="ml-3 text-primary shrink-0" />
-             <input
-                className="flex-1 h-full bg-transparent border-none text-xs px-2 focus:outline-none text-foreground placeholder:text-muted-foreground"
-                placeholder="Search products or stores..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-             />
-             <div className="h-full bg-primary text-primary-foreground text-xs font-bold px-4 flex items-center justify-center cursor-pointer transition-colors hover:bg-primary/90">
-                Search
-             </div>
-          </div>
-        </div>
-      </div>
+      {/* Navbar — shown on all screen sizes; hamburger handles mobile nav */}
+      <Navbar />
 
       {/* Desktop Header */}
       <div className="hidden md:block bg-card border-b border-border">
@@ -97,6 +71,22 @@ const HomeContent = () => {
       </div>
 
       <div className="container md:py-8 pb-4 flex-1 px-2 sm:px-4">
+        {/* Mobile Search Bar */}
+        <div className="md:hidden relative mt-3 mb-4">
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            className="w-full h-10 pl-9 pr-10 rounded-full border border-border bg-secondary/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 text-foreground placeholder:text-muted-foreground"
+            placeholder="Search products or stores..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground">
+              <X size={13} />
+            </button>
+          )}
+        </div>
+
         {/* Desktop Search & Controls */}
         <div className="hidden md:flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
