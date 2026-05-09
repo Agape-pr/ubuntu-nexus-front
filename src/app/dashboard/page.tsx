@@ -15,7 +15,7 @@ import {
   Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star, Truck,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreateProduct, useUpdateProduct, useSellerProducts } from "@/lib/api/hooks/useProducts";
+import { useCreateProduct, useUpdateProduct, useSellerProducts, useDeleteProduct } from "@/lib/api/hooks/useProducts";
 import { useSellerOrders, useUpdateOrderStatus } from "@/lib/api/hooks/useOrders";
 
 import { useCurrentUser, useUpdateStore } from "@/lib/api/hooks/useUsers";
@@ -68,6 +68,7 @@ export default function SellerDashboard() {
   const [storeForm, setStoreForm] = useState({ name: "", description: "" });
   const [isSavingProduct, setIsSavingProduct] = useState(false);
 
+  const deleteProductMutation = useDeleteProduct();
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
   const updateStoreMutation = useUpdateStore();
@@ -413,18 +414,31 @@ export default function SellerDashboard() {
 
           {/* ── PRODUCTS ─────────────────────────────── */}
           {view === "products" && (
-            <div className="max-w-5xl mx-auto space-y-8 animate-fade-up">
-              <div className="flex items-end justify-between">
+            <div className="max-w-5xl mx-auto space-y-6 animate-fade-up">
+
+              {/* Header */}
+              <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-1">Your Catalog</p>
-                  <h1 className="text-3xl font-bold text-slate-900">{sellerProducts?.length || 0} Products</h1>
+                  <h1 className="text-3xl font-bold text-slate-900">
+                    {showAddProduct
+                      ? (editingProductId ? "Edit Product" : "New Product")
+                      : `${sellerProducts?.length || 0} Products`}
+                  </h1>
                 </div>
-                {!showAddProduct && (
-                  <Button onClick={() => { setEditingProductId(null); setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "", in_stock: null }); setProductImages([]); setProductImagePreviews([]); setShowAddProduct(true); }}
-                    className="bg-slate-900 text-white rounded-2xl px-6 h-11 gap-2 font-semibold shadow-md hover:-translate-y-0.5 transition-all">
-                    <Plus size={16} /> Add Product
-                  </Button>
-                )}
+                <div className="flex items-center gap-2">
+                  {showAddProduct ? (
+                    <Button variant="ghost" onClick={() => { setShowAddProduct(false); setEditingProductId(null); }}
+                      className="gap-2 text-slate-500 rounded-2xl">
+                      <X size={15} /> Cancel
+                    </Button>
+                  ) : (
+                    <Button onClick={() => { setEditingProductId(null); setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "", in_stock: null }); setProductImages([]); setProductImagePreviews([]); setShowAddProduct(true); }}
+                      className="bg-slate-900 text-white rounded-2xl px-6 h-11 gap-2 font-semibold shadow-md hover:-translate-y-0.5 transition-all">
+                      <Plus size={16} /> Add Product
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {/* ── Add/Edit Form ── */}
@@ -540,7 +554,6 @@ export default function SellerDashboard() {
                           </p>
                           <p className="text-xs text-slate-400 mt-1">PNG, JPG, WEBP up to 10MB each</p>
                         </div>
-                        {/* Previews */}
                         {productImagePreviews.length > 0 && (
                           <div className="flex gap-3 flex-wrap mt-4">
                             {productImagePreviews.map((src, i) => (
@@ -552,11 +565,10 @@ export default function SellerDashboard() {
                         )}
                       </div>
                     </div>
-
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-3 px-6 py-5 border-t border-slate-100 bg-slate-50/50 mt-4">
+                  {/* Form Actions */}
+                  <div className="flex gap-3 px-6 py-5 border-t border-slate-100 bg-slate-50/50">
                     <Button onClick={handleSaveProduct}
                       disabled={isSavingProduct || createProductMutation.isPending || updateProductMutation.isPending}
                       className="bg-slate-900 text-white rounded-2xl px-8 h-12 font-semibold gap-2 shadow-sm hover:-translate-y-0.5 transition-all">
@@ -571,73 +583,106 @@ export default function SellerDashboard() {
                 </div>
               )}
 
-              {/* ── Product Grid ── */}
+              {/* ── Product List (always visible when not loading) ── */}
               {isProductsLoading ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                  {[1, 2, 3].map(i => <div key={i} className="h-72 rounded-3xl bg-slate-100 animate-pulse" />)}
+                <div className="space-y-3">
+                  {[1, 2, 3].map(i => <div key={i} className="h-24 rounded-2xl bg-slate-100 animate-pulse" />)}
                 </div>
               ) : !sellerProducts || sellerProducts.length === 0 ? (
-                <div className="bg-white rounded-3xl border border-slate-100 p-16 text-center">
-                  <img src="/illustrations/no-products.png" alt="No products" className="h-48 w-auto mx-auto mb-6 drop-shadow-md" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                  <h3 className="text-2xl font-bold text-slate-900 mb-2">Your store is ready</h3>
-                  <p className="text-slate-500 max-w-sm mx-auto mb-8">Add your first product and start sharing it with thousands of buyers across Rwanda.</p>
-                  <Button onClick={() => setShowAddProduct(true)} className="bg-slate-900 text-white rounded-2xl px-8 h-12 gap-2 font-semibold">
-                    <Plus size={16} /> Add First Product
-                  </Button>
-                </div>
+                !showAddProduct && (
+                  <div className="bg-white rounded-3xl border border-slate-100 p-16 text-center">
+                    <div className="h-20 w-20 rounded-3xl bg-slate-100 flex items-center justify-center mx-auto mb-6">
+                      <Package size={32} className="text-slate-300" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-2">Your store is ready</h3>
+                    <p className="text-slate-500 max-w-sm mx-auto mb-8">Add your first product and start sharing it with thousands of buyers across Rwanda.</p>
+                    <Button onClick={() => setShowAddProduct(true)} className="bg-slate-900 text-white rounded-2xl px-8 h-12 gap-2 font-semibold">
+                      <Plus size={16} /> Add First Product
+                    </Button>
+                  </div>
+                )
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {sellerProducts.map(product => {
-                    const img = product.images?.[0]?.image;
-                    const inStock = product.stock_quantity > 0;
-                    const lowStock = inStock && product.stock_quantity <= 3;
-                    return (
-                      <div key={product.id} className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-lg transition-all group">
-                        <div className="h-52 relative bg-slate-50 overflow-hidden">
-                          {img ? (
-                            <CloudImage 
-                              publicId={img} 
-                              alt={product.name} 
-                              width={400} 
-                              height={400} 
-                              crop="fill"
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                              fallback={<div className="w-full h-full flex items-center justify-center text-5xl bg-slate-100">🛍️</div>}
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-5xl">🛍️</div>
-                          )}
-                          {/* Status badge */}
-                          <div className="absolute top-3 left-3">
-                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${inStock ? statusConfig.active.color : statusConfig["out-of-stock"].color}`}>
-                              {inStock ? "Active" : "Out of stock"}
-                            </span>
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                    <Package size={16} className="text-slate-400" />
+                    <span className="font-bold text-slate-900 text-sm">All Products</span>
+                    <span className="ml-auto text-xs font-bold text-slate-400">{sellerProducts.length} listed</span>
+                  </div>
+                  <div className="divide-y divide-slate-50">
+                    {sellerProducts.map(product => {
+                      const img = product.images?.[0]?.image;
+                      const inStock = product.stock_quantity > 0;
+                      const lowStock = inStock && product.stock_quantity <= 3;
+                      const isEditing = editingProductId === String(product.id);
+                      return (
+                        <div key={product.id} className={`flex items-center gap-4 px-6 py-4 transition-colors ${
+                          isEditing ? "bg-amber-50/60 border-l-4 border-amber-400" : "hover:bg-slate-50/60"
+                        }`}>
+                          {/* Thumbnail */}
+                          <div className="h-16 w-16 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                            {img ? (
+                              <CloudImage
+                                publicId={img}
+                                alt={product.name}
+                                width={64}
+                                height={64}
+                                crop="fill"
+                                className="w-full h-full object-cover"
+                                fallback={<div className="w-full h-full flex items-center justify-center text-2xl">🛍️</div>}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-2xl">🛍️</div>
+                            )}
                           </div>
-                          {lowStock && (
-                            <div className="absolute top-3 right-3">
-                              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200 flex items-center gap-1">
-                                <AlertCircle size={10} /> Low
-                              </span>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                              <span className="font-bold text-slate-900 truncate">{product.name}</span>
+                              {isEditing && <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Editing…</span>}
                             </div>
-                          )}
-                          {/* Edit button */}
-                          <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                            <button onClick={() => handleEditClick(product)}
-                              className="h-10 w-10 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm hover:bg-white transition-colors">
-                              <Edit3 size={16} className="text-slate-800" />
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs text-slate-400">{product.category}</span>
+                              <span className="text-slate-300">·</span>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                inStock ? statusConfig.active.color : statusConfig["out-of-stock"].color
+                              }`}>{inStock ? "In stock" : "Out of stock"}</span>
+                              {lowStock && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1"><AlertCircle size={9}/> Low</span>}
+                              {product.in_stock === true && <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">⚡ Quick delivery</span>}
+                              {product.in_stock === false && <span className="text-[10px] font-semibold text-blue-500 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">📦 Same day</span>}
+                            </div>
+                          </div>
+
+                          {/* Price + qty */}
+                          <div className="text-right shrink-0 hidden sm:block">
+                            <div className="font-black text-slate-900">{Number(product.price).toLocaleString()} <span className="text-xs font-bold text-slate-400">RWF</span></div>
+                            <div className="text-xs text-slate-400 mt-0.5">{product.stock_quantity} qty</div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              onClick={() => handleEditClick(product)}
+                              className="h-9 px-4 rounded-2xl bg-slate-900 text-white text-xs font-semibold flex items-center gap-1.5 hover:bg-slate-700 transition-colors">
+                              <Edit3 size={13} /> Edit
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (confirm(`Delete "${product.name}"? This cannot be undone.`)) {
+                                  deleteProductMutation.mutate(product.id, {
+                                    onSuccess: () => toast.success("Product deleted."),
+                                    onError: () => toast.error("Failed to delete product."),
+                                  });
+                                }
+                              }}
+                              className="h-9 w-9 rounded-2xl border border-slate-200 bg-white text-slate-400 flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 transition-colors">
+                              <Trash2 size={13} />
                             </button>
                           </div>
                         </div>
-                        <div className="p-5">
-                          <h4 className="font-bold text-slate-900 truncate mb-1">{product.name}</h4>
-                          <div className="flex items-center justify-between">
-                            <span className="text-amber-600 font-black text-lg">{Number(product.price).toLocaleString()} <span className="text-xs font-bold text-slate-400">RWF</span></span>
-                            <span className="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded-lg">{product.stock_quantity} in stock</span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
