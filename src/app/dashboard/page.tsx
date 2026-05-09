@@ -504,10 +504,9 @@ export default function SellerDashboard() {
               {/* Header */}
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-1">Your Catalog</p>
                   <h1 className="text-3xl font-bold text-slate-900">
                     {showAddProduct
-                      ? (editingProductId ? "Edit Product" : "New Product")
+                      ? (editingProductId ? `Edit "${productForm.name || 'Product'}"` : "New Product")
                       : `${sellerProducts?.length || 0} Products`}
                   </h1>
                 </div>
@@ -531,7 +530,9 @@ export default function SellerDashboard() {
                 <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden animate-fade-up">
                   <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
                     <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                      {editingProductId ? <><Edit3 size={20} className="text-amber-500"/> Edit Product</> : <><Sparkles size={20} className="text-amber-500"/> New Product</>}
+                      {editingProductId
+                        ? <><Edit3 size={20} className="text-amber-500"/> Edit &ldquo;{productForm.name || 'Product'}&rdquo;</>
+                        : <><Sparkles size={20} className="text-amber-500"/> New Product</>}
                     </h2>
                     <button onClick={() => { setShowAddProduct(false); setEditingProductId(null); }} className="h-8 w-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
                       <X size={15} className="text-slate-500" />
