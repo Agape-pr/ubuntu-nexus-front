@@ -254,8 +254,8 @@ export default function SellerDashboard() {
                 ) : (
                   /* ── Inactive: icon only + tiny label below ── */
                   <>
-                    <item.icon size={17} className="text-slate-400" />
-                    <span className="text-[9px] font-semibold text-slate-400 mt-0.5 tracking-wide">
+                    <item.icon size={17} className="text-white/40" />
+                    <span className="text-[9px] font-semibold text-white/40 mt-0.5 tracking-wide">
                       {shortLabel}
                     </span>
                   </>
@@ -289,15 +289,15 @@ export default function SellerDashboard() {
                       height={48}
                       crop="fill"
                       className="w-full h-full object-cover"
-                      fallback={<span className="text-slate-700 font-bold text-sm">{storeInitials}</span>}
+                      fallback={<span className="text-white/80 font-bold text-sm">{storeInitials}</span>}
                     />
                   )}
                 </div>
                 <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-white" />
               </div>
               <div className="min-w-0">
-                <div className="font-bold text-slate-900 text-sm truncate">{isUserLoading ? "Loading..." : storeName}</div>
-                <div className="text-[11px] text-slate-400 font-medium">Verified Seller ✦</div>
+                <div className="font-bold text-white text-sm truncate">{isUserLoading ? "Loading..." : storeName}</div>
+                <div className="text-[11px] text-white/40 font-medium">Verified Seller ✦</div>
               </div>
             </div>
 
@@ -305,13 +305,13 @@ export default function SellerDashboard() {
             {storeUrl ? (
               <Link href={storeUrl} target="_blank"
                 className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 hover:bg-slate-100 transition-all group">
-                <ExternalLink size={12} className="text-slate-400 group-hover:text-slate-600 flex-shrink-0" />
-                <span className="text-[11px] text-slate-500 truncate flex-1">{storeUrlDisplay}</span>
+                <ExternalLink size={12} className="text-white/40 group-hover:text-white/60 flex-shrink-0" />
+                <span className="text-[11px] text-white/50 truncate flex-1">{storeUrlDisplay}</span>
               </Link>
             ) : (
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 opacity-60 cursor-not-allowed">
-                {isUserLoading ? <Loader2 size={12} className="animate-spin text-slate-400 flex-shrink-0" /> : <ExternalLink size={12} className="text-slate-300 flex-shrink-0" />}
-                <span className="text-[11px] text-slate-400 truncate flex-1">{storeUrlDisplay}</span>
+                {isUserLoading ? <Loader2 size={12} className="animate-spin text-white/40 flex-shrink-0" /> : <ExternalLink size={12} className="text-white/30 flex-shrink-0" />}
+                <span className="text-[11px] text-white/40 truncate flex-1">{storeUrlDisplay}</span>
               </div>
             )}
           </div>
@@ -346,7 +346,7 @@ export default function SellerDashboard() {
                 {isUserLoading ? "Loading store…" : "Preview unavailable"}
               </Button>
             )}
-            <button className="flex items-center gap-2 w-full mt-2 px-4 py-2 text-xs text-slate-400 hover:text-rose-500 transition-colors">
+            <button className="flex items-center gap-2 w-full mt-2 px-4 py-2 text-xs text-white/40 hover:text-rose-500 transition-colors">
               <LogOut size={13} /> Sign out
             </button>
           </div>
@@ -407,16 +407,16 @@ export default function SellerDashboard() {
                   <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 mt-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <Link2 size={13} className="text-slate-400 shrink-0" />
+                        <Link2 size={13} className="text-white/40 shrink-0" />
                         <span className="text-white font-mono text-sm md:text-base truncate">{storeUrlDisplay}</span>
                       </div>
-                      <p className="text-slate-400 text-xs">Share this link with customers on WhatsApp, Instagram, or anywhere.</p>
+                      <p className="text-white/40 text-xs">Share this link with customers on WhatsApp, Instagram, or anywhere.</p>
                     </div>
                     <div className="flex gap-2 shrink-0">
                       <Button
                         onClick={() => { if (!storeSlug) return; navigator.clipboard.writeText(`https://${storeUrlDisplay}`); setCopied(true); setTimeout(() => setCopied(false), 2000); toast.success("Link copied! 🔗"); }}
                         disabled={!storeSlug}
-                        className="bg-gold-accent text-slate-900 hover:bg-amber-300 rounded-xl font-bold gap-2 h-10 px-4 text-sm disabled:opacity-50 transition-all">
+                        className="bg-gold-accent text-white hover:bg-amber-300 rounded-xl font-bold gap-2 h-10 px-4 text-sm disabled:opacity-50 transition-all">
                         {copied ? <CheckCircle size={14} /> : <Copy size={14} />}
                         {copied ? "Copied!" : "Copy link"}
                       </Button>
@@ -440,11 +440,11 @@ export default function SellerDashboard() {
               <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                   <div className="flex items-center gap-2">
-                    <ShoppingBag size={15} className="text-slate-400" />
-                    <h2 className="font-bold text-slate-900 text-sm">Recent Orders</h2>
-                    {REAL_ORDERS.length > 0 && <span className="text-xs font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{REAL_ORDERS.length}</span>}
+                    <ShoppingBag size={15} className="text-white/40" />
+                    <h2 className="font-bold text-white text-sm">Recent Orders</h2>
+                    {REAL_ORDERS.length > 0 && <span className="text-xs font-bold bg-slate-100 text-white/50 px-2 py-0.5 rounded-full">{REAL_ORDERS.length}</span>}
                   </div>
-                  <button onClick={() => setView("orders")} className="text-xs font-semibold text-slate-400 hover:text-slate-900 flex items-center gap-1 transition-colors">
+                  <button onClick={() => setView("orders")} className="text-xs font-semibold text-white/40 hover:text-white flex items-center gap-1 transition-colors">
                     View all <ChevronRight size={12} />
                   </button>
                 </div>
@@ -452,10 +452,10 @@ export default function SellerDashboard() {
                 {REAL_ORDERS.length === 0 ? (
                   <div className="px-6 py-12 flex flex-col items-center text-center">
                     <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center mb-4 shadow-inner">
-                      <ShoppingBag size={22} className="text-slate-300" />
+                      <ShoppingBag size={22} className="text-white/30" />
                     </div>
-                    <p className="font-bold text-slate-700 mb-1">No orders yet — but they're coming!</p>
-                    <p className="text-sm text-slate-400 max-w-xs leading-relaxed">Share your store link on WhatsApp and Instagram to get your first order today.</p>
+                    <p className="font-bold text-white/80 mb-1">No orders yet — but they're coming!</p>
+                    <p className="text-sm text-white/40 max-w-xs leading-relaxed">Share your store link on WhatsApp and Instagram to get your first order today.</p>
                     {storeUrl && (
                       <button onClick={() => { navigator.clipboard.writeText(`https://${storeUrlDisplay}`); toast.success("Link copied! Share it now 🚀"); }}
                         className="mt-4 flex items-center gap-2 text-xs font-bold text-gold-primary hover:text-amber-700 transition-colors">
@@ -478,14 +478,14 @@ export default function SellerDashboard() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-sm text-slate-900">Order #{order.id}</span>
-                              {isPending && <span className="text-[9px] font-black uppercase tracking-wider bg-gold-accent text-slate-900 px-1.5 py-0.5 rounded-full">Action needed</span>}
+                              <span className="font-bold text-sm text-white">Order #{order.id}</span>
+                              {isPending && <span className="text-[9px] font-black uppercase tracking-wider bg-gold-accent text-white px-1.5 py-0.5 rounded-full">Action needed</span>}
                             </div>
-                            <div className="text-xs text-slate-400 truncate mt-0.5">{order.items?.map((i: any) => i.product_name).join(', ')}</div>
+                            <div className="text-xs text-white/40 truncate mt-0.5">{order.items?.map((i: any) => i.product_name).join(', ')}</div>
                           </div>
                           <div className="text-right shrink-0">
-                            <div className="font-black text-sm text-slate-900">{parseFloat(order.total_amount).toLocaleString()} <span className="text-[10px] font-bold text-slate-400">RWF</span></div>
-                            <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s?.color || 'bg-slate-100 text-slate-500'}`}>{order.status?.replace('_', ' ')}</span>
+                            <div className="font-black text-sm text-white">{parseFloat(order.total_amount).toLocaleString()} <span className="text-[10px] font-bold text-white/40">RWF</span></div>
+                            <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s?.color || 'bg-slate-100 text-white/50'}`}>{order.status?.replace('_', ' ')}</span>
                           </div>
                         </div>
                       );
@@ -504,7 +504,7 @@ export default function SellerDashboard() {
               {/* Header */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-slate-900">
+                  <h1 className="text-3xl font-bold text-white">
                     {showAddProduct
                       ? (editingProductId ? `Edit "${productForm.name || 'Product'}"` : "New Product")
                       : `${sellerProducts?.length || 0} Products`}
@@ -513,7 +513,7 @@ export default function SellerDashboard() {
                 <div className="flex items-center gap-2">
                   {showAddProduct ? (
                     <Button variant="ghost" onClick={() => { setShowAddProduct(false); setEditingProductId(null); }}
-                      className="gap-2 text-slate-500 rounded-2xl">
+                      className="gap-2 text-white/50 rounded-2xl">
                       <X size={15} /> Cancel
                     </Button>
                   ) : (
@@ -529,31 +529,31 @@ export default function SellerDashboard() {
               {showAddProduct && (
                 <div className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden animate-fade-up">
                   <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-background/50">
-                    <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
                       {editingProductId
                         ? <><Edit3 size={20} className="text-gold-bright"/> {productForm.name || 'Product'}</>
                         : <><Sparkles size={20} className="text-gold-bright"/> New Product</>}
                     </h2>
                     <button onClick={() => { setShowAddProduct(false); setEditingProductId(null); }} className="h-8 w-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
-                      <X size={15} className="text-slate-500" />
+                      <X size={15} className="text-white/50" />
                     </button>
                   </div>
 
                   <div className="p-6 md:p-8 space-y-10">
                     {/* Section: Product Info */}
                     <div>
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-border pb-2 mb-5">Product Info</h3>
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-white border-b border-border pb-2 mb-5">Product Info</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Product Name *</Label>
+                          <Label className="text-xs font-bold uppercase tracking-wider text-white/50">Product Name *</Label>
                           <Input value={productForm.name} onChange={e => setProductForm({ ...productForm, name: e.target.value })}
-                            placeholder="e.g. Ankara Print Tote Bag" className="rounded-2xl h-11 border-slate-300 bg-white text-slate-900" />
+                            placeholder="e.g. Ankara Print Tote Bag" className="rounded-2xl h-11 border-white/20 bg-white/5 text-white" />
                         </div>
                         
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Category *</Label>
+                          <Label className="text-xs font-bold uppercase tracking-wider text-white/50">Category *</Label>
                           <Select value={productForm.category} onValueChange={(val) => setProductForm({ ...productForm, category: val })}>
-                            <SelectTrigger className="rounded-2xl h-11 border-slate-300 bg-white text-slate-900">
+                            <SelectTrigger className="rounded-2xl h-11 border-white/20 bg-white/5 text-white">
                               <SelectValue placeholder="Select a category" />
                             </SelectTrigger>
                             <SelectContent>
@@ -565,38 +565,38 @@ export default function SellerDashboard() {
                         </div>
 
                         <div className="md:col-span-2 space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Description</Label>
+                          <Label className="text-xs font-bold uppercase tracking-wider text-white/50">Description</Label>
                           <Textarea value={productForm.description} onChange={e => setProductForm({ ...productForm, description: e.target.value })}
                             placeholder="Tell buyers what makes this product special — material, origin, size, care instructions…"
-                            className="rounded-2xl border-slate-300 bg-white text-slate-900 resize-none" rows={4} />
+                            className="rounded-2xl border-white/20 bg-white/5 text-white resize-none" rows={4} />
                         </div>
                       </div>
                     </div>
 
                     {/* Section: Pricing & Availability */}
                     <div>
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-border pb-2 mb-5">Pricing & Availability</h3>
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-white border-b border-border pb-2 mb-5">Pricing & Availability</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Price (RWF) *</Label>
+                          <Label className="text-xs font-bold uppercase tracking-wider text-white/50">Price (RWF) *</Label>
                           <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">RWF</span>
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 text-sm font-bold">RWF</span>
                             <Input type="number" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })}
-                              placeholder="12,500" className="rounded-2xl h-11 border-slate-300 bg-white text-slate-900 pl-12" />
+                              placeholder="12,500" className="rounded-2xl h-11 border-white/20 bg-white/5 text-white pl-12" />
                           </div>
                         </div>
 
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Stock Quantity *</Label>
+                          <Label className="text-xs font-bold uppercase tracking-wider text-white/50">Stock Quantity *</Label>
                           <Input type="number" value={productForm.stock_quantity} onChange={e => setProductForm({ ...productForm, stock_quantity: e.target.value })}
-                            placeholder="e.g. 10" className="rounded-2xl h-11 border-slate-300 bg-white text-slate-900" />
+                            placeholder="e.g. 10" className="rounded-2xl h-11 border-white/20 bg-white/5 text-white" />
                         </div>
 
                         <div className="md:col-span-2 space-y-3">
-                          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                          <Label className="text-xs font-bold uppercase tracking-wider text-white/50">
                             Do you currently have this item in stock? *
                           </Label>
-                          <p className="text-xs text-slate-400 -mt-1 mb-2">
+                          <p className="text-xs text-white/40 -mt-1 mb-2">
                             This sets the delivery label buyers see on your listing.
                           </p>
                           <div className="flex flex-col sm:flex-row gap-3">
@@ -606,7 +606,7 @@ export default function SellerDashboard() {
                               className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl border-2 text-sm font-semibold transition-all ${
                                 productForm.in_stock === true
                                   ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                                  : "border-slate-200 bg-slate-50 text-slate-500 hover:border-emerald-300 hover:bg-emerald-50/30"
+                                  : "border-slate-200 bg-slate-50 text-white/50 hover:border-emerald-300 hover:bg-emerald-50/30"
                               }`}
                             >
                               ✅ Yes — Ready for quick delivery
@@ -617,7 +617,7 @@ export default function SellerDashboard() {
                               className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl border-2 text-sm font-semibold transition-all ${
                                 productForm.in_stock === false
                                   ? "border-blue-500 bg-blue-50 text-blue-700"
-                                  : "border-slate-200 bg-slate-50 text-slate-500 hover:border-blue-300 hover:bg-blue-50/30"
+                                  : "border-slate-200 bg-slate-50 text-white/50 hover:border-blue-300 hover:bg-blue-50/30"
                               }`}
                             >
                               📦 No — Confirm & deliver same day
@@ -629,16 +629,16 @@ export default function SellerDashboard() {
 
                     {/* Section: Images */}
                     <div>
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-border pb-2 mb-5">Product Photos</h3>
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-white border-b border-border pb-2 mb-5">Product Photos</h3>
                       <div className="space-y-3">
-                        <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-amber-400 hover:bg-amber-50/20 transition-all cursor-pointer group">
+                        <div className="relative border-2 border-dashed border-white/20 rounded-2xl p-8 text-center hover:border-amber-400 hover:bg-amber-50/20 transition-all cursor-pointer group">
                           <input type="file" multiple accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                             onChange={e => handleImageChange(e.target.files)} />
-                          <ImagePlus size={28} className="mx-auto text-slate-300 group-hover:text-gold-accent transition-colors mb-3" />
-                          <p className="text-sm font-semibold text-slate-500">
+                          <ImagePlus size={28} className="mx-auto text-white/30 group-hover:text-gold-accent transition-colors mb-3" />
+                          <p className="text-sm font-semibold text-white/50">
                             {productImages.length > 0 ? `${productImages.length} image(s) selected — click to change` : "Click to upload product photos"}
                           </p>
-                          <p className="text-xs text-slate-400 mt-1">PNG, JPG, WEBP up to 10MB each</p>
+                          <p className="text-xs text-white/40 mt-1">PNG, JPG, WEBP up to 10MB each</p>
                         </div>
                         {productImagePreviews.length > 0 && (
                           <div className="flex gap-3 flex-wrap mt-4">
@@ -662,7 +662,7 @@ export default function SellerDashboard() {
                       {editingProductId ? "Update Product" : "Publish Product"}
                     </Button>
                     <Button variant="ghost" onClick={() => { setShowAddProduct(false); setEditingProductId(null); }}
-                      className="rounded-2xl px-6 h-12 text-slate-500 font-semibold hover:bg-slate-200">
+                      className="rounded-2xl px-6 h-12 text-white/50 font-semibold hover:bg-slate-200">
                       Cancel
                     </Button>
                   </div>
@@ -678,10 +678,10 @@ export default function SellerDashboard() {
                 !showAddProduct && (
                   <div className="bg-card rounded-3xl border border-border p-16 text-center">
                     <div className="h-20 w-20 rounded-3xl bg-slate-100 flex items-center justify-center mx-auto mb-6">
-                      <Package size={32} className="text-slate-300" />
+                      <Package size={32} className="text-white/30" />
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-2">Your store is ready</h3>
-                    <p className="text-slate-500 max-w-sm mx-auto mb-8">Add your first product and start sharing it with thousands of buyers across Rwanda.</p>
+                    <h3 className="text-2xl font-bold text-white mb-2">Your store is ready</h3>
+                    <p className="text-white/50 max-w-sm mx-auto mb-8">Add your first product and start sharing it with thousands of buyers across Rwanda.</p>
                     <Button onClick={() => setShowAddProduct(true)} className="bg-slate-900 text-white rounded-2xl px-8 h-12 gap-2 font-semibold">
                       <Plus size={16} /> Add First Product
                     </Button>
@@ -690,9 +690,9 @@ export default function SellerDashboard() {
               ) : (
                 <div className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden">
                   <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-                    <Package size={16} className="text-slate-400" />
-                    <span className="font-bold text-slate-900 text-sm">All Products</span>
-                    <span className="ml-auto text-xs font-bold text-slate-400">{sellerProducts.length} listed</span>
+                    <Package size={16} className="text-white/40" />
+                    <span className="font-bold text-white text-sm">All Products</span>
+                    <span className="ml-auto text-xs font-bold text-white/40">{sellerProducts.length} listed</span>
                   </div>
                   <div className="divide-y divide-border">
                     {sellerProducts.map(product => {
@@ -724,12 +724,12 @@ export default function SellerDashboard() {
                           {/* Info */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                              <span className="font-bold text-slate-900 truncate">{product.name}</span>
+                              <span className="font-bold text-white truncate">{product.name}</span>
                               {isEditing && <span className="text-[10px] font-bold bg-gold-tint text-amber-700 px-2 py-0.5 rounded-full">Editing…</span>}
                             </div>
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs text-slate-400">{product.category}</span>
-                              <span className="text-slate-300">·</span>
+                              <span className="text-xs text-white/40">{product.category}</span>
+                              <span className="text-white/30">·</span>
                               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                                 inStock ? statusConfig.active.color : statusConfig["out-of-stock"].color
                               }`}>{inStock ? "In stock" : "Out of stock"}</span>
@@ -741,8 +741,8 @@ export default function SellerDashboard() {
 
                           {/* Price + qty */}
                           <div className="text-right shrink-0 hidden sm:block">
-                            <div className="font-black text-slate-900">{Number(product.price).toLocaleString()} <span className="text-xs font-bold text-slate-400">RWF</span></div>
-                            <div className="text-xs text-slate-400 mt-0.5">{product.stock_quantity} qty</div>
+                            <div className="font-black text-white">{Number(product.price).toLocaleString()} <span className="text-xs font-bold text-white/40">RWF</span></div>
+                            <div className="text-xs text-white/40 mt-0.5">{product.stock_quantity} qty</div>
                           </div>
 
                           {/* Actions */}
@@ -761,7 +761,7 @@ export default function SellerDashboard() {
                                   });
                                 }
                               }}
-                              className="h-9 w-9 rounded-2xl border border-slate-200 bg-white text-slate-400 flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 transition-colors">
+                              className="h-9 w-9 rounded-2xl border border-slate-200 bg-white text-white/40 flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 transition-colors">
                               <Trash2 size={13} />
                             </button>
                           </div>
@@ -778,24 +778,24 @@ export default function SellerDashboard() {
           {view === "orders" && (
             <div className="max-w-5xl mx-auto space-y-8 animate-fade-up">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-1">Sales Activity</p>
-                <h1 className="text-3xl font-bold text-slate-900">Orders</h1>
-                <p className="text-slate-500 mt-1">Track and fulfill your customer orders.</p>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/40 mb-1">Sales Activity</p>
+                <h1 className="text-3xl font-bold text-white">Orders</h1>
+                <p className="text-white/50 mt-1">Track and fulfill your customer orders.</p>
               </div>
 
               <div className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-                  <BarChart2 size={16} className="text-slate-400" />
-                  <span className="font-bold text-slate-900 text-sm">All Orders</span>
-                  <span className="ml-auto text-xs font-bold text-slate-400">{REAL_ORDERS.length} order{REAL_ORDERS.length !== 1 ? "s" : ""}</span>
+                  <BarChart2 size={16} className="text-white/40" />
+                  <span className="font-bold text-white text-sm">All Orders</span>
+                  <span className="ml-auto text-xs font-bold text-white/40">{REAL_ORDERS.length} order{REAL_ORDERS.length !== 1 ? "s" : ""}</span>
                 </div>
                 {REAL_ORDERS.length === 0 ? (
                   <div className="px-6 py-20 flex flex-col items-center text-center">
                     <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-5">
-                      <ShoppingBag size={28} className="text-slate-300" />
+                      <ShoppingBag size={28} className="text-white/30" />
                     </div>
-                    <h3 className="font-bold text-slate-800 text-lg mb-2">No orders yet</h3>
-                    <p className="text-sm text-slate-400 max-w-sm">Once customers start buying from your store, their orders will appear here. Share your store link to get started!</p>
+                    <h3 className="font-bold text-white/90 text-lg mb-2">No orders yet</h3>
+                    <p className="text-sm text-white/40 max-w-sm">Once customers start buying from your store, their orders will appear here. Share your store link to get started!</p>
                     {storeUrl && (
                       <button onClick={() => { navigator.clipboard.writeText(`https://${storeUrlDisplay}`); toast.success("Link copied!"); }}
                         className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-slate-900 text-white text-sm font-semibold hover:-translate-y-0.5 transition-all">
@@ -811,21 +811,21 @@ export default function SellerDashboard() {
                         <div key={order.id} className="px-6 py-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-card/60 transition-colors">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-1">
-                              <span className="text-xs text-slate-400 font-mono">#{order.id}</span>
-                              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${s?.color || 'bg-slate-100 text-slate-500'}`}>{order.status?.replace('_', ' ')}</span>
+                              <span className="text-xs text-white/40 font-mono">#{order.id}</span>
+                              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${s?.color || 'bg-slate-100 text-white/50'}`}>{order.status?.replace('_', ' ')}</span>
                             </div>
-                            <div className="text-sm text-slate-500">{order.items?.map((i: any) => i.product_name).join(', ')}</div>
-                            <div className="text-xs text-slate-400 mt-1">{new Date(order.created_at).toLocaleDateString()}</div>
+                            <div className="text-sm text-white/50">{order.items?.map((i: any) => i.product_name).join(', ')}</div>
+                            <div className="text-xs text-white/40 mt-1">{new Date(order.created_at).toLocaleDateString()}</div>
                           </div>
                           <div className="flex items-center gap-4 flex-shrink-0">
-                            <span className="font-black text-slate-900 text-lg">{parseFloat(order.total_amount).toLocaleString()} <span className="text-xs font-bold text-slate-400">RWF</span></span>
+                            <span className="font-black text-white text-lg">{parseFloat(order.total_amount).toLocaleString()} <span className="text-xs font-bold text-white/40">RWF</span></span>
                             {order.status === "pending" && (
-                              <Button size="sm" onClick={() => updateStatus({ id: order.id, status: 'shipped' })} disabled={isUpdatingOrder} className="bg-slate-900 text-white rounded-2xl text-xs gap-1 h-9 px-4">
+                              <Button size="sm" onClick={() => updateStatus({ id: order.id, status: 'shipped' })} disabled={isUpdatingOrder} className="bg-gold-bright text-near-black hover:bg-gold-accent rounded-2xl text-xs gap-1 h-9 px-4 font-bold">
                                 Mark Shipped <Truck size={12} />
                               </Button>
                             )}
                             {order.status === "shipped" && (
-                              <Button size="sm" variant="outline" onClick={() => updateStatus({ id: order.id, status: 'completed' })} disabled={isUpdatingOrder} className="rounded-2xl text-xs gap-1 h-9 px-4 border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                              <Button size="sm" variant="outline" onClick={() => updateStatus({ id: order.id, status: 'completed' })} disabled={isUpdatingOrder} className="rounded-2xl text-xs gap-1 h-9 px-4 border-success/40 text-success hover:bg-success/10">
                                 Mark Complete <CheckCircle size={12} />
                               </Button>
                             )}
@@ -837,13 +837,13 @@ export default function SellerDashboard() {
                 )}
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-3xl p-8 flex flex-col sm:flex-row sm:items-center gap-6">
+              <div className="bg-gold-bright/10 border border-gold-bright/20 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center gap-6">
                 <div className="h-14 w-14 rounded-2xl bg-gold-accent flex items-center justify-center flex-shrink-0">
                   <Sparkles size={24} className="text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-slate-900 mb-1">Full order management coming soon</h3>
-                  <p className="text-sm text-slate-600">Real-time order tracking, buyer messaging, and automated fulfillment tools are in development.</p>
+                  <h3 className="font-bold text-white mb-1">Full order management coming soon</h3>
+                  <p className="text-sm text-white/60">Real-time order tracking, buyer messaging, and automated fulfillment tools are in development.</p>
                 </div>
               </div>
             </div>
@@ -853,16 +853,16 @@ export default function SellerDashboard() {
           {view === "store-settings" && (
             <div className="max-w-2xl mx-auto space-y-8 animate-fade-up">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-1">Configuration</p>
-                <h1 className="text-3xl font-bold text-slate-900">Store Settings</h1>
-                <p className="text-slate-500 mt-1">Manage your store identity and public profile.</p>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/40 mb-1">Configuration</p>
+                <h1 className="text-3xl font-bold text-white">Store Settings</h1>
+                <p className="text-white/50 mt-1">Manage your store identity and public profile.</p>
               </div>
 
               <div className="bg-card rounded-3xl border border-border shadow-sm p-8 space-y-8">
                 {/* Logo */}
                 <div className="flex items-center gap-6 pb-8 border-b border-border">
                   <div className="relative group cursor-pointer flex-shrink-0">
-                    <div className="h-24 w-24 rounded-2xl border-2 border-dashed border-slate-200 overflow-hidden bg-slate-50 flex items-center justify-center hover:border-amber-400 transition-colors">
+                    <div className="h-24 w-24 rounded-2xl border-2 border-dashed border-white/20 overflow-hidden bg-white/5 flex items-center justify-center hover:border-amber-400 transition-colors">
                       {storeLogoPreview ? (
                         <img src={storeLogoPreview} alt="Logo preview" className="w-full h-full object-cover" />
                       ) : (
@@ -873,10 +873,10 @@ export default function SellerDashboard() {
                           height={96}
                           crop="fill"
                           className="w-full h-full object-cover"
-                          fallback={<Store size={32} className="text-slate-300" />}
+                          fallback={<Store size={32} className="text-white/20" />}
                         />
                       )}
-                      <div className="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-2xl">
+                      <div className="absolute inset-0 bg-near-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-2xl">
                         <ImagePlus size={20} className="text-white" />
                       </div>
                     </div>
@@ -884,35 +884,35 @@ export default function SellerDashboard() {
                       onChange={e => e.target.files?.[0] && handleLogoChange(e.target.files[0])} />
                   </div>
                   <div>
-                    <Label htmlFor="store_logo_input" className="font-bold text-slate-900 cursor-pointer">Store Logo</Label>
-                    <p className="text-sm text-slate-500 mt-1">Click the image to upload a new logo.<br />Recommended: square image, 500×500px, max 10MB.</p>
+                    <Label htmlFor="store_logo_input" className="font-bold text-gold-bright cursor-pointer">Store Logo</Label>
+                    <p className="text-sm text-white/50 mt-1">Click the image to upload a new logo.<br />Recommended: square image, 500×500px, max 10MB.</p>
                   </div>
                 </div>
 
                 {/* Store name */}
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Store Name *</Label>
+                  <Label className="text-xs font-bold uppercase tracking-wider text-white/50">Store Name *</Label>
                   <Input value={storeForm.name} onChange={e => setStoreForm({ ...storeForm, name: e.target.value })}
-                    className="rounded-2xl h-12 border-slate-300 bg-white text-slate-900 font-semibold" />
+                    className="rounded-2xl h-12 border-white/20 bg-white/5 text-white font-semibold" />
                 </div>
 
                 {/* Store URL (read-only) */}
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Store URL</Label>
+                  <Label className="text-xs font-bold uppercase tracking-wider text-white/50">Store URL</Label>
                   <div className="flex rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden h-12">
-                    <span className="flex items-center px-4 text-slate-400 text-sm bg-slate-100 border-r border-slate-200 flex-shrink-0">
+                    <span className="flex items-center px-4 text-white/40 text-sm bg-slate-100 border-r border-slate-200 flex-shrink-0">
                       ubuntunow.rw/store/
                     </span>
-                    <input value={storeSlug} readOnly className="bg-transparent px-4 text-sm font-mono text-slate-600 w-full outline-none" />
+                    <input value={storeSlug} readOnly className="bg-transparent px-4 text-sm font-mono text-white/60 w-full outline-none" />
                   </div>
                 </div>
 
                 {/* Description */}
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Store Description</Label>
+                  <Label className="text-xs font-bold uppercase tracking-wider text-white/50">Store Description</Label>
                   <Textarea value={storeForm.description} onChange={e => setStoreForm({ ...storeForm, description: e.target.value })}
                     placeholder="Describe your store — what you sell, your story, your values…"
-                    className="rounded-2xl border-slate-300 bg-white text-slate-900 resize-none" rows={5} />
+                    className="rounded-2xl border-white/20 bg-white/5 text-white resize-none" rows={5} />
                 </div>
 
                 {/* Save */}
@@ -928,23 +928,23 @@ export default function SellerDashboard() {
                 <Link href={storeUrl} target="_blank">
                   <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 flex items-center gap-4 hover:opacity-90 transition-opacity cursor-pointer">
                     <div className="h-12 w-12 rounded-2xl bg-gold-accent flex items-center justify-center flex-shrink-0">
-                      <Eye size={22} className="text-slate-900" />
+                      <Eye size={22} className="text-white" />
                     </div>
                     <div className="flex-1">
                       <div className="font-bold text-white mb-0.5">See how your store looks</div>
-                      <div className="text-slate-400 text-sm">Preview your public store page with all your products.</div>
+                      <div className="text-white/40 text-sm">Preview your public store page with all your products.</div>
                     </div>
-                    <ArrowRight size={18} className="text-slate-500" />
+                    <ArrowRight size={18} className="text-white/50" />
                   </div>
                 </Link>
               ) : (
                 <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 flex items-center gap-4 opacity-60 cursor-not-allowed">
                   <div className="h-12 w-12 rounded-2xl bg-gold-accent/60 flex items-center justify-center flex-shrink-0">
-                    {isUserLoading ? <Loader2 size={22} className="text-slate-900 animate-spin" /> : <Eye size={22} className="text-slate-900" />}
+                    {isUserLoading ? <Loader2 size={22} className="text-white animate-spin" /> : <Eye size={22} className="text-white" />}
                   </div>
                   <div className="flex-1">
                     <div className="font-bold text-white mb-0.5">{isUserLoading ? "Loading store link…" : "Store link unavailable"}</div>
-                    <div className="text-slate-400 text-sm">Your store URL will appear here once your profile has loaded.</div>
+                    <div className="text-white/40 text-sm">Your store URL will appear here once your profile has loaded.</div>
                   </div>
                 </div>
               )}
