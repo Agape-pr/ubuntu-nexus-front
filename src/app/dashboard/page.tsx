@@ -531,7 +531,7 @@ export default function SellerDashboard() {
                   <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
                     <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                       {editingProductId
-                        ? <><Edit3 size={20} className="text-amber-500"/> Edit &ldquo;{productForm.name || 'Product'}&rdquo;</>
+                        ? <><Edit3 size={20} className="text-amber-500"/> {productForm.name || 'Product'}</>
                         : <><Sparkles size={20} className="text-amber-500"/> New Product</>}
                     </h2>
                     <button onClick={() => { setShowAddProduct(false); setEditingProductId(null); }} className="h-8 w-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
