@@ -518,13 +518,13 @@ export default function SellerDashboard() {
                         <div className="space-y-2">
                           <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Product Name *</Label>
                           <Input value={productForm.name} onChange={e => setProductForm({ ...productForm, name: e.target.value })}
-                            placeholder="e.g. Ankara Print Tote Bag" className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white" />
+                            placeholder="e.g. Ankara Print Tote Bag" className="rounded-2xl h-11 border-slate-300 bg-white text-slate-900" />
                         </div>
                         
                         <div className="space-y-2">
                           <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Category *</Label>
                           <Select value={productForm.category} onValueChange={(val) => setProductForm({ ...productForm, category: val })}>
-                            <SelectTrigger className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white">
+                            <SelectTrigger className="rounded-2xl h-11 border-slate-300 bg-white text-slate-900">
                               <SelectValue placeholder="Select a category" />
                             </SelectTrigger>
                             <SelectContent>
@@ -539,7 +539,7 @@ export default function SellerDashboard() {
                           <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Description</Label>
                           <Textarea value={productForm.description} onChange={e => setProductForm({ ...productForm, description: e.target.value })}
                             placeholder="Tell buyers what makes this product special — material, origin, size, care instructions…"
-                            className="rounded-2xl border-slate-200 bg-slate-50 focus:bg-white resize-none" rows={4} />
+                            className="rounded-2xl border-slate-300 bg-white text-slate-900 resize-none" rows={4} />
                         </div>
                       </div>
                     </div>
@@ -553,14 +553,14 @@ export default function SellerDashboard() {
                           <div className="relative">
                             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">RWF</span>
                             <Input type="number" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })}
-                              placeholder="12,500" className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white pl-12" />
+                              placeholder="12,500" className="rounded-2xl h-11 border-slate-300 bg-white text-slate-900 pl-12" />
                           </div>
                         </div>
 
                         <div className="space-y-2">
                           <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Stock Quantity *</Label>
                           <Input type="number" value={productForm.stock_quantity} onChange={e => setProductForm({ ...productForm, stock_quantity: e.target.value })}
-                            placeholder="e.g. 10" className="rounded-2xl h-11 border-slate-200 bg-slate-50 focus:bg-white" />
+                            placeholder="e.g. 10" className="rounded-2xl h-11 border-slate-300 bg-white text-slate-900" />
                         </div>
 
                         <div className="md:col-span-2 space-y-3">
@@ -864,7 +864,7 @@ export default function SellerDashboard() {
                 <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Store Name *</Label>
                   <Input value={storeForm.name} onChange={e => setStoreForm({ ...storeForm, name: e.target.value })}
-                    className="rounded-2xl h-12 border-slate-200 bg-slate-50 focus:bg-white font-semibold" />
+                    className="rounded-2xl h-12 border-slate-300 bg-white text-slate-900 font-semibold" />
                 </div>
 
                 {/* Store URL (read-only) */}
@@ -883,7 +883,7 @@ export default function SellerDashboard() {
                   <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Store Description</Label>
                   <Textarea value={storeForm.description} onChange={e => setStoreForm({ ...storeForm, description: e.target.value })}
                     placeholder="Describe your store — what you sell, your story, your values…"
-                    className="rounded-2xl border-slate-200 bg-slate-50 focus:bg-white resize-none" rows={5} />
+                    className="rounded-2xl border-slate-300 bg-white text-slate-900 resize-none" rows={5} />
                 </div>
 
                 {/* Save */}
