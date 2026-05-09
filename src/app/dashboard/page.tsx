@@ -224,24 +224,52 @@ export default function SellerDashboard() {
       <Navbar />
 
       {/* ── Mobile/Tablet Tab Bar ── shown below Navbar, hidden on lg+ ── */}
-      <div className="lg:hidden sticky top-14 z-30 bg-white border-b border-slate-200 shadow-sm">
-        <div className="flex overflow-x-auto scrollbar-hide gap-1 px-4 py-2">
-          {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => setView(item.id)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all shrink-0 ${
-                view === item.id
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
-              }`}
-            >
-              <item.icon size={14} className={view === item.id ? "text-amber-400" : ""} />
-              {item.label}
-            </button>
-          ))}
+      <div className="lg:hidden sticky top-14 z-30 bg-white border-b border-slate-100 shadow-sm">
+        <div className="flex w-full px-2 py-2 gap-1">
+          {navItems.map(item => {
+            const isActive = view === item.id;
+            // Labels shortened for the inactive compact state
+            const shortLabel = item.label === "My Products" ? "Products"
+              : item.label === "Store Settings" ? "Settings"
+              : item.label;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setView(item.id)}
+                style={{ flex: isActive ? "2 1 0%" : "1 1 0%" }}
+                className={`relative flex flex-col items-center justify-center rounded-2xl transition-all duration-300 overflow-hidden ${
+                  isActive
+                    ? "bg-slate-900 py-2.5 px-3 min-w-0"
+                    : "bg-transparent py-2 min-w-0 hover:bg-slate-50"
+                }`}
+              >
+                {isActive ? (
+                  /* ── Active: icon + label side by side in pill ── */
+                  <div className="flex items-center gap-1.5 whitespace-nowrap">
+                    <item.icon size={15} className="text-amber-400 shrink-0" />
+                    <span className="text-white text-xs font-bold tracking-wide truncate">
+                      {shortLabel}
+                    </span>
+                  </div>
+                ) : (
+                  /* ── Inactive: icon only + tiny label below ── */
+                  <>
+                    <item.icon size={17} className="text-slate-400" />
+                    <span className="text-[9px] font-semibold text-slate-400 mt-0.5 tracking-wide">
+                      {shortLabel}
+                    </span>
+                  </>
+                )}
+                {/* Amber accent dot at bottom of active tab */}
+                {isActive && (
+                  <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-amber-400" />
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
+
 
       <div className="flex flex-1">
         {/* ── Sidebar ────────────────────────────────── */}
