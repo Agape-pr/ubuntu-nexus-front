@@ -29,8 +29,13 @@ const Navbar = () => {
     };
     checkAuth();
     setMounted(true);
+    // storage = cross-tab, auth-change = same-tab (fired after login/logout)
     window.addEventListener("storage", checkAuth);
-    return () => window.removeEventListener("storage", checkAuth);
+    window.addEventListener("auth-change", checkAuth);
+    return () => {
+      window.removeEventListener("storage", checkAuth);
+      window.removeEventListener("auth-change", checkAuth);
+    };
   }, [pathname]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {

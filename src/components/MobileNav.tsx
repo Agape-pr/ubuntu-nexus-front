@@ -30,9 +30,15 @@ const MobileNav = () => {
   const totalItems = useCartStore((state) => state.getTotalItems());
 
   useEffect(() => {
-    setUserRole(localStorage.getItem("user_role"));
-    setLastSeenId(getLastSeenOrderId());
+    const checkAuth = () => {
+      setUserRole(localStorage.getItem("user_role"));
+      setLastSeenId(getLastSeenOrderId());
+    };
+    checkAuth();
     setMounted(true);
+    // storage = cross-tab, auth-change = same-tab (fired by apiClient after login/logout)
+    window.addEventListener("auth-change", checkAuth);
+    return () => window.removeEventListener("auth-change", checkAuth);
   }, [pathname]); // re-read on every navigation so badge refreshes after leaving orders page
 
   const isSeller = mounted && userRole === "seller";
