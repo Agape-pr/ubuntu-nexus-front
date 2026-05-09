@@ -61,6 +61,22 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        /* ── Brand Gold Palette ── */
+        gold: {
+          deep:    "#5C3800",   /* pressed states */
+          primary: "#7A4F00",   /* primary deep gold */
+          bright:  "#B87800",   /* CTAs, icons */
+          accent:  "#F0B800",   /* hover glow, highlights */
+          tint:    "#FFF8E8",   /* badge bg, secondary buttons */
+        },
+        /* ── Brand Neutrals ── */
+        cream:  "#FBF8F2",
+        "near-black": "#111110",
+        /* ── Semantic ── */
+        success: "#16A34A",
+        danger:  "#DC2626",
+        warning: "#D97706",
+        info:    "#2563EB",
         emerald: {
           DEFAULT: "hsl(var(--emerald))",
           foreground: "hsl(var(--emerald-foreground))",

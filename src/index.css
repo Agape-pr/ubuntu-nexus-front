@@ -10,79 +10,69 @@
 
 @layer base {
   :root {
-    /* Gold Palette */
-    --gold-primary: 39 100% 24%;
-    --gold-bright: 39 100% 36%;
-    --gold-deep: 36 100% 18%;
-    --gold-accent: 46 100% 47%;
-    --gold-tint: 42 100% 95%;
+    /* ── Brand Gold Palette ─────────────────────── */
+    --gold-primary:  38 100% 24%;   /* #7A4F00 */
+    --gold-bright:   39 100% 36%;   /* #B87800 */
+    --gold-accent:   46 100% 47%;   /* #F0B800 */
+    --gold-deep:     37 100% 18%;   /* #5C3800 */
+    --gold-tint:     42 100% 95%;   /* #FFF8E8 */
 
-    /* Neutrals - Cream Family */
-    --cream: 40 43% 96%;
-    --cream-mid: 44 38% 94%;
-    --cream-dark: 42 28% 91%;
-    --border: 40 24% 88%;
-    --white: 0 0% 100%;
+    /* ── Neutral Palette ────────────────────────── */
+    --cream:         42  43% 96%;   /* #FBF8F2 — page bg */
+    --cream-mid:     40  30% 92%;   /* #EDE9E1 */
+    --cream-dark:    40  24% 88%;   /* #E8E4DC — border */
+    --muted:         47   4% 52%;   /* #888780 — muted text */
+    --near-black:    60   3%  7%;   /* #111110 — dark bg */
+    --dark-surface:  45   5% 11%;   /* #1C1A16 — card on dark */
+    --dark-mid:      45   3% 22%;   /* #393731 — border on dark */
 
-    /* Dark Palette */
-    --dark: 60 3% 6%;
-    --dark-surface: 60 4% 11%;
-    --dark-mid: 60 2% 26%;
-    --muted: 52 5% 52%;
-    --warm-gray: 47 25% 93%;
+    /* ── Semantic ───────────────────────────────── */
+    --success:  142  74% 37%;   /* #16A34A */
+    --error:      0  72% 51%;   /* #DC2626 */
+    --warning:   37  91% 45%;   /* #D97706 */
+    --info:     221  83% 53%;   /* #2563EB */
 
-    /* Semantic */
-    --success: 142 76% 36%;
-    --error: 0 72% 51%;
-    --warning: 32 95% 44%;
-    --info: 221 83% 53%;
-
-    /* Core Shadcn Maps */
-    --background: var(--cream);
-    --foreground: var(--dark);
-    --card: var(--white);
-    --card-foreground: var(--dark);
-    --popover: var(--white);
-    --popover-foreground: var(--dark);
-    
-    --primary: var(--gold-bright);
-    --primary-foreground: var(--white);
-    
-    --secondary: var(--cream-mid);
-    --secondary-foreground: var(--dark);
-    
-    --muted-foreground: var(--muted);
-    
-    --accent: var(--gold-accent);
-    --accent-foreground: var(--dark);
-    
-    --destructive: var(--error);
-    --destructive-foreground: var(--white);
-    
-    --input: var(--border);
-    --ring: var(--gold-bright);
-    --radius: 0.5rem;
-
-    /* Legacy shadows map to something appropriate */
-    --shadow-card: 0 2px 8px rgba(17, 17, 16, 0.05);
-    --shadow-amber: 0 4px 12px rgba(184, 120, 0, 0.2);
+    /* ── Shadcn Token Maps (light) ──────────────── */
+    --background:          var(--cream);
+    --foreground:          var(--near-black);
+    --card:                0 0% 100%;
+    --card-foreground:     var(--near-black);
+    --popover:             0 0% 100%;
+    --popover-foreground:  var(--near-black);
+    --primary:             var(--gold-bright);
+    --primary-foreground:  0 0% 100%;
+    --secondary:           var(--cream-mid);
+    --secondary-foreground: var(--near-black);
+    --muted-foreground:    var(--muted);
+    --accent:              var(--gold-accent);
+    --accent-foreground:   var(--near-black);
+    --destructive:         var(--error);
+    --destructive-foreground: 0 0% 100%;
+    --border:              var(--cream-dark);
+    --input:               var(--cream-dark);
+    --ring:                var(--gold-bright);
+    --radius:              0.5rem;
+    --shadow-card:         0 2px 8px rgba(17, 17, 16, 0.06);
+    --shadow-amber:        0 4px 16px rgba(184, 120, 0, 0.22);
   }
 
   .dark {
-    --background: var(--dark);
-    --foreground: var(--cream);
-    --card: var(--dark-surface);
-    --card-foreground: var(--cream);
-    --popover: var(--dark-surface);
-    --popover-foreground: var(--cream);
-    --primary: var(--gold-bright);
-    --primary-foreground: var(--white);
-    --secondary: var(--dark-mid);
+    --background:          var(--near-black);
+    --foreground:          var(--cream);
+    --card:                var(--dark-surface);
+    --card-foreground:     var(--cream);
+    --popover:             var(--dark-surface);
+    --popover-foreground:  var(--cream);
+    --primary:             var(--gold-bright);
+    --primary-foreground:  var(--near-black);
+    --secondary:           var(--dark-mid);
     --secondary-foreground: var(--cream);
-    --border: var(--dark-mid);
-    --input: var(--dark-mid);
-    --ring: var(--gold-bright);
-    --muted-foreground: var(--muted);
+    --border:              var(--dark-mid);
+    --input:               var(--dark-mid);
+    --ring:                var(--gold-bright);
+    --muted-foreground:    var(--muted);
+    --accent:              var(--gold-accent);
+    --accent-foreground:   var(--near-black);
   }
 }
 
