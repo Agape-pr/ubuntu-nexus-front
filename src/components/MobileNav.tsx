@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, MessageSquare, ShoppingCart, User, Package, LayoutDashboard } from "lucide-react";
+import { Home, LayoutGrid, ShoppingCart, User, Package, LayoutDashboard, ClipboardList } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useSellerOrders } from "@/lib/api/hooks/useOrders";
 import { useEffect, useState } from "react";
@@ -36,38 +36,41 @@ const MobileNav = () => {
     };
     checkAuth();
     setMounted(true);
-    // storage = cross-tab, auth-change = same-tab (fired by apiClient after login/logout)
     window.addEventListener("auth-change", checkAuth);
-    return () => window.removeEventListener("auth-change", checkAuth);
-  }, [pathname]); // re-read on every navigation so badge refreshes after leaving orders page
+    window.addEventListener("storage", checkAuth);
+    return () => {
+      window.removeEventListener("auth-change", checkAuth);
+      window.removeEventListener("storage", checkAuth);
+    };
+  }, [pathname]);
 
   const isSeller = mounted && userRole === "seller";
   const { data: sellerOrders } = useSellerOrders(isSeller);
 
-  // Badge = orders with an ID HIGHER than what the seller last saw, that are still pending
+  // Badge = orders with an ID higher than what seller last saw, that are still new
   const badgeCount =
     sellerOrders?.filter(
-      (o: any) => o.id > lastSeenId && o.status === "pending"
+      (o: any) => o.id > lastSeenId && (o.status === "pending" || o.status === "confirmed")
     ).length ?? 0;
 
   if (pathname.startsWith("/auth")) return null;
 
-  const navItems =
-    userRole === "seller"
-      ? [
-          { label: "Home",       icon: Home,            href: "/" },
-          { label: "Categories", icon: LayoutGrid,      href: "/" },
-          { label: "Messages",   icon: MessageSquare,   href: "/messages" },
-          { label: "Orders",     icon: Package,         href: "/dashboard/orders", badgeCount },
-          { label: "Dashboard",  icon: LayoutDashboard, href: "/dashboard" },
-        ]
-      : [
-          { label: "Home",       icon: Home,         href: "/" },
-          { label: "Categories", icon: LayoutGrid,   href: "/" },
-          { label: "Messages",   icon: MessageSquare,href: "/messages" },
-          { label: "Cart",       icon: ShoppingCart, href: "/cart", badgeCount: totalItems },
-          { label: "Profile",    icon: User,         href: "/dashboard" },
-        ];
+  // ── Seller nav: Home · Categories · Orders · Dashboard ──────────────
+  // ── Buyer nav:  Home · Categories · My Orders · Cart · Profile ──────
+  const navItems = isSeller
+    ? [
+        { label: "Home",      icon: Home,           href: "/" },
+        { label: "Categories",icon: LayoutGrid,     href: "/" },
+        { label: "Orders",    icon: Package,        href: "/dashboard", badgeCount },
+        { label: "Dashboard", icon: LayoutDashboard,href: "/dashboard" },
+      ]
+    : [
+        { label: "Home",      icon: Home,           href: "/" },
+        { label: "Categories",icon: LayoutGrid,     href: "/" },
+        { label: "My Orders", icon: ClipboardList,  href: "/my-orders" },
+        { label: "Cart",      icon: ShoppingCart,   href: "/cart", badgeCount: totalItems },
+        { label: "Profile",   icon: User,           href: "/profile" },
+      ];
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border/40 pb-safe z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
@@ -78,7 +81,7 @@ const MobileNav = () => {
           const Icon = item.icon;
           return (
             <Link
-              key={item.href}
+              key={item.label}
               href={item.href}
               className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
                 isActive ? "text-primary" : "text-muted-foreground"

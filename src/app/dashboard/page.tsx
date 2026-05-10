@@ -46,19 +46,33 @@ const ORDER_STEPS = [
 ];
 
 function getOrderStep(status: string): number {
-  if (status === "completed") return 4;
-  if (status === "picked")    return 3;
-  if (status === "shipped")   return 2;
-  return 1; // pending / anything else
+  const s = (status || "").toLowerCase();
+  if (s === "completed")                                             return 4;
+  if (s === "picked" || s === "out_for_delivery" || s === "in_transit" || s === "ready_for_pickup") return 3;
+  if (s === "shipped" || s === "ready_to_ship")                     return 2;
+  return 1; // pending / confirmed / anything else → New Order
 }
 
 const statusConfig: Record<string, { color: string; dot: string; label: string }> = {
-  pending:   { color: "bg-white/10 text-white/80 border border-white/15",        dot: "bg-white/50",    label: "New Order" },
-  shipped:   { color: "bg-gold-bright/20 text-gold-accent border border-gold-bright/30", dot: "bg-gold-bright", label: "Ready to Ship" },
-  picked:    { color: "bg-blue-500/20 text-blue-400 border border-blue-500/30",   dot: "bg-blue-400",   label: "Picked by Delivery" },
-  completed: { color: "bg-success/20 text-success border border-success/30",      dot: "bg-success",    label: "Completed" },
-  "out-of-stock": { color: "bg-rose-500/20 text-rose-400 border border-rose-500/30", dot: "bg-rose-400", label: "Out of stock" },
-  active:    { color: "bg-success/20 text-success border border-success/30",      dot: "bg-success",    label: "Active" },
+  // ── Pending / New ──
+  pending:          { color: "bg-white/10 text-white/80 border border-white/15",              dot: "bg-white/50",    label: "New Order" },
+  confirmed:        { color: "bg-white/10 text-white/80 border border-white/15",              dot: "bg-white/50",    label: "New Order" },
+  PENDING:          { color: "bg-white/10 text-white/80 border border-white/15",              dot: "bg-white/50",    label: "New Order" },
+  // ── Shipped / Ready to ship ──
+  shipped:          { color: "bg-gold-bright/20 text-gold-accent border border-gold-bright/30", dot: "bg-gold-bright", label: "Ready to Ship" },
+  ready_to_ship:    { color: "bg-gold-bright/20 text-gold-accent border border-gold-bright/30", dot: "bg-gold-bright", label: "Ready to Ship" },
+  SHIPPED:          { color: "bg-gold-bright/20 text-gold-accent border border-gold-bright/30", dot: "bg-gold-bright", label: "Ready to Ship" },
+  // ── Picked / Out for delivery ──
+  picked:           { color: "bg-blue-500/20 text-blue-300 border border-blue-500/30",        dot: "bg-blue-400",   label: "Picked by Delivery" },
+  out_for_delivery: { color: "bg-blue-500/20 text-blue-300 border border-blue-500/30",        dot: "bg-blue-400",   label: "Picked by Delivery" },
+  ready_for_pickup: { color: "bg-blue-500/20 text-blue-300 border border-blue-500/30",        dot: "bg-blue-400",   label: "Picked by Delivery" },
+  in_transit:       { color: "bg-blue-500/20 text-blue-300 border border-blue-500/30",        dot: "bg-blue-400",   label: "Picked by Delivery" },
+  // ── Completed ──
+  completed:        { color: "bg-success/20 text-success border border-success/30",           dot: "bg-success",    label: "Completed" },
+  COMPLETED:        { color: "bg-success/20 text-success border border-success/30",           dot: "bg-success",    label: "Completed" },
+  // ── Product-level only ──
+  "out-of-stock":   { color: "bg-rose-500/20 text-rose-400 border border-rose-500/30",        dot: "bg-rose-400",   label: "Out of stock" },
+  active:           { color: "bg-success/20 text-success border border-success/30",           dot: "bg-success",    label: "Active" },
 };
 
 // ── OrderCard: expandable card with 4-step timeline ─────────────────
@@ -1011,7 +1025,7 @@ export default function SellerDashboard() {
                 ) : (
                   <div className="space-y-3">
                     {REAL_ORDERS.map((order: any) => {
-                      const s       = statusConfig[order.status] || statusConfig.pending;
+                      const s = statusConfig[order.status] || statusConfig[(order.status||"").toLowerCase()] || statusConfig.pending;
                       const step    = getOrderStep(order.status);
                       const itemCount = order.items?.length || 0;
 

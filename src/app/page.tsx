@@ -175,7 +175,65 @@ const HomeContent = () => {
             <p className="hidden md:block text-sm text-muted-foreground mb-4">
               {sorted.length} product{sorted.length !== 1 ? "s" : ""} found
             </p>
-            <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-1.5 md:gap-3 space-y-1.5 md:space-y-3">
+
+            {/* ── Pinterest Masonry — mobile: 2 true columns, desktop: CSS columns ── */}
+            {/* Mobile: two independent flex-column divs, shortest-column-first */}
+            <div className="md:hidden flex gap-[6px] px-0 items-start">
+              {(() => {
+                // Distribute cards using shortest-column-first
+                // We estimate height per card: base ~180px + title ~36px + price row ~32px
+                // For images we use aspect ratio from Cloudinary naming (portrait ≈ 1.33, square ≈ 1)
+                // Since we can't measure at render time, we use simple alternating with slight variance
+                const left: typeof sorted = [];
+                const right: typeof sorted = [];
+                let leftH = 0;
+                let rightH = 0;
+
+                sorted.forEach((p, i) => {
+                  // Estimate card height: image + info block
+                  // Cards are ~50vw wide → ~187px. Assume 4:5 ratio image by default
+                  const imgH = 200; // base estimate; natural ratio renders differently per image
+                  const cardH = imgH + 80; // info block
+                  if (i === 0 || leftH <= rightH) {
+                    left.push(p);
+                    leftH += cardH;
+                  } else {
+                    right.push(p);
+                    rightH += cardH;
+                  }
+                });
+
+                const renderCol = (products: typeof sorted) => (
+                  <div className="flex-1 flex flex-col gap-[6px]">
+                    {products.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        id={String(product.id)}
+                        slug={product.slug || String(product.id)}
+                        name={product.name}
+                        price={Number(product.price)}
+                        image={product.images?.[0]?.image}
+                        storeName={product.store_name}
+                        storeSlug={product.store_name ? product.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
+                        category={product.category}
+                        inStock={product.stock_quantity > 0}
+                        sellerHasStock={(product as any).in_stock}
+                      />
+                    ))}
+                  </div>
+                );
+
+                return (
+                  <>
+                    {renderCol(left)}
+                    {renderCol(right)}
+                  </>
+                );
+              })()}
+            </div>
+
+            {/* Desktop: CSS columns (3–5 cols) */}
+            <div className="hidden md:block columns-3 lg:columns-4 xl:columns-5 gap-3 space-y-3">
               {sorted.map((product) => (
                 <div key={product.id} className="break-inside-avoid">
                   <ProductCard
