@@ -860,6 +860,71 @@ export default function SellerDashboard() {
                       </div>
                     </div>
 
+                    {/* Section: Variations */}
+                    <div>
+                      <div className="flex items-center justify-between border-b border-border pb-2 mb-5">
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-white">Variations</h3>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setProductForm({ ...productForm, variations: [...productForm.variations, { name: "", options: "" }] })}
+                          className="h-7 text-xs border-white/20 hover:border-gold-accent hover:bg-gold-accent/10"
+                        >
+                          <Plus size={12} className="mr-1" /> Add Option
+                        </Button>
+                      </div>
+                      
+                      {productForm.variations.length === 0 ? (
+                        <p className="text-sm text-white/40 italic">No variations added. Buyers will not have options to select (e.g., Size, Color).</p>
+                      ) : (
+                        <div className="space-y-4">
+                          {productForm.variations.map((v, i) => (
+                            <div key={i} className="flex gap-3 items-start bg-white/5 p-3 rounded-xl border border-white/10">
+                              <div className="flex-1 space-y-3">
+                                <div>
+                                  <Label className="text-xs text-white/50 mb-1 block">Option Name (e.g. Color, Size)</Label>
+                                  <Input 
+                                    value={v.name} 
+                                    onChange={(e) => {
+                                      const newVars = [...productForm.variations];
+                                      newVars[i].name = e.target.value;
+                                      setProductForm({ ...productForm, variations: newVars });
+                                    }}
+                                    placeholder="Color" 
+                                    className="bg-background border-white/10 h-9"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs text-white/50 mb-1 block">Values (comma separated)</Label>
+                                  <Input 
+                                    value={v.options} 
+                                    onChange={(e) => {
+                                      const newVars = [...productForm.variations];
+                                      newVars[i].options = e.target.value;
+                                      setProductForm({ ...productForm, variations: newVars });
+                                    }}
+                                    placeholder="Red, Blue, Green" 
+                                    className="bg-background border-white/10 h-9"
+                                  />
+                                </div>
+                              </div>
+                              <button 
+                                type="button" 
+                                onClick={() => {
+                                  const newVars = productForm.variations.filter((_, idx) => idx !== i);
+                                  setProductForm({ ...productForm, variations: newVars });
+                                }}
+                                className="h-9 w-9 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors mt-6 shrink-0"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
                     {/* Section: Images */}
                     <div>
                       <h3 className="text-sm font-bold uppercase tracking-wider text-white border-b border-border pb-2 mb-5">Product Photos</h3>
