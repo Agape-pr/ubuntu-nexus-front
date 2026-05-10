@@ -177,6 +177,10 @@ const AuthContent = () => {
     // Step 1: Register first (creates user with is_active=False)
     registerMutation.mutate(regData, {
       onSuccess: () => {
+        // Store the intended role so Navbar shows correctly even if verifyOTP doesn't echo it
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('pending_role', role);
+        }
         // Backend automatically sends the OTP during registration.
         // We just need to move to the verify step.
         toast.success("Account created! Please check your email for the verification code.");

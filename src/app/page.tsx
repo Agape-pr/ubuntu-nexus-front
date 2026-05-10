@@ -175,7 +175,7 @@ const HomeContent = () => {
             <p className="hidden md:block text-sm text-muted-foreground mb-4">
               {sorted.length} product{sorted.length !== 1 ? "s" : ""} found
             </p>
-            <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-2 md:gap-4 space-y-2 md:space-y-4">
+            <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-1.5 md:gap-3 space-y-1.5 md:space-y-3">
               {sorted.map((product) => (
                 <div key={product.id} className="break-inside-avoid">
                   <ProductCard

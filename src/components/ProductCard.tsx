@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Link from "next/link";
-import { Star, ShoppingCart, Heart, Store, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { CloudImage } from "@/components/ui/CloudImage";
 import { useCartStore } from "@/lib/store/cartStore";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ interface ProductCardProps {
   rating?: number;
   reviewCount?: number;
   category?: string;
-  inStock?: boolean;        // stock_quantity > 0 (still exists)
+  inStock?: boolean;
   /** true = seller holds it now (quick). false = confirm & deliver same day. */
   sellerHasStock?: boolean;
 }
@@ -33,12 +33,11 @@ const ProductCard = ({
   storeName,
   storeSlug,
   storeId,
-  rating,
-  reviewCount,
   category,
   inStock = true,
   sellerHasStock,
 }: ProductCardProps) => {
+  const [wishlist, setWishlist] = useState(false);
   const formattedPrice = new Intl.NumberFormat("en-RW").format(price);
   const addItem = useCartStore((state) => state.addItem);
 
@@ -51,89 +50,92 @@ const ProductCard = ({
   };
 
   return (
-    <div className="group bg-[#1C1C1A] rounded-[10px] shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden break-inside-avoid">
-      {/* Image */}
-      <div className="relative bg-secondary/20 overflow-hidden">
-        <Link href={`/product/${encodeURIComponent(slug || id)}`} className="block w-full h-full relative">
+    <div className="group bg-card rounded-xl overflow-hidden break-inside-avoid transition-all duration-200 hover:-translate-y-0.5">
+      {/* ── Image ── */}
+      <div className="relative overflow-hidden">
+        <Link href={`/product/${encodeURIComponent(slug || id)}`} className="block">
           {image ? (
             <CloudImage
               publicId={image}
               alt={name}
               width={400}
-              className="w-full h-auto min-h-[160px] object-cover"
+              className="w-full h-auto min-h-[140px] object-cover"
             />
           ) : (
-            <div className="w-full aspect-[4/5] flex items-center justify-center bg-white/5">
-              <div className="text-4xl opacity-20">🛍️</div>
+            <div className="w-full aspect-[3/4] flex items-center justify-center bg-white/5">
+              <div className="text-5xl opacity-10">🛍️</div>
             </div>
           )}
-          
-          {/* Category Tag on Image (Optional, JD uses it sometimes for "New") */}
-          {category && (
-            <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-gradient-to-r from-primary to-amber-600 text-white shadow-sm">
-              {category}
-            </span>
-          )}
 
+          {/* Out of stock overlay */}
           {!inStock && (
-            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-              <span className="bg-card text-foreground text-[10px] font-semibold px-2 py-1 rounded-full">
+            <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
+              <span className="bg-card/90 text-foreground text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                 Out of stock
               </span>
             </div>
           )}
         </Link>
+
+        {/* Wishlist heart — top right */}
+        <button
+          aria-label="Wishlist"
+          onClick={(e) => { e.preventDefault(); setWishlist((v) => !v); }}
+          className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <span className={`text-sm ${wishlist ? "text-red-500" : "text-white/80"}`}>
+            {wishlist ? "♥" : "♡"}
+          </span>
+        </button>
+
+        {/* Delivery badge — bottom left of image */}
+        {sellerHasStock === true && (
+          <span className="absolute bottom-2 left-2 text-[9px] font-bold bg-gold-bright text-near-black px-1.5 py-0.5 rounded-sm leading-none">
+            ⚡ Quick
+          </span>
+        )}
+        {sellerHasStock === false && (
+          <span className="absolute bottom-2 left-2 text-[9px] font-bold bg-white/15 text-white px-1.5 py-0.5 rounded-sm leading-none backdrop-blur-sm">
+            📦 Same day
+          </span>
+        )}
       </div>
 
-      {/* Content */}
-      <div className="p-2.5 pb-3">
+      {/* ── Info ── */}
+      <div className="px-2.5 pt-2 pb-2.5">
+        {/* Product name */}
         <Link href={`/product/${encodeURIComponent(slug || id)}`}>
-          <h3 className="font-semibold text-[13px] text-foreground/90 line-clamp-2 hover:text-primary transition-colors leading-[18px]">
+          <h3 className="text-[12.5px] font-medium text-foreground/90 line-clamp-2 leading-[17px] hover:text-gold-bright transition-colors">
             {name}
           </h3>
         </Link>
 
-        {/* Tags Row */}
-        <div className="flex flex-wrap gap-1 mt-1.5 mb-1">
-          {/* Delivery expectation label — based on seller's in_stock answer */}
-          {sellerHasStock === true && (
-            <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded-sm border border-emerald-500/20">
-              ⚡ Quick delivery
-            </span>
-          )}
-          {sellerHasStock === false && (
-            <span className="text-[10px] font-semibold text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded-sm border border-blue-500/20">
-              📦 Confirm &amp; deliver same day
-            </span>
-          )}
-          {sellerHasStock === undefined && (
-            <span className="text-[10px] font-medium text-primary bg-primary/10 px-1 py-0.5 rounded-sm">Free Delivery</span>
-          )}
-        </div>
-
-        {/* Store link (if any) */}
+        {/* Store name */}
         {storeName && storeSlug && (
           <Link
             href={`/store/${storeSlug}`}
-            className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-accent transition-colors mb-1.5 mt-1"
+            className="text-[10px] text-muted-foreground hover:text-gold-accent transition-colors mt-0.5 block truncate"
           >
-            <span>{storeName}</span>
+            {storeName}
           </Link>
         )}
 
-        {/* Price + Cart */}
-        <div className="flex items-end justify-between mt-1.5">
-          <div className="flex items-baseline text-primary">
-            <span className="text-[11px] font-bold mr-[2px]">{currency}</span>
-            <span className="text-base font-bold leading-none tracking-tight">{formattedPrice}</span>
+        {/* Price row + Add button */}
+        <div className="flex items-center justify-between mt-1.5">
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-[10px] font-bold text-gold-bright leading-none">{currency}</span>
+            <span className="text-[15px] font-black text-gold-bright leading-none tracking-tight">
+              {formattedPrice}
+            </span>
           </div>
+
           <button
             aria-label="Add to cart"
             onClick={handleAddToCart}
             disabled={!inStock}
-            className="h-[22px] w-[22px] rounded-full border border-primary text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            className="h-6 w-6 rounded-full bg-gold-bright flex items-center justify-center hover:bg-gold-accent transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
           >
-            <Plus size={14} strokeWidth={3} />
+            <Plus size={13} strokeWidth={3} className="text-near-black" />
           </button>
         </div>
       </div>
