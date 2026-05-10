@@ -242,7 +242,7 @@ class ApiClient {
           } else {
             // Token refresh failed or didn't exist, log user out
             this.removeTokens();
-            window.location.href = '/login'; // Force a visual redirect
+            window.location.href = '/auth'; // Force a visual redirect
           }
         }
 

@@ -28,7 +28,7 @@ export default function CartPage() {
       const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
       if (!token) {
         toast.error("Please log in to proceed with checkout.");
-        router.push("/auth/login");
+        router.push("/auth");
         return;
       }
 
