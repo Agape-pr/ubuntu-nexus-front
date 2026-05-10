@@ -54,17 +54,17 @@ const ProductCard = ({
   return (
     <div className="group bg-[#1A1A19] rounded-[10px] overflow-hidden break-inside-avoid transition-all duration-200">
       {/* ── Image ── */}
-      <div className="relative overflow-hidden w-full">
-        <Link href={`/product/${encodeURIComponent(slug || id)}`} className="block w-full">
+      <div className="relative overflow-hidden w-full bg-black/20" style={{ aspectRatio }}>
+        <Link href={`/product/${encodeURIComponent(slug || id)}`} className="block w-full h-full">
           {image ? (
             <CloudImage
               publicId={image}
               alt={name}
               width={400}
-              className="w-full h-auto block"
+              className="w-full h-full object-contain object-center"
             />
           ) : (
-            <div className="w-full aspect-square flex items-center justify-center bg-white/5">
+            <div className="w-full h-full flex items-center justify-center bg-white/5">
               <div className="text-5xl opacity-10">🛍️</div>
             </div>
           )}
