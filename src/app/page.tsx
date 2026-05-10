@@ -225,22 +225,27 @@ const HomeContent = () => {
 
             {/* Desktop: CSS columns (3–5 cols) */}
             <div className="hidden md:block columns-3 lg:columns-4 xl:columns-5 gap-3 space-y-3">
-              {sorted.map((product) => (
-                <div key={product.id} className="break-inside-avoid">
-                  <ProductCard
-                    id={String(product.id)}
-                    slug={product.slug || String(product.id)}
-                    name={product.name}
-                    price={Number(product.price)}
-                    image={product.images?.[0]?.image}
-                    storeName={product.store_name}
-                    storeSlug={product.store_name ? product.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
-                    category={product.category}
-                    inStock={product.stock_quantity > 0}
-                    sellerHasStock={(product as any).in_stock}
-                  />
-                </div>
-              ))}
+              {sorted.map((product, i) => {
+                const ASPECT_RATIO_PATTERN = ['3/4', '1/1', '4/3', '1/1'];
+                const ratio = ASPECT_RATIO_PATTERN[i % 4];
+                return (
+                  <div key={product.id} className="break-inside-avoid">
+                    <ProductCard
+                      id={String(product.id)}
+                      slug={product.slug || String(product.id)}
+                      name={product.name}
+                      price={Number(product.price)}
+                      image={product.images?.[0]?.image}
+                      storeName={product.store_name}
+                      storeSlug={product.store_name ? product.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
+                      category={product.category}
+                      inStock={product.stock_quantity > 0}
+                      sellerHasStock={(product as any).in_stock}
+                      aspectRatio={ratio}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </>
         )}
