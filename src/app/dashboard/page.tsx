@@ -37,7 +37,7 @@ const PRODUCT_CATEGORIES = [
   "Other"
 ];
 
-// ── Order pipeline steps ─────────────────────────────────────────────
+// -- Order pipeline steps ---------------------------------------------
 const ORDER_STEPS = [
   { key: "pending",   step: 1, label: "New Order",          short: "New",         apiStatus: "pending"   },
   { key: "shipped",  step: 2, label: "Ready to Ship",      short: "Shipping",    apiStatus: "shipped"   },
@@ -54,28 +54,28 @@ function getOrderStep(status: string): number {
 }
 
 const statusConfig: Record<string, { color: string; dot: string; label: string }> = {
-  // ── Pending / New ──
+  // -- Pending / New --
   pending:          { color: "bg-white/10 text-white/80 border border-white/15",              dot: "bg-white/50",    label: "New Order" },
   confirmed:        { color: "bg-white/10 text-white/80 border border-white/15",              dot: "bg-white/50",    label: "New Order" },
   PENDING:          { color: "bg-white/10 text-white/80 border border-white/15",              dot: "bg-white/50",    label: "New Order" },
-  // ── Shipped / Ready to ship ──
+  // -- Shipped / Ready to ship --
   shipped:          { color: "bg-gold-bright/20 text-gold-accent border border-gold-bright/30", dot: "bg-gold-bright", label: "Ready to Ship" },
   ready_to_ship:    { color: "bg-gold-bright/20 text-gold-accent border border-gold-bright/30", dot: "bg-gold-bright", label: "Ready to Ship" },
   SHIPPED:          { color: "bg-gold-bright/20 text-gold-accent border border-gold-bright/30", dot: "bg-gold-bright", label: "Ready to Ship" },
-  // ── Picked / Out for delivery ──
+  // -- Picked / Out for delivery --
   picked:           { color: "bg-blue-500/20 text-blue-300 border border-blue-500/30",        dot: "bg-blue-400",   label: "Picked by Delivery" },
   out_for_delivery: { color: "bg-blue-500/20 text-blue-300 border border-blue-500/30",        dot: "bg-blue-400",   label: "Picked by Delivery" },
   ready_for_pickup: { color: "bg-blue-500/20 text-blue-300 border border-blue-500/30",        dot: "bg-blue-400",   label: "Picked by Delivery" },
   in_transit:       { color: "bg-blue-500/20 text-blue-300 border border-blue-500/30",        dot: "bg-blue-400",   label: "Picked by Delivery" },
-  // ── Completed ──
+  // -- Completed --
   completed:        { color: "bg-success/20 text-success border border-success/30",           dot: "bg-success",    label: "Completed" },
   COMPLETED:        { color: "bg-success/20 text-success border border-success/30",           dot: "bg-success",    label: "Completed" },
-  // ── Product-level only ──
+  // -- Product-level only --
   "out-of-stock":   { color: "bg-rose-500/20 text-rose-400 border border-rose-500/30",        dot: "bg-rose-400",   label: "Out of stock" },
   active:           { color: "bg-success/20 text-success border border-success/30",           dot: "bg-success",    label: "Active" },
 };
 
-// ── OrderCard: expandable card with 4-step timeline ─────────────────
+// -- OrderCard: expandable card with 4-step timeline -----------------
 function OrderCard({ order, s, step, itemCount, updateStatus, isUpdatingOrder }: {
   order: any;
   s: { color: string; dot: string; label: string };
@@ -95,7 +95,7 @@ function OrderCard({ order, s, step, itemCount, updateStatus, isUpdatingOrder }:
 
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
-      {/* ── Collapsed header ─────────────────────── */}
+      {/* -- Collapsed header ----------------------- */}
       <button
         onClick={() => setExpanded((v) => !v)}
         className="w-full text-left px-4 py-4 flex items-start gap-3 hover:bg-white/5 transition-colors"
@@ -131,7 +131,7 @@ function OrderCard({ order, s, step, itemCount, updateStatus, isUpdatingOrder }:
         />
       </button>
 
-      {/* ── Expanded detail ───────────────────────── */}
+      {/* -- Expanded detail ------------------------- */}
       {expanded && (
         <div className="px-4 pb-5 space-y-5 border-t border-white/8">
 
@@ -429,7 +429,7 @@ export default function SellerDashboard() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      {/* ── Mobile/Tablet Tab Bar ── shown below Navbar, hidden on lg+ ── */}
+      {/* -- Mobile/Tablet Tab Bar -- shown below Navbar, hidden on lg+ -- */}
       <div className="lg:hidden sticky top-14 z-30 bg-background border-b border-border shadow-sm">
         <div className="flex w-full px-2 py-2 gap-1">
           {navItems.map(item => {
@@ -450,7 +450,7 @@ export default function SellerDashboard() {
                 }`}
               >
                 {isActive ? (
-                  /* ── Active: icon + label side by side in pill ── */
+                  /* -- Active: icon + label side by side in pill -- */
                   <div className="flex items-center gap-1.5 whitespace-nowrap">
                     <item.icon size={15} className="text-gold-accent shrink-0" />
                     <span className="text-white text-xs font-bold tracking-wide truncate">
@@ -458,7 +458,7 @@ export default function SellerDashboard() {
                     </span>
                   </div>
                 ) : (
-                  /* ── Inactive: icon only + tiny label below ── */
+                  /* -- Inactive: icon only + tiny label below -- */
                   <>
                     <item.icon size={17} className="text-white/40" />
                     <span className="text-[9px] font-semibold text-white/40 mt-0.5 tracking-wide">
@@ -478,7 +478,7 @@ export default function SellerDashboard() {
 
 
       <div className="flex flex-1">
-        {/* ── Sidebar ────────────────────────────────── */}
+        {/* -- Sidebar ---------------------------------- */}
         <aside className="hidden lg:flex w-64 xl:w-72 flex-col bg-white border-r border-slate-100 sticky top-16 h-[calc(100vh-64px)]">
           {/* Store identity */}
           <div className="p-6 border-b border-border">
@@ -558,14 +558,14 @@ export default function SellerDashboard() {
           </div>
         </aside>
 
-        {/* ── Main content ───────────────────────────── */}
+        {/* -- Main content ----------------------------- */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10 bg-background">
 
-          {/* ── OVERVIEW ─────────────────────────────── */}
+          {/* -- OVERVIEW ------------------------------- */}
           {view === "overview" && (
             <div className="max-w-5xl mx-auto space-y-6 animate-fade-up">
 
-              {/* ── Greeting ── */}
+              {/* -- Greeting -- */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold text-white/40 mb-0.5">{getGreeting()}, {storeName} 👋</p>
@@ -585,7 +585,7 @@ export default function SellerDashboard() {
                 </Button>
               </div>
 
-              {/* ── Stats cards ── */}
+              {/* -- Stats cards -- */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 {STATS.map(stat => (
                   <div key={stat.label} className="bg-white/5 rounded-2xl p-4 md:p-5 border border-white/10 hover:-translate-y-0.5 transition-all group cursor-default">
@@ -599,7 +599,7 @@ export default function SellerDashboard() {
                 ))}
               </div>
 
-              {/* ── Store link card ── */}
+              {/* -- Store link card -- */}
               <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 md:p-8">
                 <div className="absolute inset-0 pointer-events-none">
                   <div className="absolute top-0 right-0 h-56 w-56 rounded-full bg-gold-accent/10 blur-3xl" />
@@ -642,7 +642,7 @@ export default function SellerDashboard() {
                 </div>
               </div>
 
-              {/* ── Recent Orders ── */}
+              {/* -- Recent Orders -- */}
               <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                   <div className="flex items-center gap-2">
@@ -703,7 +703,7 @@ export default function SellerDashboard() {
             </div>
           )}
 
-          {/* ── PRODUCTS ─────────────────────────────── */}
+          {/* -- PRODUCTS ------------------------------- */}
           {view === "products" && (
             <div className="max-w-5xl mx-auto space-y-6 animate-fade-up">
 
@@ -731,7 +731,7 @@ export default function SellerDashboard() {
                 </div>
               </div>
 
-              {/* ── Add/Edit Form ── */}
+              {/* -- Add/Edit Form -- */}
               {showAddProduct && (
                 <div className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden animate-fade-up">
                   <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-background/50">
@@ -875,7 +875,7 @@ export default function SellerDashboard() {
                 </div>
               )}
 
-              {/* ── Product List (always visible when not loading) ── */}
+              {/* -- Product List (always visible when not loading) -- */}
               {isProductsLoading ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map(i => <div key={i} className="h-24 rounded-2xl bg-slate-100 animate-pulse" />)}
@@ -980,7 +980,7 @@ export default function SellerDashboard() {
             </div>
           )}
 
-          {/* ── ORDERS ───────────────────────────────── */}
+          {/* -- ORDERS --------------------------------- */}
           {view === "orders" && (() => {
             const newOrders       = REAL_ORDERS.filter((o: any) => o.status === "pending");
             const shippingOrders  = REAL_ORDERS.filter((o: any) => o.status === "shipped" || o.status === "picked");
@@ -1044,10 +1044,10 @@ export default function SellerDashboard() {
                   </div>
                 )}
               </div>
-            </div>
-          )}
+            );
+          })()}
 
-          {/* ── STORE SETTINGS ───────────────────────── */}
+          {/* -- STORE SETTINGS ------------------------- */}
           {view === "store-settings" && (
             <div className="max-w-2xl mx-auto space-y-8 animate-fade-up">
               <div>
