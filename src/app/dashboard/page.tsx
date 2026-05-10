@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Store, Package, TrendingUp, Settings, Plus, Copy, ExternalLink,
   CheckCircle, Edit3, Trash2, ShoppingBag, AlertCircle, Loader2,
-  Eye, LayoutDashboard, Wallet, LogOut, ChevronRight, Search,
+  Eye, LayoutDashboard, Wallet, LogOut, ChevronRight, ChevronDown, Search,
   Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star, Truck, Bell, Zap, Link2,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -37,15 +37,207 @@ const PRODUCT_CATEGORIES = [
   "Other"
 ];
 
+// ── Order pipeline steps ─────────────────────────────────────────────
+const ORDER_STEPS = [
+  { key: "pending",   step: 1, label: "New Order",          short: "New",         apiStatus: "pending"   },
+  { key: "shipped",  step: 2, label: "Ready to Ship",      short: "Shipping",    apiStatus: "shipped"   },
+  { key: "picked",   step: 3, label: "Picked by Delivery", short: "On the way",  apiStatus: "picked"    },
+  { key: "completed",step: 4, label: "Completed",          short: "Done",        apiStatus: "completed" },
+];
+
+function getOrderStep(status: string): number {
+  if (status === "completed") return 4;
+  if (status === "picked")    return 3;
+  if (status === "shipped")   return 2;
+  return 1; // pending / anything else
+}
+
 const statusConfig: Record<string, { color: string; dot: string; label: string }> = {
-  pending:   { color: "bg-amber-50 text-amber-700 border border-amber-200",   dot: "bg-gold-accent",   label: "Pending" },
-  shipped:   { color: "bg-blue-50 text-blue-700 border border-blue-200",      dot: "bg-blue-400",    label: "Shipped" },
-  completed: { color: "bg-emerald-50 text-emerald-700 border border-emerald-200", dot: "bg-emerald-400", label: "Completed" },
-  "out-of-stock": { color: "bg-rose-50 text-rose-700 border border-rose-200", dot: "bg-rose-400",   label: "Out of stock" },
-  active:    { color: "bg-emerald-50 text-emerald-700 border border-emerald-200", dot: "bg-emerald-400", label: "Active" },
+  pending:   { color: "bg-white/10 text-white/80 border border-white/15",        dot: "bg-white/50",    label: "New Order" },
+  shipped:   { color: "bg-gold-bright/20 text-gold-accent border border-gold-bright/30", dot: "bg-gold-bright", label: "Ready to Ship" },
+  picked:    { color: "bg-blue-500/20 text-blue-400 border border-blue-500/30",   dot: "bg-blue-400",   label: "Picked by Delivery" },
+  completed: { color: "bg-success/20 text-success border border-success/30",      dot: "bg-success",    label: "Completed" },
+  "out-of-stock": { color: "bg-rose-500/20 text-rose-400 border border-rose-500/30", dot: "bg-rose-400", label: "Out of stock" },
+  active:    { color: "bg-success/20 text-success border border-success/30",      dot: "bg-success",    label: "Active" },
 };
 
+// ── OrderCard: expandable card with 4-step timeline ─────────────────
+function OrderCard({ order, s, step, itemCount, updateStatus, isUpdatingOrder }: {
+  order: any;
+  s: { color: string; dot: string; label: string };
+  step: number;
+  itemCount: number;
+  updateStatus: (args: { id: number; status: string }) => void;
+  isUpdatingOrder: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  const stepDefs = [
+    { n: 1, label: "New Order",          sub: "Order placed" },
+    { n: 2, label: "Ready to Ship",      sub: "Seller confirmed" },
+    { n: 3, label: "Picked by Delivery", sub: "On the way" },
+    { n: 4, label: "Completed",          sub: "Payment released" },
+  ];
+
+  return (
+    <div className="bg-card border border-border rounded-2xl overflow-hidden">
+      {/* ── Collapsed header ─────────────────────── */}
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full text-left px-4 py-4 flex items-start gap-3 hover:bg-white/5 transition-colors"
+      >
+        {/* Icon */}
+        <div className="h-10 w-10 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center shrink-0 mt-0.5">
+          <Package size={18} className="text-white/50" />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-sm font-bold text-white">Order #{order.id}</span>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${s.color}`}>
+              {s.label}
+            </span>
+          </div>
+          <div className="text-xs text-white/40">
+            {new Date(order.created_at).toLocaleDateString("en-RW", { month: "short", day: "numeric", year: "numeric" })}
+            {" · "}
+            {new Date(order.created_at).toLocaleTimeString("en-RW", { hour: "2-digit", minute: "2-digit" })}
+          </div>
+          <div className="mt-1.5">
+            <span className="font-black text-white text-base">{parseFloat(order.total_amount).toLocaleString()} </span>
+            <span className="text-xs font-bold text-white/40">RWF</span>
+            <span className="text-xs text-white/30 ml-2">{itemCount} item{itemCount !== 1 ? "s" : ""}</span>
+          </div>
+        </div>
+
+        {/* Expand chevron */}
+        <ChevronDown
+          size={18}
+          className={`text-white/30 shrink-0 mt-2 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {/* ── Expanded detail ───────────────────────── */}
+      {expanded && (
+        <div className="px-4 pb-5 space-y-5 border-t border-white/8">
+
+          {/* 4-step timeline */}
+          <div className="pt-4">
+            <div className="flex items-start justify-between gap-1 relative">
+              {/* Connecting line behind steps */}
+              <div className="absolute top-4 left-4 right-4 h-px bg-white/10 z-0" />
+
+              {stepDefs.map((sd) => {
+                const isDone    = step > sd.n;
+                const isCurrent = step === sd.n;
+                const isFuture  = step < sd.n;
+
+                const circleClass = isDone
+                  ? "bg-success text-white border-success"
+                  : isCurrent
+                  ? "bg-gold-bright text-near-black border-gold-bright"
+                  : "bg-white/5 text-white/30 border-white/15";
+
+                return (
+                  <button
+                    key={sd.n}
+                    disabled={isFuture}
+                    onClick={() => {
+                      // Step 1→2: only seller can trigger (Ready to Ship)
+                      if (sd.n === 2 && order.status === "pending") {
+                        updateStatus({ id: order.id, status: "shipped" });
+                      }
+                      // Steps 3 & 4 are still in dev — clickable but no-op for now
+                    }}
+                    className={`flex flex-col items-center gap-1.5 z-10 relative flex-1 group ${isFuture ? "cursor-default opacity-50" : "cursor-pointer"}`}
+                  >
+                    <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center text-[11px] font-black transition-all ${circleClass} ${!isFuture ? "group-hover:scale-110" : ""}`}>
+                      {isDone ? <CheckCircle size={14} /> : sd.n}
+                    </div>
+                    <div className="text-center">
+                      <div className={`text-[10px] font-bold leading-tight ${isCurrent ? "text-gold-accent" : isDone ? "text-success" : "text-white/30"}`}>
+                        {sd.label}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Items ordered */}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Items Ordered</p>
+            <div className="bg-white/5 rounded-xl divide-y divide-white/8 overflow-hidden">
+              {order.items?.map((item: any, i: number) => (
+                <div key={i} className="flex items-center gap-3 px-3 py-3">
+                  <div className="h-9 w-9 rounded-lg bg-white/8 border border-white/10 flex items-center justify-center shrink-0">
+                    <Package size={14} className="text-white/30" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-white truncate">{item.product_name}</div>
+                    <div className="text-xs text-white/40">Qty: {item.quantity}</div>
+                  </div>
+                  <div className="text-sm font-bold text-white shrink-0">
+                    {parseFloat(item.total_price || item.price || "0").toLocaleString()} <span className="text-xs text-white/40">RWF</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Payment status */}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Payment</p>
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🔒</span>
+              <span className={`text-sm font-bold ${order.status === "completed" ? "text-success" : "text-gold-bright"}`}>
+                {order.status === "completed" ? "Payment Released" : "Held in Escrow"}
+              </span>
+            </div>
+          </div>
+
+          {/* Action button — only shown for seller-actionable states */}
+          {order.status === "pending" && (
+            <button
+              onClick={() => updateStatus({ id: order.id, status: "shipped" })}
+              disabled={isUpdatingOrder}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gold-bright text-near-black font-bold text-sm hover:bg-gold-accent transition-colors disabled:opacity-50"
+            >
+              <Truck size={15} /> Ready to Ship
+            </button>
+          )}
+          {order.status === "shipped" && (
+            <button
+              onClick={() => updateStatus({ id: order.id, status: "picked" })}
+              disabled={isUpdatingOrder}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/30 font-bold text-sm hover:bg-blue-500/30 transition-colors disabled:opacity-50"
+            >
+              <Package size={15} /> Mark Picked by Delivery
+            </button>
+          )}
+          {order.status === "picked" && (
+            <button
+              onClick={() => updateStatus({ id: order.id, status: "completed" })}
+              disabled={isUpdatingOrder}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-success/20 text-success border border-success/30 font-bold text-sm hover:bg-success/30 transition-colors disabled:opacity-50"
+            >
+              <CheckCircle size={15} /> Mark Completed
+            </button>
+          )}
+          {order.status === "completed" && (
+            <div className="flex items-center justify-center gap-2 py-3 rounded-xl bg-success/10 text-success border border-success/20 text-sm font-bold">
+              <CheckCircle size={15} /> Order Complete · Payment Released
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SellerDashboard() {
+
   const router = useRouter();
   const [view, setView] = useState<DashView>("overview");
   const [copied, setCopied] = useState(false);
@@ -775,76 +967,68 @@ export default function SellerDashboard() {
           )}
 
           {/* ── ORDERS ───────────────────────────────── */}
-          {view === "orders" && (
-            <div className="max-w-5xl mx-auto space-y-8 animate-fade-up">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/40 mb-1">Sales Activity</p>
-                <h1 className="text-3xl font-bold text-white">Orders</h1>
-                <p className="text-white/50 mt-1">Track and fulfill your customer orders.</p>
-              </div>
+          {view === "orders" && (() => {
+            const newOrders       = REAL_ORDERS.filter((o: any) => o.status === "pending");
+            const shippingOrders  = REAL_ORDERS.filter((o: any) => o.status === "shipped" || o.status === "picked");
+            const doneOrders      = REAL_ORDERS.filter((o: any) => o.status === "completed");
 
-              <div className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-                  <BarChart2 size={16} className="text-white/40" />
-                  <span className="font-bold text-white text-sm">All Orders</span>
-                  <span className="ml-auto text-xs font-bold text-white/40">{REAL_ORDERS.length} order{REAL_ORDERS.length !== 1 ? "s" : ""}</span>
+            return (
+              <div className="max-w-3xl mx-auto space-y-6 animate-fade-up">
+                {/* Header */}
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 mb-1">Sales Activity</p>
+                  <h1 className="text-2xl font-bold text-white">Order Notifications</h1>
                 </div>
+
+                {/* Summary pills */}
+                <div className="flex gap-2 flex-wrap">
+                  <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-white/10 text-white/70 border border-white/10">
+                    {newOrders.length} New
+                  </span>
+                  <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gold-bright/20 text-gold-accent border border-gold-bright/30">
+                    {shippingOrders.length} Shipping
+                  </span>
+                  <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-success/20 text-success border border-success/30">
+                    {doneOrders.length} Done
+                  </span>
+                </div>
+
+                {/* Order cards */}
                 {REAL_ORDERS.length === 0 ? (
-                  <div className="px-6 py-20 flex flex-col items-center text-center">
-                    <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-5">
-                      <ShoppingBag size={28} className="text-white/30" />
+                  <div className="bg-card rounded-3xl border border-border py-20 flex flex-col items-center text-center px-6">
+                    <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center mb-5">
+                      <ShoppingBag size={28} className="text-white/20" />
                     </div>
-                    <h3 className="font-bold text-white/90 text-lg mb-2">No orders yet</h3>
-                    <p className="text-sm text-white/40 max-w-sm">Once customers start buying from your store, their orders will appear here. Share your store link to get started!</p>
+                    <h3 className="font-bold text-white/80 text-lg mb-2">No orders yet</h3>
+                    <p className="text-sm text-white/40 max-w-sm">Once customers start buying, orders appear here. Share your store link!</p>
                     {storeUrl && (
                       <button onClick={() => { navigator.clipboard.writeText(`https://${storeUrlDisplay}`); toast.success("Link copied!"); }}
-                        className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-slate-900 text-white text-sm font-semibold hover:-translate-y-0.5 transition-all">
+                        className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gold-bright text-near-black text-sm font-bold">
                         <Copy size={14} /> Copy Store Link
                       </button>
                     )}
                   </div>
                 ) : (
-                  <div className="divide-y divide-border">
+                  <div className="space-y-3">
                     {REAL_ORDERS.map((order: any) => {
-                      const s = statusConfig[order.status];
+                      const s       = statusConfig[order.status] || statusConfig.pending;
+                      const step    = getOrderStep(order.status);
+                      const itemCount = order.items?.length || 0;
+
                       return (
-                        <div key={order.id} className="px-6 py-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-card/60 transition-colors">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-1">
-                              <span className="text-xs text-white/40 font-mono">#{order.id}</span>
-                              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${s?.color || 'bg-slate-100 text-white/50'}`}>{order.status?.replace('_', ' ')}</span>
-                            </div>
-                            <div className="text-sm text-white/50">{order.items?.map((i: any) => i.product_name).join(', ')}</div>
-                            <div className="text-xs text-white/40 mt-1">{new Date(order.created_at).toLocaleDateString()}</div>
-                          </div>
-                          <div className="flex items-center gap-4 flex-shrink-0">
-                            <span className="font-black text-white text-lg">{parseFloat(order.total_amount).toLocaleString()} <span className="text-xs font-bold text-white/40">RWF</span></span>
-                            {order.status === "pending" && (
-                              <Button size="sm" onClick={() => updateStatus({ id: order.id, status: 'shipped' })} disabled={isUpdatingOrder} className="bg-gold-bright text-near-black hover:bg-gold-accent rounded-2xl text-xs gap-1 h-9 px-4 font-bold">
-                                Mark Shipped <Truck size={12} />
-                              </Button>
-                            )}
-                            {order.status === "shipped" && (
-                              <Button size="sm" variant="outline" onClick={() => updateStatus({ id: order.id, status: 'completed' })} disabled={isUpdatingOrder} className="rounded-2xl text-xs gap-1 h-9 px-4 border-success/40 text-success hover:bg-success/10">
-                                Mark Complete <CheckCircle size={12} />
-                              </Button>
-                            )}
-                          </div>
-                        </div>
+                        <OrderCard
+                          key={order.id}
+                          order={order}
+                          s={s}
+                          step={step}
+                          itemCount={itemCount}
+                          updateStatus={updateStatus}
+                          isUpdatingOrder={isUpdatingOrder}
+                        />
                       );
                     })}
                   </div>
                 )}
-              </div>
-
-              <div className="bg-gold-bright/10 border border-gold-bright/20 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center gap-6">
-                <div className="h-14 w-14 rounded-2xl bg-gold-accent flex items-center justify-center flex-shrink-0">
-                  <Sparkles size={24} className="text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-white mb-1">Full order management coming soon</h3>
-                  <p className="text-sm text-white/60">Real-time order tracking, buyer messaging, and automated fulfillment tools are in development.</p>
-                </div>
               </div>
             </div>
           )}
