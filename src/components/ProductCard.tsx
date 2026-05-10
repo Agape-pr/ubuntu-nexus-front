@@ -21,6 +21,7 @@ interface ProductCardProps {
   inStock?: boolean;
   /** true = seller holds it now (quick). false = confirm & deliver same day. */
   sellerHasStock?: boolean;
+  aspectRatio?: string;
 }
 
 const ProductCard = ({
@@ -36,6 +37,7 @@ const ProductCard = ({
   category,
   inStock = true,
   sellerHasStock,
+  aspectRatio = "1/1",
 }: ProductCardProps) => {
   const [wishlist, setWishlist] = useState(false);
   const formattedPrice = new Intl.NumberFormat("en-RW").format(price);
@@ -50,19 +52,19 @@ const ProductCard = ({
   };
 
   return (
-    <div className="group bg-card rounded-xl overflow-hidden break-inside-avoid transition-all duration-200 hover:-translate-y-0.5">
+    <div className="group bg-[#1A1A19] rounded-[10px] overflow-hidden break-inside-avoid transition-all duration-200">
       {/* ── Image ── */}
-      <div className="relative overflow-hidden">
-        <Link href={`/product/${encodeURIComponent(slug || id)}`} className="block">
+      <div className="relative overflow-hidden w-full" style={{ aspectRatio }}>
+        <Link href={`/product/${encodeURIComponent(slug || id)}`} className="block w-full h-full">
           {image ? (
             <CloudImage
               publicId={image}
               alt={name}
               width={400}
-              className="w-full h-auto min-h-[140px] object-cover"
+              className="w-full h-full object-cover object-top"
             />
           ) : (
-            <div className="w-full aspect-[3/4] flex items-center justify-center bg-white/5">
+            <div className="w-full h-full flex items-center justify-center bg-white/5">
               <div className="text-5xl opacity-10">🛍️</div>
             </div>
           )}
@@ -70,7 +72,7 @@ const ProductCard = ({
           {/* Out of stock overlay */}
           {!inStock && (
             <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
-              <span className="bg-card/90 text-foreground text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
+              <span className="bg-[#1A1A19]/90 text-[#FBF8F2] text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                 Out of stock
               </span>
             </div>
@@ -88,43 +90,43 @@ const ProductCard = ({
           </span>
         </button>
 
-        {/* Delivery badge — bottom left of image */}
+        {/* Delivery badge — absolute bottom-left of image */}
         {sellerHasStock === true && (
-          <span className="absolute bottom-2 left-2 text-[9px] font-bold bg-gold-bright text-near-black px-1.5 py-0.5 rounded-sm leading-none">
+          <span className="absolute bottom-0 left-0 text-[10px] bg-[#B87800] text-white px-1.5 py-0.5 leading-none">
             ⚡ Quick
           </span>
         )}
         {sellerHasStock === false && (
-          <span className="absolute bottom-2 left-2 text-[9px] font-bold bg-white/15 text-white px-1.5 py-0.5 rounded-sm leading-none backdrop-blur-sm">
+          <span className="absolute bottom-0 left-0 text-[10px] bg-[#B87800] text-white px-1.5 py-0.5 leading-none">
             📦 Same day
           </span>
         )}
       </div>
 
       {/* ── Info ── */}
-      <div className="px-2.5 pt-2 pb-2.5">
+      <div className="px-[10px] pt-[8px] pb-[10px]">
         {/* Product name */}
         <Link href={`/product/${encodeURIComponent(slug || id)}`}>
-          <h3 className="text-[12.5px] font-medium text-foreground/90 line-clamp-2 leading-[17px] hover:text-gold-bright transition-colors">
+          <h3 className="text-[13px] text-[#FBF8F2] font-display line-clamp-2 leading-snug hover:text-[#B87800] transition-colors">
             {name}
           </h3>
         </Link>
 
-        {/* Store name */}
+        {/* Store name (optional) */}
         {storeName && storeSlug && (
           <Link
             href={`/store/${storeSlug}`}
-            className="text-[10px] text-muted-foreground hover:text-gold-accent transition-colors mt-0.5 block truncate"
+            className="text-[10px] text-[#888780] hover:text-[#B87800] transition-colors mt-0.5 block truncate"
           >
             {storeName}
           </Link>
         )}
 
         {/* Price row + Add button */}
-        <div className="flex items-center justify-between mt-1.5">
-          <div className="flex items-baseline gap-0.5">
-            <span className="text-[10px] font-bold text-gold-bright leading-none">{currency}</span>
-            <span className="text-[15px] font-black text-gold-bright leading-none tracking-tight">
+        <div className="flex items-end justify-between mt-1.5">
+          <div className="flex items-baseline gap-1">
+            <span className="text-[11px] text-[#888780] leading-none">{currency}</span>
+            <span className="text-[17px] font-black text-[#B87800] leading-none tracking-tight" style={{ fontFamily: 'Nunito, sans-serif' }}>
               {formattedPrice}
             </span>
           </div>
@@ -133,9 +135,9 @@ const ProductCard = ({
             aria-label="Add to cart"
             onClick={handleAddToCart}
             disabled={!inStock}
-            className="h-6 w-6 rounded-full bg-gold-bright flex items-center justify-center hover:bg-gold-accent transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+            className="h-[28px] w-[28px] rounded-full bg-[#B87800] flex items-center justify-center hover:bg-[#F0B800] transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
           >
-            <Plus size={13} strokeWidth={3} className="text-near-black" />
+            <Plus size={16} strokeWidth={3} className="text-[#111110]" />
           </button>
         </div>
       </div>

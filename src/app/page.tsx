@@ -177,47 +177,38 @@ const HomeContent = () => {
             </p>
 
             {/* ── Pinterest Masonry — mobile: 2 true columns, desktop: CSS columns ── */}
-            {/* Mobile: two independent flex-column divs, shortest-column-first */}
-            <div className="md:hidden flex gap-[6px] px-0 items-start">
+            {/* Mobile: two independent flex-column divs, strict index distribution */}
+            <div className="md:hidden flex gap-[6px] px-[6px] items-start bg-[#111110]">
               {(() => {
-                // Distribute cards using shortest-column-first
-                // We estimate height per card: base ~180px + title ~36px + price row ~32px
-                // For images we use aspect ratio from Cloudinary naming (portrait ≈ 1.33, square ≈ 1)
-                // Since we can't measure at render time, we use simple alternating with slight variance
-                const left: typeof sorted = [];
-                const right: typeof sorted = [];
-                let leftH = 0;
-                let rightH = 0;
+                const left: { p: typeof sorted[0], ratio: string }[] = [];
+                const right: { p: typeof sorted[0], ratio: string }[] = [];
+                const ASPECT_RATIO_PATTERN = ['3/4', '1/1', '4/3', '1/1'];
 
                 sorted.forEach((p, i) => {
-                  // Estimate card height: image + info block
-                  // Cards are ~50vw wide → ~187px. Assume 4:5 ratio image by default
-                  const imgH = 200; // base estimate; natural ratio renders differently per image
-                  const cardH = imgH + 80; // info block
-                  if (i === 0 || leftH <= rightH) {
-                    left.push(p);
-                    leftH += cardH;
+                  const ratio = ASPECT_RATIO_PATTERN[i % 4];
+                  if (i % 2 === 0) {
+                    left.push({ p, ratio });
                   } else {
-                    right.push(p);
-                    rightH += cardH;
+                    right.push({ p, ratio });
                   }
                 });
 
-                const renderCol = (products: typeof sorted) => (
+                const renderCol = (items: { p: typeof sorted[0], ratio: string }[]) => (
                   <div className="flex-1 flex flex-col gap-[6px]">
-                    {products.map((product) => (
+                    {items.map(({ p, ratio }) => (
                       <ProductCard
-                        key={product.id}
-                        id={String(product.id)}
-                        slug={product.slug || String(product.id)}
-                        name={product.name}
-                        price={Number(product.price)}
-                        image={product.images?.[0]?.image}
-                        storeName={product.store_name}
-                        storeSlug={product.store_name ? product.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
-                        category={product.category}
-                        inStock={product.stock_quantity > 0}
-                        sellerHasStock={(product as any).in_stock}
+                        key={p.id}
+                        id={String(p.id)}
+                        slug={p.slug || String(p.id)}
+                        name={p.name}
+                        price={Number(p.price)}
+                        image={p.images?.[0]?.image}
+                        storeName={p.store_name}
+                        storeSlug={p.store_name ? p.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
+                        category={p.category}
+                        inStock={p.stock_quantity > 0}
+                        sellerHasStock={(p as any).in_stock}
+                        aspectRatio={ratio}
                       />
                     ))}
                   </div>
