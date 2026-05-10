@@ -9,6 +9,8 @@ export interface CartItem {
   storeName?: string;
   storeId?: string;
   quantity: number;
+  selected_variations?: Record<string, string>;
+  productId?: string; // Real backend product ID
   /** true = seller holds stock (quick delivery), false = confirm & deliver same day */
   in_stock?: boolean;
 }

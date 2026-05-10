@@ -29,6 +29,7 @@ export interface Product {
   price: string; // API returns as string
   stock_quantity: number;
   is_active: boolean;
+  variations?: Record<string, string[]>;
   images: ProductImage[];
   created_at: string;
 }
@@ -42,6 +43,7 @@ export interface SellerProduct {
   price: string; // API returns as string
   stock_quantity: number;
   is_active: boolean;
+  variations?: Record<string, string[]>;
   images?: ProductImage[];
 }
 
@@ -63,6 +65,7 @@ export interface ProductCreateUpdate {
   price: string | number; // Can be string or number
   stock_quantity: number;
   is_active?: boolean;
+  variations?: Record<string, string[]>;
   uploaded_images?: (File | string)[]; // Array of Files for upload or string URLs
 }
 

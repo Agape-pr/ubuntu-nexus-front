@@ -191,6 +191,15 @@ function OrderCard({ order, s, step, itemCount, updateStatus, isUpdatingOrder }:
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold text-white truncate">{item.product_name}</div>
                     <div className="text-xs text-white/40">Qty: {item.quantity}</div>
+                    {item.selected_variations && Object.keys(item.selected_variations).length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {Object.entries(item.selected_variations).map(([k, v]) => (
+                          <span key={k} className="text-[10px] bg-white/10 text-white/60 px-1.5 py-0.5 rounded">
+                            {k}: {v as string}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="text-sm font-bold text-white shrink-0">
                     {parseFloat(item.total_price || item.price || "0").toLocaleString()} <span className="text-xs text-white/40">RWF</span>
@@ -270,6 +279,7 @@ export default function SellerDashboard() {
   const [productForm, setProductForm] = useState({
     name: "", price: "", stock_quantity: "", category: "", description: "",
     in_stock: null as boolean | null,  // null = unanswered (required)
+    variations: [] as { name: string, options: string }[],
   });
   const [storeForm, setStoreForm] = useState({ name: "", description: "" });
   const [isSavingProduct, setIsSavingProduct] = useState(false);
@@ -334,7 +344,14 @@ export default function SellerDashboard() {
 
     setIsSavingProduct(true);
     try {
-      const payload = {
+      const formattedVariations: Record<string, string[]> = {};
+      productForm.variations.forEach(v => {
+        if (v.name.trim() && v.options.trim()) {
+          formattedVariations[v.name.trim()] = v.options.split(',').map(o => o.trim()).filter(Boolean);
+        }
+      });
+
+      const payload: any = {
         name: productForm.name,
         price: Number(productForm.price),
         stock_quantity: Number(productForm.stock_quantity),
@@ -343,13 +360,14 @@ export default function SellerDashboard() {
         is_active: true,
         in_stock: productForm.in_stock,
         uploaded_images: productImages.length > 0 ? productImages : undefined,
+        variations: Object.keys(formattedVariations).length > 0 ? formattedVariations : undefined,
       };
 
       const opts = {
         onSuccess: () => {
           setShowAddProduct(false);
           setEditingProductId(null);
-          setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "", in_stock: null });
+          setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "", in_stock: null, variations: [] });
           setProductImages([]);
           setProductImagePreviews([]);
           setIsSavingProduct(false);
@@ -374,12 +392,21 @@ export default function SellerDashboard() {
 
   const handleEditClick = (product: any) => {
     setEditingProductId(product.id.toString());
+    
+    const existingVariations: {name: string, options: string}[] = [];
+    if (product.variations) {
+      for (const [k, v] of Object.entries(product.variations)) {
+        existingVariations.push({ name: k, options: (v as string[]).join(", ") });
+      }
+    }
+
     setProductForm({
       name: product.name, price: product.price.toString(),
       stock_quantity: product.stock_quantity.toString(),
       category: product.category.toString(),
       description: product.description || "",
       in_stock: typeof product.in_stock === 'boolean' ? product.in_stock : null,
+      variations: existingVariations,
     });
     setProductImages([]);
     setProductImagePreviews([]);
@@ -723,7 +750,7 @@ export default function SellerDashboard() {
                       <X size={15} /> Cancel
                     </Button>
                   ) : (
-                    <Button onClick={() => { setEditingProductId(null); setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "", in_stock: null }); setProductImages([]); setProductImagePreviews([]); setShowAddProduct(true); }}
+                    <Button onClick={() => { setEditingProductId(null); setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "", in_stock: null, variations: [] }); setProductImages([]); setProductImagePreviews([]); setShowAddProduct(true); }}
                       className="bg-slate-900 text-white rounded-2xl px-6 h-11 gap-2 font-semibold shadow-md hover:-translate-y-0.5 transition-all">
                       <Plus size={16} /> Add Product
                     </Button>

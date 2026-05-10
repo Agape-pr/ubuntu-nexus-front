@@ -34,10 +34,15 @@ export default function CartPage() {
 
       // 1. Create the order
       const orderPayload = {
-        items: items.map(item => ({ 
-          product_id: parseInt(item.id.toString(), 10), 
-          quantity: item.quantity 
-        }))
+        items: items.map(item => {
+          // Backward compatibility: if productId doesn't exist, try parsing id (which might be the raw product id if no variations)
+          const realId = item.productId || item.id.toString().split('-')[0];
+          return {
+            product_id: parseInt(realId, 10), 
+            quantity: item.quantity,
+            selected_variations: item.selected_variations || {}
+          };
+        })
       };
       
       const orderRes = await fetch(`${API_BASE_URL}/orders/checkout/`, {
@@ -116,6 +121,19 @@ export default function CartPage() {
                     <div>
                       <h3 className="font-semibold text-foreground line-clamp-1">{item.name}</h3>
                       <p className="text-sm text-muted-foreground">{item.storeName || "Unknown store"}</p>
+                      
+                      {/* Variations display */}
+                      {item.selected_variations && Object.keys(item.selected_variations).length > 0 && (
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5 mb-1">
+                          {Object.entries(item.selected_variations).map(([k, v]) => (
+                            <span key={k} className="text-[11px] font-medium bg-secondary/50 text-secondary-foreground px-2 py-0.5 rounded-md border border-border/40">
+                              <span className="text-muted-foreground mr-1">{k}:</span>
+                              {v as string}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      
                       {/* Delivery expectation label */}
                       {item.in_stock === true && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full mt-1">

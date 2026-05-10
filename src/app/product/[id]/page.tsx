@@ -38,6 +38,7 @@ export default function ProductPage() {
 
   const [quantity, setQuantity] = useState(1);
   const [mounted, setMounted] = useState(false);
+  const [selectedVariations, setSelectedVariations] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setMounted(true);
@@ -122,13 +123,19 @@ export default function ProductPage() {
 
   const handleAddToCart = () => {
     const actualId = isSeed ? idStr : String(product.id);
+    const cartItemId = Object.keys(selectedVariations).length > 0 
+      ? `${actualId}-${JSON.stringify(selectedVariations)}`
+      : actualId;
+      
     addItem({
-      id: actualId,
+      id: cartItemId,
+      productId: actualId,
       name,
       price,
       image: coverImage,
       storeName,
       quantity,
+      selected_variations: selectedVariations,
     });
     toast.success(`${name} added to cart!`);
   };
@@ -229,6 +236,39 @@ export default function ProductPage() {
                   </p>
                 )}
               </div>
+
+              {/* Variations */}
+              {product.variations && Object.keys(product.variations).length > 0 && (
+                <div className="mb-8 space-y-6">
+                  {Object.entries(product.variations).map(([variationName, options]: [string, any]) => {
+                    const opts = Array.isArray(options) ? options : [];
+                    if (opts.length === 0) return null;
+                    return (
+                      <div key={variationName}>
+                        <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">{variationName}</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {opts.map((option: string) => {
+                            const isSelected = selectedVariations[variationName] === option;
+                            return (
+                              <button
+                                key={option}
+                                onClick={() => setSelectedVariations(prev => ({ ...prev, [variationName]: option }))}
+                                className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
+                                  isSelected 
+                                    ? "border-primary bg-primary/10 text-primary shadow-sm" 
+                                    : "border-border bg-card text-foreground hover:border-primary/50"
+                                }`}
+                              >
+                                {option}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Add to Cart Actions */}
               <div className="bg-secondary/30 rounded-3xl p-6 border border-border/50 mb-10 shadow-sm">
