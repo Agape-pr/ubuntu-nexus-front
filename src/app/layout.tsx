@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "UbuntuNow | Coming Soon",
-  description: "The future of Rwandan commerce. Zero-friction marketplace connecting buyers directly to sellers.",
+  description: "The missing tech infrastructure and trust layer for digital commerce in Rwanda.",
 };
 
 export default function RootLayout({

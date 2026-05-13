@@ -40,11 +40,11 @@ export default function ComingSoonPage() {
 
         {/* Content */}
         <h1 className="text-4xl md:text-6xl font-black text-[#FBF8F2] mb-6 leading-tight tracking-tight animate-fade-up">
-          The future of <span className="text-[#B87800]">Rwandan commerce</span> is almost here.
+          Building the <span className="text-[#B87800]">trust layer</span> for African commerce.
         </h1>
         
         <p className="text-lg text-[#888780] mb-12 max-w-xl mx-auto animate-fade-up" style={{ animationDelay: "100ms" }}>
-          We are putting the final touches on a revolutionary marketplace connecting buyers directly to sellers with zero friction.
+          We are not just another marketplace. We are building the missing tech infrastructure that empowers sellers and guarantees trust for every digital transaction.
         </p>
 
         <div className="space-y-8 animate-fade-up" style={{ animationDelay: "200ms" }}>
