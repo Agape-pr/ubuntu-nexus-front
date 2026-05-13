@@ -126,6 +126,8 @@ const buildProductPayload = (data: ProductCreateUpdate | Partial<ProductCreateUp
     if (data.price !== undefined) formData.append('price', String(data.price));
     if (data.stock_quantity !== undefined) formData.append('stock_quantity', String(data.stock_quantity));
     if (data.is_active !== undefined) formData.append('is_active', String(data.is_active));
+    if (data.in_stock !== undefined) formData.append('in_stock', String(data.in_stock));
+    if (data.variations !== undefined) formData.append('variations', JSON.stringify(data.variations));
 
     if (data.uploaded_images) {
       data.uploaded_images.forEach(img => {

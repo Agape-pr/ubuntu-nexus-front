@@ -152,6 +152,28 @@ const HomeContent = () => {
           ))}
         </div>
 
+        {/* Action Banners (Mobile mostly) */}
+        <div className="flex md:hidden flex-col gap-2 mb-6">
+          <Link href="/home" className="flex items-center gap-3 bg-secondary/50 border border-border/50 p-3 rounded-2xl hover:bg-secondary transition-colors">
+            <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+              <span className="text-blue-500 text-sm">💡</span>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">Learn how it works</p>
+              <p className="text-xs text-muted-foreground">Discover the UbuntuNow platform</p>
+            </div>
+          </Link>
+          <Link href="/auth?tab=register&intent=seller" className="flex items-center gap-3 bg-secondary/50 border border-border/50 p-3 rounded-2xl hover:bg-secondary transition-colors">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <span className="text-emerald-500 text-sm">🏪</span>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">Start your store</p>
+              <p className="text-xs text-muted-foreground">Sell your products to thousands</p>
+            </div>
+          </Link>
+        </div>
+
         {/* Results */}
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">

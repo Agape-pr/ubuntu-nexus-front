@@ -15,6 +15,12 @@ export interface UserProfile {
     role: string;
     phone_number?: string | null;
     store?: UserStore | null;
+    first_name?: string | null;
+    last_name?: string | null;
+    address_line1?: string | null;
+    address_line2?: string | null;
+    city?: string | null;
+    country?: string | null;
 }
 
 export interface PublicStoreData {
@@ -31,6 +37,10 @@ export interface PublicStoreData {
  */
 export const getCurrentUser = async (): Promise<UserProfile> => {
     return apiClient.get<UserProfile>(API_ENDPOINTS.USERS.ME);
+};
+
+export const updateProfile = async (data: Partial<UserProfile>): Promise<UserProfile> => {
+    return apiClient.patch<UserProfile>(API_ENDPOINTS.USERS.ME, data);
 };
 
 /**

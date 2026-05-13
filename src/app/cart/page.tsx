@@ -12,12 +12,14 @@ import { toast } from "sonner";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCurrentUser } from "@/lib/api/hooks/useUsers";
 
 export default function CartPage() {
   const { items, removeItem, getTotalPrice, updateQuantity, clearCart } = useCartStore();
   const totalPrice = getTotalPrice();
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
+  const { data: userProfile } = useCurrentUser();
 
   const handleCheckout = async () => {
     if (items.length === 0) return;
@@ -32,8 +34,26 @@ export default function CartPage() {
         return;
       }
 
+      // Check delivery address
+      if (!userProfile?.address_line1) {
+        toast.error("Please add a delivery address to checkout.", {
+          action: {
+            label: "Add Address",
+            onClick: () => router.push("/profile")
+          }
+        });
+        router.push("/profile");
+        return;
+      }
+
       // 1. Create the order
       const orderPayload = {
+        delivery_address: {
+          address_line1: userProfile.address_line1,
+          address_line2: userProfile.address_line2,
+          city: userProfile.city,
+          country: userProfile.country,
+        },
         items: items.map(item => {
           // Backward compatibility: if productId doesn't exist, try parsing id (which might be the raw product id if no variations)
           const realId = item.productId || item.id.toString().split('-')[0];

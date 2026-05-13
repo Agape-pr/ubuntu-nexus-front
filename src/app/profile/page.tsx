@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import { useCurrentUser } from "@/lib/api/hooks/useUsers";
+import { useCurrentUser, useUpdateProfile } from "@/lib/api/hooks/useUsers";
 import { useLogout } from "@/lib/api/hooks/useAuth";
 import { User, MapPin, Phone, Mail, Edit3, Save, X, LogOut, ShoppingBag, CheckCircle } from "lucide-react";
 import Link from "next/link";
@@ -38,10 +38,23 @@ export default function ProfilePage() {
     }
   }, [userProfile]);
 
+  const updateProfileMutation = useUpdateProfile();
+
   const handleSave = () => {
-    // TODO: wire to PATCH /api/v1/users/me/ when endpoint is available
-    toast.success("Profile saved (local only — API endpoint coming soon)");
-    setEditMode(false);
+    updateProfileMutation.mutate({
+      first_name: form.first_name,
+      last_name: form.last_name,
+      phone_number: form.phone,
+      address_line1: form.address_line1,
+      address_line2: form.address_line2,
+      city: form.city,
+      country: form.country,
+    }, {
+      onSuccess: () => {
+        toast.success("Profile saved successfully");
+        setEditMode(false);
+      }
+    });
   };
 
   const field = (label: string, value: string, key: keyof typeof form, placeholder?: string) => (
@@ -124,8 +137,8 @@ export default function ProfilePage() {
                 <button onClick={() => setEditMode(false)} className="text-xs text-white/40 hover:text-white flex items-center gap-1">
                   <X size={12} /> Cancel
                 </button>
-                <button onClick={handleSave} className="text-xs text-gold-bright hover:text-gold-accent flex items-center gap-1 font-bold">
-                  <Save size={12} /> Save
+                <button onClick={handleSave} disabled={updateProfileMutation.isPending} className="text-xs text-gold-bright hover:text-gold-accent flex items-center gap-1 font-bold">
+                  <Save size={12} /> {updateProfileMutation.isPending ? "Saving..." : "Save"}
                 </button>
               </div>
             ) : (
