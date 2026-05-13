@@ -1,13 +1,10 @@
+import "./globals.css";
 import type { Metadata } from "next";
-import { Providers } from "@/components/Providers";
-import "../index.css";
 
 export const metadata: Metadata = {
-  title: "UbuntuNow — Buy & Sell Locally in Rwanda",
-  description: "UbuntuNow is Rwanda's trusted marketplace. Buy unique local products and sell online in minutes with escrow-protected payments.",
+  title: "UbuntuNow | Coming Soon",
+  description: "The future of Rwandan commerce. Zero-friction marketplace connecting buyers directly to sellers.",
 };
-
-import MobileNav from "@/components/MobileNav";
 
 export default function RootLayout({
   children,
@@ -15,12 +12,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="font-sans antialiased md:pb-0 pb-14">
-        <Providers>
-          {children}
-          <MobileNav />
-        </Providers>
+    <html lang="en">
+      <body className="antialiased bg-[#111110] text-[#FBF8F2]">
+        {children}
       </body>
     </html>
   );

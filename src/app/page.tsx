@@ -1,290 +1,48 @@
-"use client";
+import { Sparkles, ArrowRight } from "lucide-react";
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import ProductCard from "@/components/ProductCard";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, SlidersHorizontal, X } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useProducts } from "@/lib/api/hooks/useProducts";
-
-const CATEGORIES = [
-  "All",
-  "Clothing & Fashion",
-  "Electronics & Gadgets",
-  "Beauty & Personal Care",
-  "Bags & Accessories",
-  "Home & Living",
-  "Jewelry",
-  "Books",
-  "Other"
-];
-
-const SORT_OPTIONS = ["Most popular", "Newest", "Price: Low to High", "Price: High to Low"];
-
-const HomeContent = () => {
-  const searchParams = useSearchParams();
-  const [search, setSearch] = useState(searchParams.get("search") ?? "");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-
-  useEffect(() => {
-    setSearch(searchParams.get("search") ?? "");
-  }, [searchParams]);
-
-  const [sortBy, setSortBy] = useState("Most popular");
-  const [showFilters, setShowFilters] = useState(false);
-
-  const { data: allProducts = [], isLoading } = useProducts();
-
-  const filtered = allProducts.filter((p) => {
-    const searchLower = search.toLowerCase();
-    const matchSearch = (p.name || "").toLowerCase().includes(searchLower) ||
-                        (p.store_name || "").toLowerCase().includes(searchLower);
-    const matchCategory = selectedCategory === "All" || p.category === selectedCategory;
-    return matchSearch && matchCategory;
-  });
-
-  const sorted = [...filtered].sort((a, b) => {
-    if (sortBy === "Price: Low to High") return Number(a.price) - Number(b.price);
-    if (sortBy === "Price: High to Low") return Number(b.price) - Number(a.price);
-    if (sortBy === "Newest") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    return 0;
-  });
-
+export default function ComingSoonPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Navbar — shown on all screen sizes; hamburger handles mobile nav */}
-      <Navbar />
+    <div className="min-h-screen bg-[#111110] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background glow effects */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#7A4F00]/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#B87800]/10 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Desktop Header */}
-      <div className="hidden md:block bg-card border-b border-border">
-        <div className="container py-8">
-          <h1 className="text-3xl font-display font-bold text-foreground mb-1">Marketplace</h1>
-          <p className="text-muted-foreground">
-            {allProducts.length} products from Kigali&apos;s finest sellers
-          </p>
+      <div className="z-10 text-center max-w-2xl w-full">
+        {/* Logo / Brand */}
+        <div className="flex justify-center mb-8">
+          <div className="flex items-center gap-2 px-4 py-2 bg-[#1A1A19] border border-white/10 rounded-full shadow-lg">
+            <span className="text-[#FBF8F2] font-black text-xl tracking-tight">Ubuntu</span>
+            <span className="text-[#111110] bg-[#B87800] px-2 py-0.5 rounded-sm font-black text-xl italic tracking-tight">
+              Now
+            </span>
+          </div>
         </div>
-      </div>
 
-      <div className="container md:py-8 pb-4 flex-1 px-2 sm:px-4">
-        {/* Mobile Search Bar */}
-        <div className="md:hidden relative mt-3 mb-4">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            className="w-full h-10 pl-9 pr-10 rounded-full border border-border bg-secondary/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 text-foreground placeholder:text-muted-foreground"
-            placeholder="Search products or stores..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          {search && (
-            <button onClick={() => setSearch("")} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground">
-              <X size={13} />
+        {/* Content */}
+        <h1 className="text-4xl md:text-6xl font-black text-[#FBF8F2] mb-6 leading-tight tracking-tight animate-fade-up">
+          The future of <span className="text-[#B87800]">Rwandan commerce</span> is almost here.
+        </h1>
+        
+        <p className="text-lg text-[#888780] mb-12 max-w-lg mx-auto animate-fade-up" style={{ animationDelay: "100ms" }}>
+          We are putting the final touches on a revolutionary marketplace connecting buyers directly to sellers with zero friction.
+        </p>
+
+        {/* CTA */}
+        <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+          <div className="bg-[#1A1A19] border border-white/10 p-2 pl-6 rounded-full flex items-center justify-between max-w-md mx-auto">
+            <span className="text-white/40 text-sm font-medium">Get notified when we launch</span>
+            <button className="flex items-center gap-2 bg-[#B87800] text-[#111110] px-6 py-3 rounded-full font-black text-sm hover:bg-[#F0B800] transition-colors">
+              Join Waitlist <ArrowRight size={16} strokeWidth={3} />
             </button>
-          )}
-        </div>
-
-        {/* Desktop Search & Controls */}
-        <div className="hidden md:flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search products or stores..."
-              className="pl-10 h-11 rounded-xl"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="h-11 w-48 rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SORT_OPTIONS.map((opt) => (
-                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Toggle filters"
-              className="h-11 w-11 rounded-xl"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <SlidersHorizontal size={16} />
-            </Button>
           </div>
         </div>
 
-        {/* Categories */}
-        <div className="flex overflow-x-auto no-scrollbar gap-4 md:mb-8 mb-4 pb-2 pt-2 md:pt-0 snap-x">
-          {CATEGORIES.map((cat, i) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className="flex flex-col items-center justify-center shrink-0 snap-start gap-1"
-            >
-              <div className={`w-12 h-12 md:w-auto md:h-auto md:px-4 md:py-2 flex items-center justify-center transition-all duration-200 ${
-                  selectedCategory === cat
-                  ? "bg-primary text-primary-foreground md:rounded-full rounded-2xl shadow-sm"
-                  : "bg-card text-muted-foreground md:rounded-full rounded-2xl shadow-sm hover:bg-primary/5 border border-border"
-                }`}>
-                <span className="md:block hidden text-sm font-medium">{cat}</span>
-                <div className="md:hidden text-lg">
-                  {i === 0 ? '🌟' : i === 1 ? '👕' : i === 2 ? '💻' : i === 3 ? '💄' : i === 4 ? '👜' : i === 5 ? '🏠' : i === 6 ? '💍' : i === 7 ? '📚' : '✨'}
-                </div>
-              </div>
-              <span className="md:hidden text-[11px] font-medium text-foreground">{cat}</span>
-            </button>
-          ))}
+        {/* Status */}
+        <div className="mt-16 flex items-center justify-center gap-2 text-[#888780] text-sm animate-fade-up" style={{ animationDelay: "300ms" }}>
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          Systems in final testing
         </div>
-
-        {/* Action Banners (Mobile mostly) */}
-        <div className="flex md:hidden flex-col gap-2 mb-6">
-          <Link href="/home" className="flex items-center gap-3 bg-secondary/50 border border-border/50 p-3 rounded-2xl hover:bg-secondary transition-colors">
-            <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-              <span className="text-blue-500 text-sm">💡</span>
-            </div>
-            <div>
-              <p className="text-sm font-bold text-foreground">Learn how it works</p>
-              <p className="text-xs text-muted-foreground">Discover the UbuntuNow platform</p>
-            </div>
-          </Link>
-          <Link href="/auth?tab=register&intent=seller" className="flex items-center gap-3 bg-secondary/50 border border-border/50 p-3 rounded-2xl hover:bg-secondary transition-colors">
-            <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <span className="text-emerald-500 text-sm">🏪</span>
-            </div>
-            <div>
-              <p className="text-sm font-bold text-foreground">Start your store</p>
-              <p className="text-xs text-muted-foreground">Sell your products to thousands</p>
-            </div>
-          </Link>
-        </div>
-
-        {/* Results */}
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <p className="text-muted-foreground">Loading products...</p>
-          </div>
-        ) : sorted.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="text-5xl mb-4">🔍</div>
-            <h3 className="font-semibold text-foreground mb-2">No products found</h3>
-            <p className="text-muted-foreground text-sm">Try a different search or category</p>
-            <Button
-              variant="outline"
-              className="mt-4 rounded-xl"
-              onClick={() => { setSearch(""); setSelectedCategory("All"); }}
-            >
-              Clear filters
-            </Button>
-          </div>
-        ) : (
-          <>
-            <p className="hidden md:block text-sm text-muted-foreground mb-4">
-              {sorted.length} product{sorted.length !== 1 ? "s" : ""} found
-            </p>
-
-            {/* ── Pinterest Masonry — mobile: 2 true columns, desktop: CSS columns ── */}
-            {/* Mobile: two independent flex-column divs, strict index distribution */}
-            <div className="md:hidden flex gap-[6px] px-[6px] items-start bg-[#111110]">
-              {(() => {
-                const left: { p: typeof sorted[0], ratio: string }[] = [];
-                const right: { p: typeof sorted[0], ratio: string }[] = [];
-                const ASPECT_RATIO_PATTERN = ['3/4', '1/1', '4/3', '1/1'];
-
-                sorted.forEach((p, i) => {
-                  const ratio = ASPECT_RATIO_PATTERN[i % 4];
-                  if (i % 2 === 0) {
-                    left.push({ p, ratio });
-                  } else {
-                    right.push({ p, ratio });
-                  }
-                });
-
-                const renderCol = (items: { p: typeof sorted[0], ratio: string }[]) => (
-                  <div className="flex-1 flex flex-col gap-[6px]">
-                    {items.map(({ p, ratio }) => (
-                      <ProductCard
-                        key={p.id}
-                        id={String(p.id)}
-                        slug={p.slug || String(p.id)}
-                        name={p.name}
-                        price={Number(p.price)}
-                        image={p.images?.[0]?.image}
-                        storeName={p.store_name}
-                        storeSlug={p.store_name ? p.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
-                        category={p.category}
-                        inStock={p.stock_quantity > 0}
-                        sellerHasStock={(p as any).in_stock}
-                        aspectRatio={ratio}
-                      />
-                    ))}
-                  </div>
-                );
-
-                return (
-                  <>
-                    {renderCol(left)}
-                    {renderCol(right)}
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Desktop: CSS columns (3–5 cols) */}
-            <div className="hidden md:block columns-3 lg:columns-4 xl:columns-5 gap-3 space-y-3">
-              {sorted.map((product, i) => {
-                const ASPECT_RATIO_PATTERN = ['3/4', '1/1', '4/3', '1/1'];
-                const ratio = ASPECT_RATIO_PATTERN[i % 4];
-                return (
-                  <div key={product.id} className="break-inside-avoid">
-                    <ProductCard
-                      id={String(product.id)}
-                      slug={product.slug || String(product.id)}
-                      name={product.name}
-                      price={Number(product.price)}
-                      image={product.images?.[0]?.image}
-                      storeName={product.store_name}
-                      storeSlug={product.store_name ? product.store_name.toLowerCase().replace(/\s+/g, '-') : undefined}
-                      category={product.category}
-                      inStock={product.stock_quantity > 0}
-                      sellerHasStock={(product as any).in_stock}
-                      aspectRatio={ratio}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className="hidden md:block">
-        <Footer />
       </div>
     </div>
   );
-};
-
-const Home = () => (
-  <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Loading…</p></div>}>
-    <HomeContent />
-  </Suspense>
-);
-
-export default Home;
+}
