@@ -61,16 +61,6 @@ const HomeContent = () => {
       {/* Navbar — shown on all screen sizes; hamburger handles mobile nav */}
       <Navbar />
 
-      {/* Desktop Header */}
-      <div className="hidden md:block bg-card border-b border-border">
-        <div className="container py-8">
-          <h1 className="text-3xl font-display font-bold text-foreground mb-1">Marketplace</h1>
-          <p className="text-muted-foreground">
-            {allProducts.length} products from Kigali&apos;s finest sellers
-          </p>
-        </div>
-      </div>
-
       <div className="container md:py-8 pb-4 flex-1 px-2 sm:px-4">
         {/* Mobile Search Bar */}
         <div className="md:hidden relative mt-3 mb-4">
