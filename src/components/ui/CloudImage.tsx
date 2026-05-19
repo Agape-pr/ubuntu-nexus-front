@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { buildImageUrl, CloudinaryOptions } from "@/lib/cloudinary";
 
 interface CloudImageProps
@@ -7,23 +10,39 @@ interface CloudImageProps
   height?: number;
   crop?: CloudinaryOptions["crop"];
   priority?: boolean;
-  fallbackSrc?: string;
+  /** Rendered when the image fails to load or has no src */
+  fallback?: React.ReactNode;
 }
 
 export function CloudImage({
-  publicId, width, height, crop,
-  alt = "", className, priority = false, fallbackSrc, ...rest
+  publicId,
+  width,
+  height,
+  crop,
+  alt = "",
+  className,
+  priority = false,
+  fallback = null,
+  ...rest
 }: CloudImageProps) {
   const src = buildImageUrl(publicId, { width, height, crop });
-  // If we get a full HTTP url back (non-cloudinary or cloudinary direct), use it as-is
-  const imgSrc = src || fallbackSrc || "";
-  if (!imgSrc) return null;
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return fallback ? <>{fallback}</> : null;
+  }
+
   return (
     <img
-      src={imgSrc} alt={alt} width={width} height={height}
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
       loading={priority ? "eager" : "lazy"}
       decoding={priority ? "sync" : "async"}
-      className={className} {...rest}
+      className={className}
+      onError={() => setFailed(true)}
+      {...rest}
     />
   );
 }

@@ -53,6 +53,8 @@ class ApiClient {
       if (role) {
         localStorage.setItem('user_role', role);
       }
+      // Notify same-tab listeners (Navbar, MobileNav) of auth state change
+      window.dispatchEvent(new Event('auth-change'));
     }
   }
 
@@ -64,6 +66,8 @@ class ApiClient {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user_role');
+      // Notify same-tab listeners of logout
+      window.dispatchEvent(new Event('auth-change'));
     }
   }
 
@@ -238,7 +242,7 @@ class ApiClient {
           } else {
             // Token refresh failed or didn't exist, log user out
             this.removeTokens();
-            window.location.href = '/login'; // Force a visual redirect
+            window.location.href = '/auth'; // Force a visual redirect
           }
         }
 

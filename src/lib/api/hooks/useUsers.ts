@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { getCurrentUser, UserProfile, getPublicStore, PublicStoreData, updateStore, UpdateStoreRequest, UserStore } from '../services/users';
+import { getCurrentUser, UserProfile, getPublicStore, PublicStoreData, updateStore, UpdateStoreRequest, UserStore, updateProfile } from '../services/users';
 
 /**
  * Hook to fetch the current authenticated user's profile
@@ -38,6 +38,20 @@ export const useUpdateStore = () => {
         },
         onError: (error) => {
             toast.error(error.message || "Failed to update store settings.");
+        }
+    });
+};
+
+export const useUpdateProfile = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation<UserProfile, Error, Partial<UserProfile>>({
+        mutationFn: updateProfile,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+        },
+        onError: (error) => {
+            toast.error(error.message || "Failed to update profile.");
         }
     });
 };

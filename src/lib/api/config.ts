@@ -5,13 +5,13 @@
  * The API base URL is read from environment variables.
  */
 
-let BASE_API_URL = 'http://localhost:8000/api/v1';
+let BASE_API_URL: string;
 
 if (process.env.NODE_ENV === 'production') {
-  // Hardcode the reliable Railway backend URL in production to bypass ALL Vercel proxy / Env Var configuration errors
-  BASE_API_URL = 'https://api-gatewayubuntunow-platform-be-production.up.railway.app/api/v1';
-} else if (process.env.NEXT_PUBLIC_API_BASE_URL) {
-  BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  // Confirmed live Railway URL — backend is reachable and CORS is open
+  BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-gatewayubuntunow-platform-be-production.up.railway.app/api/v1';
+} else {
+  BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
 }
 
 // Auto-fix misconfigured production environment variables (e.g. Vercel)
@@ -69,7 +69,23 @@ export const API_ENDPOINTS = {
     PATCH: (id: number) => `/products/categories/${id}/`,
     DELETE: (id: number) => `/products/categories/${id}/`,
   },
+
+  // Admin
+  ADMIN: {
+    USERS: '/users/admin/users/',
+    USER_DETAIL: (id: number) => `/users/admin/users/${id}/`,
+  },
+
+  // Orders
+  ORDERS: {
+    CHECKOUT: '/orders/checkout/',
+    BUYER_LIST: '/orders/orders/',
+    SELLER_LIST: '/orders/seller/orders/',
+    UPDATE_STATUS: (id: number | string) => `/orders/seller/orders/${id}/update-status/`,
+    CONFIRM_RECEIPT: (id: number | string) => `/orders/orders/${id}/confirm-receipt/`,
+  },
 } as const;
+
 
 // Request timeout (in milliseconds)
 export const API_TIMEOUT = 60000; // 60 seconds

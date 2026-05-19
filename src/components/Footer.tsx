@@ -1,5 +1,12 @@
-
+import Link from "next/link";
 import { Twitter, Instagram, Linkedin, Mail } from "lucide-react";
+
+const SOCIAL_LINKS = [
+  { Icon: Twitter,   href: "https://twitter.com/ubuntunow",   label: "Twitter"   },
+  { Icon: Instagram, href: "https://instagram.com/ubuntunow", label: "Instagram" },
+  { Icon: Linkedin,  href: "https://linkedin.com/company/ubuntunow", label: "LinkedIn" },
+  { Icon: Mail,      href: "mailto:hello@ubuntunow.com",      label: "Email"     },
+];
 
 const Footer = () => {
   return (
@@ -17,13 +24,17 @@ const Footer = () => {
               Human connection before transactions. Community-powered commerce from Kigali to the world.
             </p>
             <div className="flex gap-3 mt-6">
-              {[Twitter, Instagram, Linkedin, Mail].map((Icon, i) => (
-                <button
-                  key={i}
+              {SOCIAL_LINKS.map(({ Icon, href, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  target={href.startsWith("http") ? "_blank" : undefined}
+                  rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
                   className="h-8 w-8 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
                 >
                   <Icon size={16} />
-                </button>
+                </a>
               ))}
             </div>
           </div>
@@ -58,12 +69,12 @@ const Footer = () => {
               <ul className="space-y-2.5">
                 {group.links.map((link) => (
                   <li key={link.label}>
-                    <a
+                    <Link
                       href={link.href}
                       className="text-sm text-primary-foreground/60 hover:text-primary-foreground transition-colors duration-200"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

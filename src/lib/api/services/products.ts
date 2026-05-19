@@ -16,25 +16,20 @@ export interface ProductImage {
   is_primary: boolean;
 }
 
-// Category
-export interface Category {
-  id: number;
-  name: string;
-  slug: string;
-}
 
 // Public Product (from /products/products/)
 export interface Product {
   id: number;
   store: number;
   store_name: string;
-  category: number;
-  category_name: string;
+  category: string;
   name: string;
+  slug: string;
   description?: string;
   price: string; // API returns as string
   stock_quantity: number;
   is_active: boolean;
+  variations?: Record<string, string[]>;
   images: ProductImage[];
   created_at: string;
 }
@@ -42,12 +37,13 @@ export interface Product {
 // Seller Product (from /products/seller/products/)
 export interface SellerProduct {
   id: number;
-  category: number;
+  category: string;
   name: string;
   description?: string;
   price: string; // API returns as string
   stock_quantity: number;
   is_active: boolean;
+  variations?: Record<string, string[]>;
   images?: ProductImage[];
 }
 
@@ -63,12 +59,13 @@ export interface ProductsListParams {
 
 // Product Create/Update Request (Seller)
 export interface ProductCreateUpdate {
-  category: number;
+  category: string;
   name: string;
   description?: string;
   price: string | number; // Can be string or number
   stock_quantity: number;
   is_active?: boolean;
+  variations?: Record<string, string[]>;
   uploaded_images?: (File | string)[]; // Array of Files for upload or string URLs
 }
 
@@ -114,12 +111,6 @@ export const getSellerProduct = async (id: string): Promise<SellerProduct> => {
   return apiClient.get<SellerProduct>(API_ENDPOINTS.SELLER_PRODUCTS.DETAIL(id));
 };
 
-/**
- * Get all product categories
- */
-export const getCategories = async (): Promise<Category[]> => {
-  return apiClient.get<Category[]>(API_ENDPOINTS.CATEGORIES.LIST);
-};
 
 /**
  * Helper to convert product data to FormData if needed
@@ -135,6 +126,8 @@ const buildProductPayload = (data: ProductCreateUpdate | Partial<ProductCreateUp
     if (data.price !== undefined) formData.append('price', String(data.price));
     if (data.stock_quantity !== undefined) formData.append('stock_quantity', String(data.stock_quantity));
     if (data.is_active !== undefined) formData.append('is_active', String(data.is_active));
+    if (data.in_stock !== undefined) formData.append('in_stock', String(data.in_stock));
+    if (data.variations !== undefined) formData.append('variations', JSON.stringify(data.variations));
 
     if (data.uploaded_images) {
       data.uploaded_images.forEach(img => {

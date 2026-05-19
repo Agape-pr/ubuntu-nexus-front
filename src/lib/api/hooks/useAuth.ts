@@ -58,8 +58,18 @@ export const useVerifyOTP = () => {
     mutationFn: (data: VerifyOTPRequest) => authService.verifyOTP(data),
     onSuccess: (response) => {
       toast.success('Email verified! Welcome to UbuntuNow.');
-      // Tokens are stored by authService - navigate based on role
-      const role = response?.user?.role;
+
+      // Role from API response, fallback to what we stored before the OTP step
+      const role = response?.user?.role
+        || (typeof window !== 'undefined' ? localStorage.getItem('pending_role') : null);
+
+      // Ensure role is properly saved (in case setTokens didn't have it from the response)
+      if (role && typeof window !== 'undefined') {
+        localStorage.setItem('user_role', role);
+        localStorage.removeItem('pending_role');     // clean up temp key
+        window.dispatchEvent(new Event('auth-change')); // update Navbar instantly
+      }
+
       router.push(role === 'seller' ? '/dashboard' : '/marketplace');
     },
     onError: (error: { message?: string }) => {

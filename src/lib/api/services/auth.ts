@@ -189,9 +189,10 @@ export const refreshToken = async (refreshToken?: string): Promise<TokenRefreshR
     { refresh }
   );
 
-  // Update access token
+  // Update access token, preserving the existing role
   if (response.access) {
-    apiClient.setTokens(response.access);
+    const existingRole = typeof window !== 'undefined' ? localStorage.getItem('user_role') || undefined : undefined;
+    apiClient.setTokens(response.access, undefined, existingRole);
   }
 
   return response;

@@ -1,23 +1,13 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, DM_Serif_Display } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import "../index.css";
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-const dmSerifDisplay = DM_Serif_Display({
-  weight: ["400"],
-  subsets: ["latin"],
-  variable: "--font-display",
-});
 
 export const metadata: Metadata = {
   title: "UbuntuNow — Buy & Sell Locally in Rwanda",
   description: "UbuntuNow is Rwanda's trusted marketplace. Buy unique local products and sell online in minutes with escrow-protected payments.",
 };
+
+import MobileNav from "@/components/MobileNav";
 
 export default function RootLayout({
   children,
@@ -25,9 +15,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`${plusJakartaSans.variable} ${dmSerifDisplay.variable} font-sans antialiased`}>
-        <Providers>{children}</Providers>
+    <html lang="en" className="dark">
+      <body className="font-sans antialiased md:pb-0 pb-14">
+        <Providers>
+          {children}
+          <MobileNav />
+        </Providers>
       </body>
     </html>
   );
