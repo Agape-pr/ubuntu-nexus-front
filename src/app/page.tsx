@@ -13,6 +13,17 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProducts } from "@/lib/api/hooks/useProducts";
 
+import {
+  ArrowRight, Store, ShieldCheck, Zap, Star, MapPin, 
+  CheckCircle, ThumbsUp, CreditCard, PackageCheck, Sparkles,
+  Heart, ShoppingCart,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+// Import images (make sure these exist or remove if not needed)
+// import kigaliMarket from "@/assets/kigali-market.jpg";
+// import kigaliSeller from "@/assets/kigali-seller.jpg";
+
 const CATEGORIES = [
   "All",
   "Clothing & Fashion",
@@ -58,7 +69,6 @@ const HomeContent = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Navbar — shown on all screen sizes; hamburger handles mobile nav */}
       <Navbar />
 
       <div className="container md:py-8 pb-4 flex-1 px-2 sm:px-4">
@@ -77,6 +87,147 @@ const HomeContent = () => {
             </button>
           )}
         </div>
+
+        {/* 1. HERO - Split Layout */}
+        <section className="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-32">
+          <div className="absolute top-0 right-0 -m-32 h-[800px] w-[800px] rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+
+          <div className="container relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+              {/* Left Content */}
+              <div className="max-w-2xl animate-fade-up">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary border border-border text-xs font-medium text-muted-foreground mb-6">
+                  <Sparkles size={14} className="text-accent" />
+                  <span>The new era of local commerce</span>
+                </div>
+
+                <h1 className="text-5xl md:text-6xl lg:text-[4.5rem] font-bold tracking-tight text-foreground leading-[1.05] mb-6 text-balance">
+                  Buy and sell with{" "}
+                  <span className="relative inline-block text-primary">
+                    people you trust
+                    <svg
+                      className="absolute -bottom-2 left-0 w-full text-accent/40"
+                      viewBox="0 0 200 9"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M2.00049 6.84039C50.0005 1.84039 120.501 -2.15961 198.001 6.84039"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </span>
+                </h1>
+
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 max-w-xl">
+                  Start selling online in minutes. Discover unique products from
+                  your neighbors, and shop securely with our 2-hour escrow
+                  guarantee.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4 mb-10">
+                  <Link href="/auth?tab=register&role=seller">
+                    <Button
+                      size="lg"
+                      className="w-full sm:w-auto gradient-amber text-white font-semibold px-8 h-14 rounded-2xl shadow-amber hover:-translate-y-1 hover:shadow-lg transition-all duration-300 border-0"
+                    >
+                      Start your store <ArrowRight size={18} className="ml-2" />
+                    </Button>
+                  </Link>
+                  <Link href="/marketplace">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="w-full sm:w-auto h-14 px-8 rounded-2xl border-border bg-card hover:bg-secondary hover:-translate-y-1 transition-all duration-300"
+                    >
+                      Explore marketplace
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Trust bar */}
+                <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck size={18} className="text-emerald" />
+                    <span className="font-medium text-foreground">100% Secure</span>
+                  </div>
+                  <div className="hidden sm:block w-1 h-1 rounded-full bg-border" />
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex -space-x-1.5">
+                      {["🧑🏿", "👩🏾", "👨🏿"].map((emoji, i) => (
+                        <div
+                          key={i}
+                          className="h-6 w-6 rounded-full bg-secondary border border-background flex items-center justify-center text-[10px] z-10 shadow-sm"
+                        >
+                          {emoji}
+                        </div>
+                      ))}
+                    </div>
+                    <span className="ml-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald/10 border border-emerald/20 text-xs font-semibold text-emerald-700">
+                      🌱 Early Access — Be a founding seller
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Images Collage */}
+              <div className="relative h-[450px] lg:h-[600px] w-full lg:w-[110%] animate-slide-in-right hidden md:block">
+                <div className="absolute inset-0 rounded-3xl bg-secondary transform rotate-3" />
+
+                <div className="absolute top-4 left-4 right-12 bottom-12 rounded-3xl overflow-hidden shadow-lift border-4 border-card group bg-secondary">
+                  {/* Replace with actual image or remove */}
+                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary flex items-center justify-center">
+                    <span className="text-muted-foreground">Market Image</span>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-6 left-6 text-white">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="flex h-2 w-2 rounded-full bg-emerald animate-pulse" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-white/80">Live</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Element 1 - Small Image */}
+                <div className="absolute -bottom-6 -left-6 h-48 w-40 rounded-2xl overflow-hidden shadow-ambient border-4 border-card z-20 group bg-secondary">
+                  <div className="w-full h-full bg-gradient-to-tr from-accent/20 to-secondary flex items-center justify-center">
+                    <span className="text-muted-foreground text-xs">Seller</span>
+                  </div>
+                </div>
+
+                {/* Floating Element 2 - Glassmorphism Badge */}
+                <div className="absolute top-12 -right-8 bg-card/90 backdrop-blur-md p-4 rounded-2xl shadow-lift border border-border/50 z-30 animate-float flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-emerald/10 flex items-center justify-center text-emerald">
+                    <Zap size={20} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">Fast Delivery</p>
+                    <p className="text-xs text-muted-foreground">Within 2 hours</p>
+                  </div>
+                </div>
+
+                {/* Floating Element 3 - Rating Card */}
+                <div
+                  className="absolute bottom-24 -right-2 bg-card p-3 rounded-2xl shadow-lift border border-border z-30 animate-float"
+                  style={{ animationDelay: "1.5s" }}
+                >
+                  <div className="flex items-center gap-1.5 mb-1">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Star key={i} size={12} className="fill-accent text-accent" />
+                    ))}
+                  </div>
+                  <p className="text-xs font-medium text-foreground">
+                    <span className="font-bold">Kigali local vendors</span>
+                    <br />
+                    Best platform ever!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Desktop Search & Controls */}
         <div className="hidden md:flex flex-col sm:flex-row gap-3 mb-6">
@@ -189,7 +340,6 @@ const HomeContent = () => {
               {sorted.length} product{sorted.length !== 1 ? "s" : ""} found
             </p>
 
-            {/* ── Pinterest Masonry — mobile: 2 true columns, desktop: CSS columns ── */}
             {/* Mobile: two independent flex-column divs, strict index distribution */}
             <div className="md:hidden flex gap-[6px] px-[6px] items-start bg-[#111110]">
               {(() => {
