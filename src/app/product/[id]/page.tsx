@@ -194,7 +194,7 @@ export default function ProductPage() {
             {/* RIGHT: Product Details */}
             <div className="lg:col-span-7 flex flex-col">
               <div className="mb-6 border-b border-border/50 pb-6">
-                <Link href={`/store/${storeSlug}`} className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold hover:underline mb-2">
+                <Link href={`/shop/${storeSlug}`} className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold hover:underline mb-2">
                   <Store size={14} /> {storeName}
                 </Link>
                 

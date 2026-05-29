@@ -118,11 +118,11 @@ function UserDrawer({ userId, onClose }: { userId: number; onClose: () => void }
                       <div>
                         <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">Store URL</p>
                         <Link
-                          href={`https://www.ubuntunow.rw/store/${user.store.slug}`}
+                          href={`https://www.ubuntunow.rw/shop/${user.store.slug}`}
                           target="_blank"
-                          className="text-sm font-mono text-primary hover:underline flex items-center gap-1"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-200 transition-colors"
                         >
-                          /store/{user.store.slug} <ExternalLink size={12} />
+                          /shop/{user.store.slug} <ExternalLink size={12} />
                         </Link>
                       </div>
                     )}

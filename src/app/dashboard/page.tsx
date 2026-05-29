@@ -417,12 +417,12 @@ export default function SellerDashboard() {
 
   const storeName = userProfile?.store?.store_name || "My Store";
   const storeSlug = userProfile?.store?.slug || "";
-  const storeUrl = storeSlug ? `/store/${storeSlug}` : null;
+  const storeUrl = storeSlug ? `/shop/${storeSlug}` : null;
   const storeUrlDisplay = storeSlug
-    ? `www.ubuntunow.rw/store/${storeSlug}`
+    ? `www.ubuntunow.rw/shop/${storeSlug}`
     : isUserLoading
     ? "Loading your store link…"
-    : "www.ubuntunow.rw/store/your-store";
+    : "www.ubuntunow.rw/shop/your-store";
   const storeInitials = storeName.substring(0, 2).toUpperCase();
   const activeProductsCount = sellerProducts?.filter(p => p.is_active).length || 0;
 
@@ -1191,7 +1191,7 @@ export default function SellerDashboard() {
                   <Label className="text-xs font-bold uppercase tracking-wider text-white/50">Store URL</Label>
                   <div className="flex rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden h-12">
                     <span className="flex items-center px-4 text-white/40 text-sm bg-slate-100 border-r border-slate-200 flex-shrink-0">
-                      ubuntunow.rw/store/
+                      ubuntunow.rw/shop/
                     </span>
                     <input value={storeSlug} readOnly className="bg-transparent px-4 text-sm font-mono text-white/60 w-full outline-none" />
                   </div>
