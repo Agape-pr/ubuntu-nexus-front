@@ -647,7 +647,7 @@ export default function SellerDashboard() {
                     </div>
                     <div className="flex gap-2 shrink-0">
                       <Button
-                        onClick={() => { if (!storeSlug) return; navigator.clipboard.writeText(`https://${storeUrlDisplay}`); setCopied(true); setTimeout(() => setCopied(false), 2000); toast.success("Link copied! 🔗"); }}
+                        onClick={() => { if (!storeSlug) return; navigator.clipboard.writeText(`${window.location.origin}/shop/${storeSlug}`); setCopied(true); setTimeout(() => setCopied(false), 2000); toast.success("Link copied! 🔗"); }}
                         disabled={!storeSlug}
                         className="bg-gold-accent text-white hover:bg-amber-300 rounded-xl font-bold gap-2 h-10 px-4 text-sm disabled:opacity-50 transition-all">
                         {copied ? <CheckCircle size={14} /> : <Copy size={14} />}
@@ -690,7 +690,7 @@ export default function SellerDashboard() {
                     <p className="font-bold text-white/80 mb-1">No orders yet — but they're coming!</p>
                     <p className="text-sm text-white/40 max-w-xs leading-relaxed">Share your store link on WhatsApp and Instagram to get your first order today.</p>
                     {storeUrl && (
-                      <button onClick={() => { navigator.clipboard.writeText(`https://${storeUrlDisplay}`); toast.success("Link copied! Share it now 🚀"); }}
+                      <button onClick={() => { if (storeSlug) navigator.clipboard.writeText(`${window.location.origin}/shop/${storeSlug}`); toast.success("Link copied! Share it now 🚀"); }}
                         className="mt-4 flex items-center gap-2 text-xs font-bold text-gold-primary hover:text-amber-700 transition-colors">
                         <Copy size={12} /> Copy store link
                       </button>
@@ -1108,7 +1108,7 @@ export default function SellerDashboard() {
                     <h3 className="font-bold text-white/80 text-lg mb-2">No orders yet</h3>
                     <p className="text-sm text-white/40 max-w-sm">Once customers start buying, orders appear here. Share your store link!</p>
                     {storeUrl && (
-                      <button onClick={() => { navigator.clipboard.writeText(`https://${storeUrlDisplay}`); toast.success("Link copied!"); }}
+                      <button onClick={() => { if (storeSlug) navigator.clipboard.writeText(`${window.location.origin}/shop/${storeSlug}`); toast.success("Link copied!"); }}
                         className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gold-bright text-near-black text-sm font-bold">
                         <Copy size={14} /> Copy Store Link
                       </button>
