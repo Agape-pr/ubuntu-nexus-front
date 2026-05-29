@@ -24,16 +24,18 @@ async function getStore(username: string) {
 }
 
 // 2. Fetch Store Products
-// TEMP WORKAROUND: The backend API currently returns all products and ignores store filters.
-// It also does not return the store ID in the store profile, and products lack a store slug.
-// We must hardcode the mapping and manually filter on the frontend for the demo.
-const STORE_SLUG_TO_ID_MAP: Record<string, number> = {
-  'ladine-beauty-1': 11, // Mapped from backend database ID for Ladine Beauty
-};
-
-async function getStoreProducts(username: string) {
+async function getStoreProducts(storeId: number, username: string) {
   try {
-    const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.PRODUCTS.LIST}`, {
+    // We now have store.id from the updated backend!
+    // But if Railway is still deploying, storeId might be undefined.
+    // We'll fallback to a hardcoded mapping just in case during the transition.
+    const fallbackId = username === 'ladine-beauty-1' ? 11 : null;
+    const finalStoreId = storeId || fallbackId;
+
+    if (!finalStoreId) return [];
+
+    // The backend uses django-filter which expects `store_id=`
+    const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.PRODUCTS.LIST}?store_id=${finalStoreId}`, {
       next: { revalidate: 60 }
     });
     
@@ -42,15 +44,9 @@ async function getStoreProducts(username: string) {
     }
     const data = await res.json();
     const allProducts = data.results || data || [];
-
-    // Filter products manually based on the mapped store_id
-    const storeId = STORE_SLUG_TO_ID_MAP[username];
-    if (storeId) {
-      return allProducts.filter((p: any) => p.store_id === storeId);
-    }
-
-    // Return empty if we don't know the store ID mapping to prevent showing all products
-    return [];
+    
+    // In case the backend filter fails, we also filter client-side just to be absolutely safe
+    return allProducts.filter((p: any) => p.store_id === finalStoreId);
   } catch (error) {
     console.error(error);
     return [];
@@ -87,8 +83,8 @@ export default async function ShopPage({ params }: { params: { username: string 
     notFound();
   }
 
-  // Fetch products by the string slug since the backend doesn't provide store.id
-  const products = await getStoreProducts(resolvedParams.username);
+  // Fetch products by the store.id (which was added to the backend!)
+  const products = await getStoreProducts(store.id, resolvedParams.username);
 
   return (
     <ShopClient store={store} initialProducts={products} username={resolvedParams.username} />
