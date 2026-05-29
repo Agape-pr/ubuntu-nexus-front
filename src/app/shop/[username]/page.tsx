@@ -24,10 +24,10 @@ async function getStore(username: string) {
 }
 
 // 2. Fetch Store Products
-async function getStoreProducts(username: string) {
+async function getStoreProducts(storeId: number) {
   try {
-    // Assuming backend supports filtering products by store slug: ?store=username
-    const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.PRODUCTS.LIST}?store=${username}`, {
+    // API uses store__id or store to filter by store ID
+    const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.PRODUCTS.LIST}?store=${storeId}&store__id=${storeId}`, {
       next: { revalidate: 60 }
     });
     
@@ -72,7 +72,8 @@ export default async function ShopPage({ params }: { params: { username: string 
     notFound();
   }
 
-  const products = await getStoreProducts(resolvedParams.username);
+  // Fetch products by the actual store ID instead of the string slug
+  const products = await getStoreProducts(store.id);
 
   return (
     <ShopClient store={store} initialProducts={products} username={resolvedParams.username} />
