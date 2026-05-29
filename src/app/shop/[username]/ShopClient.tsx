@@ -22,7 +22,7 @@ export default function ShopClient({ store, initialProducts, username }: { store
     return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF', maximumFractionDigits: 0 }).format(price);
   };
 
-  const formattedUsername = store?.name || (username ? username.replace(/-/g, ' ') : "Store");
+  const formattedUsername = store?.store_name || (username ? username.replace(/-/g, ' ') : "Store");
   
   // Filter products by search query
   const products = initialProducts.filter(p => 
@@ -60,7 +60,7 @@ export default function ShopClient({ store, initialProducts, username }: { store
           <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl bg-[#1A1A19] border-4 border-[#111110] shadow-2xl flex-shrink-0 overflow-hidden relative group">
             <div className="absolute inset-0 bg-gradient-to-tr from-[#B87800] to-[#FFB340] opacity-80 mix-blend-overlay group-hover:scale-110 transition-transform duration-700" />
             <img 
-              src={store?.logo || `https://api.dicebear.com/7.x/shapes/svg?seed=${username}`} 
+              src={store?.store_logo || `https://api.dicebear.com/7.x/shapes/svg?seed=${username}`} 
               alt={formattedUsername}
               className="w-full h-full object-cover"
             />
@@ -97,7 +97,7 @@ export default function ShopClient({ store, initialProducts, username }: { store
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 border-b border-white/10 pb-8 mb-8">
           <div className="lg:col-span-2">
             <p className="text-[#A0A09A] leading-relaxed">
-              {store?.description || "Welcome to our official UbuntuNow storefront! We specialize in premium products crafted with care and sourced sustainably. Follow us for the latest drops and exclusive discounts."}
+              {store?.store_description || "Welcome to our official UbuntuNow storefront! We specialize in premium products crafted with care and sourced sustainably. Follow us for the latest drops and exclusive discounts."}
             </p>
             <div className="flex items-center gap-6 mt-4 text-sm">
               <div className="flex flex-col">
@@ -153,13 +153,13 @@ export default function ShopClient({ store, initialProducts, username }: { store
                 {/* Product Image Container */}
                 <div className="relative aspect-[4/5] rounded-2xl bg-[#1A1A19] border border-white/5 overflow-hidden mb-3">
                   <img 
-                    src={product.image || product.images?.[0]?.image_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${product.name}`} 
+                    src={product.image || product.images?.[0]?.image || `https://api.dicebear.com/7.x/shapes/svg?seed=${product.name}`} 
                     alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   
                   {/* Out of Stock Overlay */}
-                  {product.inStock === false && (
+                  {product.in_stock === false && (
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10">
                       <span className="px-4 py-1.5 bg-white/10 border border-white/20 rounded-full font-bold text-xs uppercase tracking-wider">
                         Sold Out
@@ -168,7 +168,7 @@ export default function ShopClient({ store, initialProducts, username }: { store
                   )}
 
                   {/* Quick Add Button (Hover) */}
-                  {(product.inStock !== false) && (
+                  {(product.in_stock !== false) && (
                     <div className="absolute bottom-3 left-3 right-3 translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-10">
                       {/* Clicking Buy Now passes a redirectTo param so login redirects back here */}
                       <Link href={`/login?redirectTo=/shop/${username}/product/${product.slug || product.id}`} className="w-full py-2.5 bg-white/90 backdrop-blur text-black font-bold rounded-xl text-sm hover:bg-white flex items-center justify-center gap-2 shadow-lg shadow-black/20">

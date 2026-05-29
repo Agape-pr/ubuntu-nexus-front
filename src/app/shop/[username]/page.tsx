@@ -54,12 +54,12 @@ export async function generateMetadata({ params }: { params: { username: string 
   }
 
   return {
-    title: `${store.name || store.slug} | UbuntuNow`,
-    description: store.description || `Welcome to ${store.name || store.slug}'s official storefront on UbuntuNow.`,
+    title: `${store.store_name || store.slug} | UbuntuNow`,
+    description: store.store_description || `Welcome to ${store.store_name || store.slug}'s official storefront on UbuntuNow.`,
     openGraph: {
-      title: store.name || store.slug,
-      description: store.description,
-      images: [store.logo || `https://api.dicebear.com/7.x/shapes/svg?seed=${store.slug}`],
+      title: store.store_name || store.slug,
+      description: store.store_description || `Shop ${store.store_name || store.slug}'s collection on UbuntuNow.`,
+      images: [store.store_logo || '/default-og.png'],
     },
   };
 }
