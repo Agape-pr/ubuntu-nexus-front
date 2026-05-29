@@ -24,10 +24,16 @@ async function getStore(username: string) {
 }
 
 // 2. Fetch Store Products
-async function getStoreProducts(storeId: number) {
+// TEMP WORKAROUND: The backend API currently returns all products and ignores store filters.
+// It also does not return the store ID in the store profile, and products lack a store slug.
+// We must hardcode the mapping and manually filter on the frontend for the demo.
+const STORE_SLUG_TO_ID_MAP: Record<string, number> = {
+  'ladine-beauty-1': 11, // Mapped from backend database ID for Ladine Beauty
+};
+
+async function getStoreProducts(username: string) {
   try {
-    // API uses store__id or store to filter by store ID
-    const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.PRODUCTS.LIST}?store=${storeId}&store__id=${storeId}`, {
+    const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.PRODUCTS.LIST}`, {
       next: { revalidate: 60 }
     });
     
@@ -35,7 +41,16 @@ async function getStoreProducts(storeId: number) {
       return [];
     }
     const data = await res.json();
-    return data.results || data || [];
+    const allProducts = data.results || data || [];
+
+    // Filter products manually based on the mapped store_id
+    const storeId = STORE_SLUG_TO_ID_MAP[username];
+    if (storeId) {
+      return allProducts.filter((p: any) => p.store_id === storeId);
+    }
+
+    // Return empty if we don't know the store ID mapping to prevent showing all products
+    return [];
   } catch (error) {
     console.error(error);
     return [];
@@ -72,8 +87,8 @@ export default async function ShopPage({ params }: { params: { username: string 
     notFound();
   }
 
-  // Fetch products by the actual store ID instead of the string slug
-  const products = await getStoreProducts(store.id);
+  // Fetch products by the string slug since the backend doesn't provide store.id
+  const products = await getStoreProducts(resolvedParams.username);
 
   return (
     <ShopClient store={store} initialProducts={products} username={resolvedParams.username} />
