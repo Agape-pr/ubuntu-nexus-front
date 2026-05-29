@@ -47,8 +47,11 @@ class ApiClient {
   setTokens(access: string, refresh?: string, role?: string): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem('access_token', access);
+      document.cookie = `access_token=${access}; path=/; max-age=2592000; SameSite=Lax`; // 30 days
+      
       if (refresh) {
         localStorage.setItem('refresh_token', refresh);
+        document.cookie = `refresh_token=${refresh}; path=/; max-age=2592000; SameSite=Lax`;
       }
       if (role) {
         localStorage.setItem('user_role', role);
@@ -66,6 +69,10 @@ class ApiClient {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user_role');
+      
+      document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      
       // Notify same-tab listeners of logout
       window.dispatchEvent(new Event('auth-change'));
     }
@@ -242,7 +249,7 @@ class ApiClient {
           } else {
             // Token refresh failed or didn't exist, log user out
             this.removeTokens();
-            window.location.href = '/auth'; // Force a visual redirect
+            window.location.href = '/login'; // Force a visual redirect
           }
         }
 
