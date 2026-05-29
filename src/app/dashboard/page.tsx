@@ -506,12 +506,12 @@ export default function SellerDashboard() {
 
       <div className="flex flex-1">
         {/* -- Sidebar ---------------------------------- */}
-        <aside className="hidden lg:flex w-64 xl:w-72 flex-col bg-white border-r border-slate-100 sticky top-16 h-[calc(100vh-64px)]">
+        <aside className="hidden lg:flex w-64 xl:w-72 flex-col bg-background border-r border-border sticky top-16 h-[calc(100vh-64px)]">
           {/* Store identity */}
           <div className="p-6 border-b border-border">
             <div className="flex items-center gap-3 mb-4">
               <div className="relative">
-                <div className="h-12 w-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
                   {storeLogoPreview ? (
                     <img src={storeLogoPreview} alt={storeName} className="w-full h-full object-cover" />
                   ) : (
@@ -537,12 +537,12 @@ export default function SellerDashboard() {
             {/* Store link pill */}
             {storeUrl ? (
               <Link href={storeUrl} target="_blank"
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 hover:bg-slate-100 transition-all group">
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all group">
                 <ExternalLink size={12} className="text-white/40 group-hover:text-white/60 flex-shrink-0" />
                 <span className="text-[11px] text-white/50 truncate flex-1">{storeUrlDisplay}</span>
               </Link>
             ) : (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 opacity-60 cursor-not-allowed">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 opacity-60 cursor-not-allowed">
                 {isUserLoading ? <Loader2 size={12} className="animate-spin text-white/40 flex-shrink-0" /> : <ExternalLink size={12} className="text-white/30 flex-shrink-0" />}
                 <span className="text-[11px] text-white/40 truncate flex-1">{storeUrlDisplay}</span>
               </div>
@@ -569,12 +569,12 @@ export default function SellerDashboard() {
           <div className="p-4 border-t border-border">
             {storeUrl ? (
               <Link href={storeUrl} target="_blank">
-                <Button variant="outline" className="w-full rounded-2xl h-10 text-sm font-semibold gap-2 border-slate-200 hover:border-slate-300">
+                <Button variant="outline" className="w-full rounded-2xl h-10 text-sm font-semibold gap-2 border-white/10 hover:border-white/20 hover:bg-white/5 text-white hover:text-white">
                   <Eye size={14} /> Preview My Store
                 </Button>
               </Link>
             ) : (
-              <Button variant="outline" disabled className="w-full rounded-2xl h-10 text-sm font-semibold gap-2 border-slate-200 opacity-60 cursor-not-allowed">
+              <Button variant="outline" disabled className="w-full rounded-2xl h-10 text-sm font-semibold gap-2 border-white/10 bg-white/5 text-white/50 opacity-60 cursor-not-allowed">
                 {isUserLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
                 {isUserLoading ? "Loading store…" : "Preview unavailable"}
               </Button>
