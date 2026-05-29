@@ -70,7 +70,14 @@ export const useVerifyOTP = () => {
         window.dispatchEvent(new Event('auth-change')); // update Navbar instantly
       }
 
-      router.push(role === 'seller' ? '/dashboard' : '/marketplace');
+      // Redirect logic
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectTo = searchParams.get('redirectTo');
+      if (redirectTo) {
+        router.push(redirectTo);
+      } else {
+        router.push(role === 'seller' ? '/dashboard' : '/marketplace');
+      }
     },
     onError: (error: { message?: string }) => {
       toast.error(error.message || 'Invalid OTP. Please try again.');
@@ -92,7 +99,13 @@ export const useLogin = () => {
       // Tokens are stored automatically by the service
       toast.success('Welcome back!');
       const role = response.user?.role || (typeof window !== 'undefined' ? localStorage.getItem('user_role') : null);
-      router.push(role === 'seller' ? '/dashboard' : '/marketplace');
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectTo = searchParams.get('redirectTo');
+      if (redirectTo) {
+        router.push(redirectTo);
+      } else {
+        router.push(role === 'seller' ? '/dashboard' : '/marketplace');
+      }
     },
     onError: (error: { message?: string }) => {
       toast.error(error.message || 'Login failed. Please check your credentials.');
