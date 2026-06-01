@@ -1,0 +1,44 @@
+name: Auto-merge enock-develops → dev
+
+# Fires every time you push to enock-develops
+on:
+  push:
+    branches:
+      - enock-develops
+
+jobs:
+  merge-to-dev:
+    name: Merge into dev
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the FULL repo history (needed for merge to work correctly)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # fetch all branches & history
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 2. Set a bot identity for the merge commit
+      - name: Configure git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # 3. Switch to dev and merge enock-develops into it
+      - name: Merge enock-develops into dev
+        run: |
+          git checkout dev
+          git merge origin/enock-develops --no-ff \
+            -m "chore: auto-merge enock-develops → dev [skip ci]"
+
+      # 4. Push the updated dev branch back
+      - name: Push dev
+        run: git push origin dev
+
+      # ── Notify on failure ──────────────────────────────────────────────────
+      - name: Notify on merge conflict
+        if: failure()
+        run: |
+          echo "::error::Auto-merge failed — likely a conflict between enock-develops and dev."
+          echo "::error::Resolve the conflict locally, then push again."
