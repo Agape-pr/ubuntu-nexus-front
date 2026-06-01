@@ -153,7 +153,7 @@ export default function CartPage() {
                         )}
                         {item.in_stock === false && (
                           <span className="absolute bottom-0 inset-x-0 text-center text-[9px] font-bold bg-black/70 text-[#F0B800] py-0.5">
-                            📦 Same day
+                            📦 Same day/Right now
                           </span>
                         )}
                       </div>
