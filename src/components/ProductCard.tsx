@@ -91,7 +91,6 @@ const ProductCard = ({
   return (
     // h-full + flex-col so all cards in a grid row stretch to equal height
     <div className="group relative flex flex-col h-full bg-[#1A1A19] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:-translate-y-0.5">
-
       {/* ── Image area ── */}
       <Link href={productHref} className="block relative overflow-hidden aspect-square shrink-0">
         {image ? (
@@ -136,16 +135,11 @@ const ProductCard = ({
             e.stopPropagation();
             setWishlisted((v) => !v);
           }}
-          className={`
-            absolute top-2 right-2 h-7 w-7 rounded-full
-            flex items-center justify-center
-            backdrop-blur-sm border
-            transition-all duration-200
-            ${wishlisted
-              ? "bg-red-500/20 border-red-400/40 opacity-100"
+          className={`absolute top-2 right-2 h-7 w-7 rounded-full flex items-center justify-center backdrop-blur-sm border transition-all duration-200 ${
+            wishlisted 
+              ? "bg-red-500/20 border-red-400/40 opacity-100" 
               : "bg-black/30 border-white/10 opacity-0 group-hover:opacity-100"
-            }
-          `}
+          }`}
         >
           <Heart
             size={13}
@@ -157,7 +151,6 @@ const ProductCard = ({
 
       {/* ── Info — flex-col + flex-1 so bottom content is always flush ── */}
       <div className="flex flex-col flex-1 px-2.5 pt-2 pb-2.5 gap-1">
-
         {/* Product name — clamps to 2 lines, reserves space */}
         <Link href={productHref}>
           <h3 className="text-[12.5px] text-[#FBF8F2] font-medium leading-snug line-clamp-2 hover:text-[#F0B800] transition-colors min-h-[2.6em]">
@@ -173,13 +166,10 @@ const ProductCard = ({
           >
             {storeName}
           </Link>
-        ) : (
-          /* Placeholder to keep height consistent when no store name */
-          <span className="text-[10px] text-transparent select-none">·</span>
-        )}
+        ) : null}
 
         {/* Rating */}
-        {typeof rating === "number" && rating > 0 ? (
+        {typeof rating === "number" && rating > 0 && (
           <div className="flex items-center gap-1">
             <div className="flex items-center gap-0.5">
               {renderStars(rating)}
@@ -188,16 +178,10 @@ const ProductCard = ({
               <span className="text-[10px] text-[#555450]">({reviewCount})</span>
             )}
           </div>
-        ) : (
-          /* Reserve space even when no rating */
-          <span className="h-[11px] block" />
         )}
 
-        {/* Spacer pushes price+button to the bottom */}
-        <div className="flex-1" />
-
-        {/* Price row + Add to cart — always at card bottom */}
-        <div className="flex items-center justify-between mt-1">
+        {/* Price row + Add to cart — mt-auto keeps it at the bottom without a spacer gap */}
+        <div className="flex items-center justify-between mt-auto pt-2">
           <div className="flex items-baseline gap-0.5 min-w-0">
             <span className="text-[10px] text-[#666560] shrink-0">{currency}</span>
             <span
@@ -230,7 +214,6 @@ const ProductCard = ({
 };
 
 export default ProductCard;
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ProductGrid — drop this in your page/section to get correct responsive columns
