@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api/config";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/lib/api/hooks/useUsers";
 
@@ -19,6 +19,7 @@ export default function CartPage() {
   const { items, removeItem, getTotalPrice, updateQuantity, clearCart } = useCartStore();
   const totalPrice = getTotalPrice();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentIframeUrl, setPaymentIframeUrl] = useState<string | null>(null);
   const router = useRouter();
   const { data: userProfile } = useCurrentUser();
 
@@ -67,14 +68,34 @@ export default function CartPage() {
       const orders = await orderRes.json();
       if (orders && orders.length > 0) {
         const orderId = orders[0].id;
-        const paymentRes = await fetch(`${API_BASE_URL}/orders/${orderId}/mock-payment/`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+        // 2. Initiate Real Payment with Pesapal
+        const paymentPayload = {
+          order_id: orderId,
+          payment_method: 'pesapal'
+        };
+        
+        const paymentRes = await fetch(`${API_BASE_URL}/payments/payment/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(paymentPayload)
         });
-        if (!paymentRes.ok) throw new Error("Payment simulation failed");
-        clearCart();
-        toast.success("Order placed! Payment held securely in escrow.", { duration: 5000 });
-        router.push("/");
+        
+        if (!paymentRes.ok) {
+           const errData = await paymentRes.json();
+           throw new Error(errData.error || 'Failed to initiate payment');
+        }
+        
+        const paymentData = await paymentRes.json();
+        
+        // 3. Open Pesapal iframe in a popup
+        if (paymentData.redirect_url) {
+           setPaymentIframeUrl(paymentData.redirect_url);
+        } else {
+           throw new Error("No redirect URL returned from payment gateway");
+        }
       }
     } catch (error: any) {
       console.error("Checkout Error:", error);
@@ -85,6 +106,23 @@ export default function CartPage() {
   };
 
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
+
+  // Listen for messages from the iframe (when callback page loads)
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "PESAPAL_PAYMENT_COMPLETE") {
+        setPaymentIframeUrl(null);
+        clearCart();
+        toast.success('Payment completed successfully!');
+        router.push('/dashboard'); // or wherever you want them to go
+      } else if (event.data?.type === "PESAPAL_PAYMENT_CANCELLED") {
+        setPaymentIframeUrl(null);
+        toast.error('Payment was cancelled.');
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [clearCart, router]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0e0e0d]">
@@ -352,6 +390,34 @@ export default function CartPage() {
           </div>
         )}
       </main>
+<<<<<<< HEAD
+=======
+      <Footer />
+      
+      {/* Pesapal Payment Popup Modal */}
+      {paymentIframeUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6">
+          <div className="bg-white rounded-3xl overflow-hidden w-full max-w-4xl h-[90vh] flex flex-col relative shadow-2xl animate-fade-up">
+            <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50">
+              <h2 className="font-bold text-gray-800">Complete Your Payment</h2>
+              <button 
+                onClick={() => setPaymentIframeUrl(null)}
+                className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+              >
+                ✕ Cancel
+              </button>
+            </div>
+            <div className="flex-1 w-full relative bg-white">
+              <iframe 
+                src={paymentIframeUrl} 
+                className="absolute inset-0 w-full h-full border-0"
+                allow="payment"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+>>>>>>> 40fd8ab (feat: add iframe modal for pesapal checkout and callback page)
     </div>
   );
 }
