@@ -62,11 +62,18 @@ export default function CartPage() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(orderPayload),
       });
+      
+      const isOrderJson = orderRes.headers.get("content-type")?.includes("application/json");
       if (!orderRes.ok) {
-        const errorData = await orderRes.json();
-        throw new Error(errorData.error || "Failed to create order");
+        if (isOrderJson) {
+          const errorData = await orderRes.json();
+          throw new Error(errorData.error || "Failed to create order");
+        } else {
+          throw new Error(`Order failed (Server returned ${orderRes.status}). The backend may be offline or outdated.`);
+        }
       }
-      const orders = await orderRes.json();
+      
+      const orders = isOrderJson ? await orderRes.json() : [];
       if (orders && orders.length > 0) {
         const orderId = orders[0].id;
         // 2. Initiate Real Payment with Pesapal
@@ -84,9 +91,14 @@ export default function CartPage() {
           body: JSON.stringify(paymentPayload)
         });
         
+        const isPaymentJson = paymentRes.headers.get("content-type")?.includes("application/json");
         if (!paymentRes.ok) {
-           const errData = await paymentRes.json();
-           throw new Error(errData.error || 'Failed to initiate payment');
+           if (isPaymentJson) {
+             const errData = await paymentRes.json();
+             throw new Error(errData.error || 'Failed to initiate payment');
+           } else {
+             throw new Error(`Payment endpoint not found (Server returned ${paymentRes.status}). Railway backend needs to be deployed first!`);
+           }
         }
         
         const paymentData = await paymentRes.json();
