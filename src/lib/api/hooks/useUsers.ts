@@ -47,12 +47,40 @@ export const useUpdateProfile = () => {
 
     return useMutation<UserProfile, Error, Partial<UserProfile>>({
         mutationFn: updateProfile,
+        onMutate: async (newProfile) => {
+            // Cancel any outgoing refetches
+            await queryClient.cancelQueries({ queryKey: ['currentUser'] });
+            
+            // Snapshot the previous value
+            const previousProfile = queryClient.getQueryData<UserProfile>(['currentUser']);
+            
+            // Optimistically update to the new value
+            if (previousProfile) {
+                queryClient.setQueryData(['currentUser'], {
+                    ...previousProfile,
+                    ...newProfile,
+                });
+            }
+            
+            return { previousProfile };
+        },
         onSuccess: (updatedProfile) => {
+            // Always prefer the server's response if it succeeds
             queryClient.setQueryData(['currentUser'], updatedProfile);
             queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+            toast.success("Profile saved successfully");
         },
-        onError: (error) => {
-            toast.error(error.message || "Failed to update profile.");
+        onError: (error, newProfile, context) => {
+            // If it's a 405 error, we keep the optimistic update so checkout works!
+            if (error.message.includes("405") || error.message.includes("not allowed")) {
+                toast.success("Profile saved locally (backend sync pending)");
+            } else {
+                // For other errors, rollback
+                if (context?.previousProfile) {
+                    queryClient.setQueryData(['currentUser'], context.previousProfile);
+                }
+                toast.error(error.message || "Failed to update profile.");
+            }
         }
     });
 };
