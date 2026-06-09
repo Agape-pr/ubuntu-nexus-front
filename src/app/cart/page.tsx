@@ -28,7 +28,7 @@ export default function CartPage() {
     if (items.length === 0) return;
     setIsProcessing(true);
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+      const token = typeof window !== "undefined" ? localStorage.getItem("access_token")?.replace(/[\s\n\r\t\u200B]+/g, '') : null;
       if (!token) {
         toast.error("Please log in to proceed with checkout.");
         router.push("/auth");

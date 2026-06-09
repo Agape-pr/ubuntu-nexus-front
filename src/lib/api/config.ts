@@ -9,9 +9,9 @@ let BASE_API_URL: string;
 
 if (process.env.NODE_ENV === 'production') {
   // Confirmed live Railway URL — backend is reachable and CORS is open
-  BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || 'https://api-gatewayubuntunow-platform-be-production.up.railway.app/api/v1';
+  BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/[\s\n\r\t\u200B]+/g, '') || 'https://api-gatewayubuntunow-platform-be-production.up.railway.app/api/v1';
 } else {
-  BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || 'http://localhost:8000/api/v1';
+  BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/[\s\n\r\t\u200B]+/g, '') || 'http://localhost:8000/api/v1';
 }
 
 // Auto-fix misconfigured production environment variables (e.g. Vercel)
