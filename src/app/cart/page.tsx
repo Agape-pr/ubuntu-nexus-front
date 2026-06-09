@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/store/cartStore";
 import { PaymentOptions } from "@/components/ui/PaymentOptions";
@@ -390,8 +391,6 @@ export default function CartPage() {
           </div>
         )}
       </main>
-<<<<<<< HEAD
-=======
       <Footer />
       
       {/* Pesapal Payment Popup Modal */}
@@ -417,7 +416,6 @@ export default function CartPage() {
           </div>
         </div>
       )}
->>>>>>> 40fd8ab (feat: add iframe modal for pesapal checkout and callback page)
     </div>
   );
 }
