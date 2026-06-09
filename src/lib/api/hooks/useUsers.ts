@@ -47,7 +47,8 @@ export const useUpdateProfile = () => {
 
     return useMutation<UserProfile, Error, Partial<UserProfile>>({
         mutationFn: updateProfile,
-        onSuccess: () => {
+        onSuccess: (updatedProfile) => {
+            queryClient.setQueryData(['currentUser'], updatedProfile);
             queryClient.invalidateQueries({ queryKey: ['currentUser'] });
         },
         onError: (error) => {
