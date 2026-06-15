@@ -203,4 +203,111 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
+
+  /* ── Film grain noise overlay ── */
+  .noise-overlay {
+    position: relative;
+  }
+  .noise-overlay::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+  }
+
+  /* ── Subtle dot grid background ── */
+  .dot-grid {
+    background-image: radial-gradient(circle, rgba(184, 120, 0, 0.07) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* ── Gold gradient text ── */
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #F0B800 0%, #B87800 50%, #F0B800 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Gold ambient glow for CTAs ── */
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(184, 120, 0, 0.3), 0 0 60px rgba(184, 120, 0, 0.1);
+  }
+  .glow-gold-sm {
+    box-shadow: 0 0 12px rgba(184, 120, 0, 0.2);
+  }
+
+  /* ── Scroll-triggered reveal animations ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 100ms; }
+  .reveal-delay-2 { transition-delay: 200ms; }
+  .reveal-delay-3 { transition-delay: 300ms; }
+  .reveal-delay-4 { transition-delay: 400ms; }
+
+  /* ── Scroll progress bar ── */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #B87800, #F0B800);
+    z-index: 10000;
+    transition: width 0.1s linear;
+  }
+
+  /* ── Imigongo geometric divider ── */
+  .imigongo-divider {
+    height: 3px;
+    background: repeating-linear-gradient(
+      90deg,
+      #B87800 0px,
+      #B87800 8px,
+      transparent 8px,
+      transparent 12px,
+      #F0B800 12px,
+      #F0B800 16px,
+      transparent 16px,
+      transparent 24px
+    );
+    opacity: 0.4;
+  }
+
+  /* ── Card border glow on hover ── */
+  .card-glow {
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .card-glow:hover {
+    box-shadow: 0 0 24px rgba(184, 120, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-color: rgba(184, 120, 0, 0.3);
+  }
+
+  /* ── Floating animation variants ── */
+  @keyframes float-slow {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(1.5deg); }
+  }
+  .animate-float-slow {
+    animation: float-slow 8s ease-in-out infinite;
+  }
+
+  @keyframes float-delayed {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-14px) rotate(-2deg); }
+  }
+  .animate-float-delayed {
+    animation: float-delayed 7s ease-in-out 2s infinite;
+  }
 }
