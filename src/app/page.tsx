@@ -316,15 +316,12 @@ export default function ComingSoonPage() {
         }`}
       >
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
-          {/* Wordmark */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[#FBF8F2] font-black text-lg tracking-tight">
-              Ubuntu
-            </span>
-            <span className="text-[#111110] bg-[#B87800] px-1.5 py-0.5 rounded-sm font-black text-lg italic tracking-tight">
-              Now
-            </span>
-          </div>
+          {/* Logo */}
+          <img
+            src="/logo.png"
+            alt="UbuntuNow"
+            className="h-10 w-auto object-contain"
+          />
 
           {/* CTA */}
           <a
@@ -632,15 +629,12 @@ export default function ComingSoonPage() {
       <footer className="border-t border-white/5 py-10">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
-            {/* Wordmark */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[#FBF8F2] font-black text-base tracking-tight">
-                Ubuntu
-              </span>
-              <span className="text-[#111110] bg-[#B87800] px-1.5 py-0.5 rounded-sm font-black text-base italic tracking-tight">
-                Now
-              </span>
-            </div>
+            {/* Logo */}
+            <img
+              src="/logo.png"
+              alt="UbuntuNow"
+              className="h-8 w-auto object-contain"
+            />
 
             {/* Status */}
             <div className="flex items-center gap-2 text-[#888780] text-xs">
