@@ -1,5 +1,6 @@
 import "../index.css";
 import type { Metadata } from "next";
+import { Providers } from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "UbuntuNow | Coming Soon",
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased bg-[#111110] text-[#FBF8F2]">
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
