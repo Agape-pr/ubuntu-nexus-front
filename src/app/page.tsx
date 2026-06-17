@@ -336,7 +336,7 @@ export default function ComingSoonPage() {
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 2 — HERO (Split Layout)
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="relative min-h-screen flex items-center pt-20 pb-16 md:pt-0 md:pb-0">
+      <section className="relative min-h-[85vh] flex items-center pt-20 pb-10 md:pt-24 md:pb-12">
         {/* Ambient glow — intentionally subtle, not the main visual */}
         <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-[#7A4F00]/8 rounded-full blur-[160px] pointer-events-none" />
 
@@ -504,16 +504,16 @@ export default function ComingSoonPage() {
 
       {/* ── Imigongo Divider ── */}
       <div className="max-w-4xl mx-auto px-8">
-        <ImigongoPattern className="w-full h-12 opacity-60" />
+        <ImigongoPattern className="w-full h-6 opacity-60" />
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 3 — WHAT WE'RE BUILDING
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28">
+      <section className="py-12 sm:py-16">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
           {/* Section header */}
-          <div ref={addRevealRef} className="reveal text-center mb-14">
+          <div ref={addRevealRef} className="reveal text-center mb-8">
             <p className="text-xs font-bold text-[#B87800] uppercase tracking-[0.2em] mb-3">
               What we&apos;re building
             </p>
@@ -565,13 +565,13 @@ export default function ComingSoonPage() {
 
       {/* ── Imigongo Divider ── */}
       <div className="max-w-4xl mx-auto px-8">
-        <ImigongoPattern className="w-full h-12 opacity-40" />
+        <ImigongoPattern className="w-full h-6 opacity-40" />
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 4 — SELLER CTA
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28">
+      <section className="py-12 sm:py-16">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
           <div
             ref={addRevealRef}
@@ -626,7 +626,7 @@ export default function ComingSoonPage() {
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 5 — FOOTER
       ══════════════════════════════════════════════════════════════════════ */}
-      <footer className="border-t border-white/5 py-10">
+      <footer className="border-t border-white/5 py-6">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
             {/* Logo */}
