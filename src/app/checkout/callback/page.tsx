@@ -27,11 +27,16 @@ function CallbackContent() {
     setStatus("success");
     
     const timer = setTimeout(() => {
-      window.parent.postMessage({ 
-        type: "PESAPAL_PAYMENT_COMPLETE", 
-        orderTrackingId,
-        orderMerchantReference
-      }, "*");
+      if (window.parent !== window) {
+        window.parent.postMessage({ 
+          type: "PESAPAL_PAYMENT_COMPLETE", 
+          orderTrackingId,
+          orderMerchantReference
+        }, "*");
+      } else {
+        // We are on the top window, redirect to the homepage/dashboard manually
+        window.location.href = "/";
+      }
     }, 2000);
 
     return () => clearTimeout(timer);
