@@ -4,10 +4,13 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 
+import { useCartStore } from "@/lib/store/cartStore";
+
 function CallbackContent() {
   const searchParams = useSearchParams();
   const orderTrackingId = searchParams.get("OrderTrackingId");
   const orderMerchantReference = searchParams.get("OrderMerchantReference");
+  const clearCart = useCartStore((state) => state.clearCart);
   
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
 
@@ -16,7 +19,11 @@ function CallbackContent() {
     if (!orderTrackingId) {
       setStatus("error");
       setTimeout(() => {
-        window.parent.postMessage({ type: "PESAPAL_PAYMENT_CANCELLED" }, "*");
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: "PESAPAL_PAYMENT_CANCELLED" }, "*");
+        } else {
+          window.location.href = "/cart";
+        }
       }, 3000);
       return;
     }
@@ -25,6 +32,7 @@ function CallbackContent() {
     // Pesapal will hit our backend webhook which actually confirms the order,
     // so here we just assume success based on the redirect and tell the parent window to close the modal.
     setStatus("success");
+    clearCart(); // Clear the cart here to be absolutely safe
     
     const timer = setTimeout(() => {
       if (window.parent !== window) {
