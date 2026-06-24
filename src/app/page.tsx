@@ -190,13 +190,13 @@ export default function ComingSoonPage() {
         }`}
       >
         <div className="max-w-5xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4 sm:gap-6">
+          <div className="flex items-center gap-3 sm:gap-6">
             <img
               src="/logo.png"
               alt="UbuntuNow"
-              className="h-14 w-auto object-contain"
+              className="h-10 sm:h-14 w-auto object-contain"
             />
-            <span className="hidden md:block text-[10px] font-bold text-[#B87800] uppercase tracking-[0.15em] pl-4 sm:pl-6 border-l border-white/10 mt-1">
+            <span className="text-[8px] sm:text-[10px] font-bold text-[#B87800] uppercase tracking-[0.1em] sm:tracking-[0.15em] pl-3 sm:pl-6 border-l border-white/10 mt-1 leading-tight sm:leading-normal max-w-[130px] sm:max-w-none">
               Built on Trust. Powered by Community.
             </span>
           </div>
@@ -392,7 +392,7 @@ export default function ComingSoonPage() {
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
           <div ref={addRevealRef} className="reveal text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl font-black text-[#FBF8F2] mb-3 font-['Nunito'] tracking-tight">
-              Why Buyers Love It
+              Do you usually order anything online?
             </h2>
             <p className="text-[#888780] max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
               Online shopping in Rwanda has always carried a risk. We are eliminating that risk entirely.
@@ -470,7 +470,7 @@ export default function ComingSoonPage() {
               alt="UbuntuNow"
               className="h-10 w-auto object-contain"
             />
-            <p className="text-[11px] text-[#888780]">
+            <p className="text-[11px] text-[#888780] text-center sm:text-left mt-2 sm:mt-0">
               © 2026 UbuntuNow · Kigali, Rwanda · Built on Trust. Powered by Community.
             </p>
           </div>
