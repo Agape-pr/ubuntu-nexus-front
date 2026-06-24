@@ -11,6 +11,51 @@ import {
   Store,
 } from "lucide-react";
 
+// ─── Imigongo SVG Pattern ───────────────────────────────────────────────────────
+
+function ImigongoPattern({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 800 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <linearGradient id="imi-grad" x1="0" y1="0" x2="800" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#B87800" stopOpacity="0" />
+          <stop offset="20%" stopColor="#B87800" stopOpacity="0.5" />
+          <stop offset="50%" stopColor="#F0B800" stopOpacity="0.7" />
+          <stop offset="80%" stopColor="#B87800" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#B87800" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M0 40 L40 20 L80 40 L120 20 L160 40 L200 20 L240 40 L280 20 L320 40 L360 20 L400 40 L440 20 L480 40 L520 20 L560 40 L600 20 L640 40 L680 20 L720 40 L760 20 L800 40"
+        stroke="url(#imi-grad)"
+        strokeWidth="2"
+        fill="none"
+      />
+      <path
+        d="M0 40 L40 60 L80 40 L120 60 L160 40 L200 60 L240 40 L280 60 L320 40 L360 60 L400 40 L440 60 L480 40 L520 60 L560 40 L600 60 L640 40 L680 60 L720 40 L760 60 L800 40"
+        stroke="url(#imi-grad)"
+        strokeWidth="2"
+        fill="none"
+      />
+      {[80, 240, 400, 560, 720].map((x) => (
+        <path
+          key={x}
+          d={`M${x} 28 L${x + 12} 40 L${x} 52 L${x - 12} 40 Z`}
+          fill="#B87800"
+          fillOpacity="0.3"
+        />
+      ))}
+    </svg>
+  );
+}
+
 // ─── Constants ──────────────────────────────────────────────────────────────────
 
 const SURVEY_LINK =
@@ -179,9 +224,9 @@ export default function ComingSoonPage() {
         </div>
       </section>
 
-      {/* ── thin divider ── */}
-      <div className="max-w-5xl mx-auto px-5 sm:px-8">
-        <div className="h-px bg-white/5" />
+      {/* ── Imigongo Divider ── */}
+      <div className="max-w-4xl mx-auto px-8">
+        <ImigongoPattern className="w-full h-8 opacity-50" />
       </div>
 
       {/* ── FEATURES ── */}
@@ -212,9 +257,9 @@ export default function ComingSoonPage() {
         </div>
       </section>
 
-      {/* ── thin divider ── */}
-      <div className="max-w-5xl mx-auto px-5 sm:px-8">
-        <div className="h-px bg-white/5" />
+      {/* ── Imigongo Divider ── */}
+      <div className="max-w-4xl mx-auto px-8">
+        <ImigongoPattern className="w-full h-8 opacity-40" />
       </div>
 
       {/* ── SELLER CTA ── */}
