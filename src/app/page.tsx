@@ -332,7 +332,7 @@ export default function ComingSoonPage() {
       <section className="py-14 sm:py-20">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
           <div ref={addRevealRef} className="reveal text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-black text-[#FBF8F2] mb-3 font-['Nunito'] tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#B87800] mb-3 font-['Nunito'] tracking-tight">
               How It Works
             </h2>
             <p className="text-[#888780] max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
@@ -431,7 +431,7 @@ export default function ComingSoonPage() {
           >
             <div className="max-w-md">
               <h2
-                className="text-lg sm:text-xl font-black tracking-tight mb-1"
+                className="text-lg sm:text-xl font-black text-[#B87800] tracking-tight mb-1"
                 style={{ fontFamily: "'Nunito', sans-serif" }}
               >
                 Sell in Rwanda? We want to hear from you.
