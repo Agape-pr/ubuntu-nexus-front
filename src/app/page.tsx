@@ -217,13 +217,13 @@ export default function ComingSoonPage() {
 
             <h1
               ref={addRevealRef}
-              className="reveal reveal-delay-1 text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.1] tracking-tight mb-4"
+              className="reveal reveal-delay-1 text-[24px] leading-[1.35] sm:text-4xl lg:text-5xl font-black sm:leading-[1.1] tracking-tight mb-4"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
-              Commerce that operates 24/7.<br className="hidden sm:block" />
-              Transactions protected from fraud.<br className="hidden sm:block" />
+              Commerce that operates 24/7.<br />
+              Transactions protected from fraud.<br />
               Deliveries guaranteed on schedule.<br />
-              <span className="text-[#B87800]">We&apos;re building the infrastructure for all three.</span>
+              <span className="text-[#B87800] inline-block mt-1 sm:mt-2">We&apos;re building the infrastructure for all three.</span>
             </h1>
 
             <p
