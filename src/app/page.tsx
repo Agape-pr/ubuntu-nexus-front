@@ -220,8 +220,10 @@ export default function ComingSoonPage() {
               className="reveal reveal-delay-1 text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.1] tracking-tight mb-4"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
-              Selling should run 24/7. Buying shouldn&apos;t mean losing money. Delivery should show up on time.{" "}
-              <span className="text-[#B87800]">We&apos;re building all three.</span>
+              Selling should run 24/7.<br className="hidden sm:block" />
+              Buying shouldn&apos;t mean losing money.<br className="hidden sm:block" />
+              Delivery should show up on time.<br />
+              <span className="text-[#B87800]">We&apos;re building the infrastructure for all three.</span>
             </h1>
 
             <p
@@ -263,7 +265,7 @@ export default function ComingSoonPage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="flex items-center justify-center gap-2 bg-[#B87800] text-[#111110] px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-[#F0B800] transition-colors whitespace-nowrap disabled:opacity-70"
+                      className="self-start sm:self-auto flex items-center justify-center gap-2 bg-[#B87800] text-[#111110] px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-[#F0B800] transition-colors whitespace-nowrap disabled:opacity-70"
                     >
                       {loading ? "Joining..." : "Join Waitlist"}
                       <ArrowRight size={14} strokeWidth={3} />
