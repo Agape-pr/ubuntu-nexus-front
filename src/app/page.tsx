@@ -205,12 +205,12 @@ export default function ComingSoonPage() {
 
       {/* ── HERO ── */}
       <section className="pt-24 pb-10 sm:pt-28 sm:pb-14">
-        <div className="max-w-5xl mx-auto px-5 sm:px-8">
-          <div className="max-w-2xl">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 text-center flex flex-col items-center">
+          <div className="max-w-4xl flex flex-col items-center">
             {/* Status Pill */}
             <div
               ref={addRevealRef}
-              className="reveal flex items-center gap-2 mb-6"
+              className="reveal flex items-center justify-center gap-2 mb-6"
             >
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#B87800]/20 bg-[#B87800]/10 text-xs font-semibold text-[#B87800]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#F0B800] animate-pulse"></span>
@@ -220,17 +220,18 @@ export default function ComingSoonPage() {
 
             <h1
               ref={addRevealRef}
-              className="reveal reveal-delay-1 text-3xl sm:text-5xl lg:text-[56px] font-black leading-[1.1] tracking-tight mb-5"
+              className="reveal reveal-delay-1 text-[24px] leading-[1.35] sm:text-4xl lg:text-5xl font-black sm:leading-[1.1] tracking-tight mb-5"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
-              Always-on storefronts.<br />
-              Fraud-proof payments.<br />
-              Precision logistics.
+              Commerce that operates 24/7.<br />
+              Transactions protected from fraud.<br />
+              Deliveries guaranteed on schedule.<br />
+              <span className="text-[#B87800] inline-block mt-1 sm:mt-2">We&apos;re building the infrastructure for all three.</span>
             </h1>
 
             <p
               ref={addRevealRef}
-              className="reveal reveal-delay-2 text-base text-[#888780] leading-relaxed mb-6 max-w-lg"
+              className="reveal reveal-delay-2 text-base text-[#888780] leading-relaxed mb-8 max-w-2xl mx-auto"
             >
               UbuntuNow is the <strong className="text-[#FBF8F2]">Trust Layer</strong> for
               commerce in Rwanda — storefronts, escrow payments, and built-in logistics
@@ -244,17 +245,17 @@ export default function ComingSoonPage() {
               id="waitlist"
             >
               {submitted ? (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-lg flex items-center gap-3 max-w-md text-emerald-400">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-lg flex items-center justify-center gap-3 w-full max-w-md mx-auto text-emerald-400">
                   <CheckCircle2 size={18} />
                   <span className="font-semibold text-sm">
                     You&apos;re on the list! We&apos;ll be in touch soon.
                   </span>
                 </div>
               ) : (
-                <div className="max-w-md">
+                <div className="w-full max-w-[320px] sm:max-w-md mx-auto">
                   <form
                     onSubmit={handleWaitlistSubmit}
-                    className="flex flex-col sm:flex-row gap-2"
+                    className="flex flex-col items-center sm:flex-row sm:items-stretch justify-center gap-2"
                   >
                     <input
                       type="email"
@@ -262,12 +263,12 @@ export default function ComingSoonPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="flex-1 bg-[#1A1A19] border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-[#B87800]/40 transition-colors"
+                      className="w-full sm:flex-1 bg-[#1A1A19] border border-white/10 rounded-lg px-4 py-2.5 text-sm text-center sm:text-left text-white placeholder:text-white/25 outline-none focus:border-[#B87800]/40 transition-colors"
                     />
                     <button
                       type="submit"
                       disabled={loading}
-                      className="self-start sm:self-auto flex items-center justify-center gap-2 bg-[#B87800] text-[#111110] px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-[#F0B800] transition-colors whitespace-nowrap disabled:opacity-70"
+                      className="w-auto flex items-center justify-center gap-2 bg-[#B87800] text-[#111110] px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-[#F0B800] transition-colors whitespace-nowrap disabled:opacity-70"
                     >
                       {loading ? "Joining..." : "Join Waitlist"}
                       <ArrowRight size={14} strokeWidth={3} />
