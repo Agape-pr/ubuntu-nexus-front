@@ -223,32 +223,47 @@ export default function ComingSoonPage() {
               className="reveal reveal-delay-1 text-left w-full font-black tracking-tight mb-8"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
-              <div className="flex flex-col gap-5 sm:gap-7 w-full max-w-3xl">
-                <div className="flex items-start sm:items-center gap-4 sm:gap-6">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#B87800]/5 border border-[#B87800]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(184,120,0,0.1)] mt-1 sm:mt-0">
-                    <Store className="text-[#B87800]" size={22} />
+              <div className="flex flex-col gap-6 sm:gap-8 w-full max-w-3xl">
+                <div className="flex items-center gap-4 sm:gap-6 text-left">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#B87800]/5 border border-[#B87800]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(184,120,0,0.1)]">
+                    <Store className="text-[#B87800] w-6 h-6 sm:w-8 sm:h-8" />
                   </div>
-                  <span className="text-[22px] sm:text-3xl lg:text-4xl text-[#FBF8F2] leading-[1.2]">
-                    Commerce that operates <span className="text-[#B87800]">24/7</span>.
-                  </span>
+                  <div className="flex flex-col gap-0.5 sm:gap-1">
+                    <span className="text-[11px] sm:text-xs text-[#888780] font-semibold uppercase tracking-widest line-through decoration-[#B87800]/30">
+                      Losing sales when closed
+                    </span>
+                    <span className="text-[20px] sm:text-3xl lg:text-4xl text-[#FBF8F2] leading-[1.1]">
+                      Commerce that operates <span className="text-[#B87800]">24/7</span>.
+                    </span>
+                  </div>
                 </div>
                 
-                <div className="flex items-start sm:items-center gap-4 sm:gap-6">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#B87800]/5 border border-[#B87800]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(184,120,0,0.1)] mt-1 sm:mt-0">
-                    <ShieldCheck className="text-[#B87800]" size={22} />
+                <div className="flex items-center gap-4 sm:gap-6 text-left">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#B87800]/5 border border-[#B87800]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(184,120,0,0.1)]">
+                    <ShieldCheck className="text-[#B87800] w-6 h-6 sm:w-8 sm:h-8" />
                   </div>
-                  <span className="text-[22px] sm:text-3xl lg:text-4xl text-[#FBF8F2] leading-[1.2]">
-                    Transactions <span className="text-[#B87800]">protected</span> from fraud.
-                  </span>
+                  <div className="flex flex-col gap-0.5 sm:gap-1">
+                    <span className="text-[11px] sm:text-xs text-[#888780] font-semibold uppercase tracking-widest line-through decoration-[#B87800]/30">
+                      Fear of scams and fraud
+                    </span>
+                    <span className="text-[20px] sm:text-3xl lg:text-4xl text-[#FBF8F2] leading-[1.1]">
+                      Transactions <span className="text-[#B87800]">protected</span> from fraud.
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-start sm:items-center gap-4 sm:gap-6">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#B87800]/5 border border-[#B87800]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(184,120,0,0.1)] mt-1 sm:mt-0">
-                    <Truck className="text-[#B87800]" size={22} />
+                <div className="flex items-center gap-4 sm:gap-6 text-left">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#B87800]/5 border border-[#B87800]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(184,120,0,0.1)]">
+                    <Truck className="text-[#B87800] w-6 h-6 sm:w-8 sm:h-8" />
                   </div>
-                  <span className="text-[22px] sm:text-3xl lg:text-4xl text-[#FBF8F2] leading-[1.2]">
-                    Deliveries <span className="text-[#B87800]">guaranteed</span> on schedule.
-                  </span>
+                  <div className="flex flex-col gap-0.5 sm:gap-1">
+                    <span className="text-[11px] sm:text-xs text-[#888780] font-semibold uppercase tracking-widest line-through decoration-[#B87800]/30">
+                      Unreliable delivery riders
+                    </span>
+                    <span className="text-[20px] sm:text-3xl lg:text-4xl text-[#FBF8F2] leading-[1.1]">
+                      Deliveries <span className="text-[#B87800]">guaranteed</span> on schedule.
+                    </span>
+                  </div>
                 </div>
               </div>
               
