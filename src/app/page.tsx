@@ -189,11 +189,16 @@ export default function ComingSoonPage() {
         }`}
       >
         <div className="max-w-5xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
-          <img
-            src="/logo.png"
-            alt="UbuntuNow"
-            className="h-14 w-auto object-contain"
-          />
+          <div className="flex items-center gap-4 sm:gap-6">
+            <img
+              src="/logo.png"
+              alt="UbuntuNow"
+              className="h-14 w-auto object-contain"
+            />
+            <span className="hidden md:block text-[10px] font-bold text-[#B87800] uppercase tracking-[0.15em] pl-4 sm:pl-6 border-l border-white/10 mt-1">
+              Built on Trust. Powered by Community.
+            </span>
+          </div>
           <a
             href="#waitlist"
             className="hidden sm:inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#B87800]/30 text-sm font-semibold text-[#FBF8F2] hover:bg-[#B87800]/10 transition-colors"
