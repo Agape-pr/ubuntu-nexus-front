@@ -108,13 +108,13 @@ const FEATURES = [
   {
     icon: ShieldCheck,
     title: "Escrow Protection",
-    desc: "Payments held safe until buyers confirm delivery. Sellers get paid, buyers stay protected.",
+    desc: "Payments held safe with a 2-hour dispute window after receiving delivery. Sellers get paid, buyers stay protected.",
     accent: "#16A34A",
   },
   {
     icon: Truck,
     title: "Built-In Logistics",
-    desc: "From local deliveries to business fulfillment — we handle the movement so you focus on selling.",
+    desc: "From local deliveries to business fulfillment with live tracking — we handle the movement so you focus on selling.",
     accent: "#F0B800",
   },
   {
