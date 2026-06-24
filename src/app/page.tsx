@@ -200,7 +200,7 @@ export default function ComingSoonPage() {
           </a>
         </div>
         {/* Imigongo accent line below nav */}
-        <ImigongoLine className={`w-full h-[6px] transition-opacity duration-300 ${navSolid ? "opacity-60" : "opacity-0"}`} />
+        <ImigongoLine className="w-full h-[6px] opacity-50" />
       </nav>
 
       {/* ── HERO ── */}
@@ -220,8 +220,8 @@ export default function ComingSoonPage() {
               className="reveal reveal-delay-1 text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.1] tracking-tight mb-4"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
-              Selling online shouldn&apos;t mean losing money to fraud.{" "}
-              <span className="text-[#B87800]">We&apos;re fixing that.</span>
+              Selling should run 24/7. Buying shouldn&apos;t mean losing money. Delivery should show up on time.{" "}
+              <span className="text-[#B87800]">We&apos;re building all three.</span>
             </h1>
 
             <p
