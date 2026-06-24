@@ -460,7 +460,7 @@ export default function ComingSoonPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="py-5">
+      <footer className="py-5 bg-black mt-10">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
           {/* Imigongo accent above footer */}
           <ImigongoLine className="w-full h-[6px] opacity-30 mb-5" />
@@ -471,7 +471,7 @@ export default function ComingSoonPage() {
               className="h-10 w-auto object-contain"
             />
             <p className="text-[11px] text-[#888780]">
-              © 2025 UbuntuNow · Kigali, Rwanda · Built on Trust. Powered by Community.
+              © 2026 UbuntuNow · Kigali, Rwanda · Built on Trust. Powered by Community.
             </p>
           </div>
         </div>
