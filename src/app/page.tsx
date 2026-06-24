@@ -232,25 +232,31 @@ export default function ComingSoonPage() {
       {/* ── FEATURES ── */}
       <section className="py-10 sm:py-14">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-0">
             {FEATURES.map((feature, i) => (
               <div
                 key={feature.title}
                 ref={addRevealRef}
-                className={`reveal reveal-delay-${i + 1} bg-[#1A1A19] border border-white/8 rounded-xl p-5`}
+                className={`reveal reveal-delay-${i + 1} flex items-start gap-4 py-5 md:flex-col md:gap-0 md:px-5 md:py-0 ${
+                  i < FEATURES.length - 1
+                    ? "border-b border-white/5 md:border-b-0 md:border-r"
+                    : ""
+                }`}
               >
                 <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
-                  style={{ backgroundColor: `${feature.accent}15` }}
+                  className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 md:mb-3"
+                  style={{ backgroundColor: `${feature.accent}12` }}
                 >
-                  <feature.icon size={18} style={{ color: feature.accent }} />
+                  <feature.icon size={20} style={{ color: feature.accent }} />
                 </div>
-                <h3 className="text-sm font-bold text-[#FBF8F2] mb-1">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-[#888780] leading-relaxed">
-                  {feature.desc}
-                </p>
+                <div>
+                  <h3 className="text-[15px] font-bold text-[#FBF8F2] mb-0.5">
+                    {feature.title}
+                  </h3>
+                  <p className="text-[13px] text-[#888780] leading-relaxed">
+                    {feature.desc}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
