@@ -223,41 +223,32 @@ export default function ComingSoonPage() {
               className="reveal reveal-delay-1 text-left w-full font-black tracking-tight mb-8"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
-              <div className="grid grid-cols-1 gap-6 sm:gap-8 w-full">
-                {/* Item 1 */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center gap-3 sm:gap-4 text-[#888780] text-sm sm:text-base font-medium pl-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#B87800]/40 shrink-0"></div>
-                    <span className="line-through decoration-[#B87800]/30">Losing sales when the shop closes</span>
+              <div className="flex flex-col gap-5 sm:gap-7 w-full max-w-3xl">
+                <div className="flex items-start sm:items-center gap-4 sm:gap-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#B87800]/5 border border-[#B87800]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(184,120,0,0.1)] mt-1 sm:mt-0">
+                    <Store className="text-[#B87800]" size={22} />
                   </div>
-                  <div className="flex items-start sm:items-center gap-3 sm:gap-4 text-[22px] sm:text-3xl lg:text-4xl text-[#FBF8F2]">
-                    <ArrowRight className="text-[#B87800] shrink-0 mt-1 sm:mt-0 ml-0.5" size={20} strokeWidth={3} />
-                    <span>Commerce that operates <span className="text-[#B87800]">24/7</span>.</span>
+                  <span className="text-[22px] sm:text-3xl lg:text-4xl text-[#FBF8F2] leading-[1.2]">
+                    Commerce that operates <span className="text-[#B87800]">24/7</span>.
+                  </span>
+                </div>
+                
+                <div className="flex items-start sm:items-center gap-4 sm:gap-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#B87800]/5 border border-[#B87800]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(184,120,0,0.1)] mt-1 sm:mt-0">
+                    <ShieldCheck className="text-[#B87800]" size={22} />
                   </div>
+                  <span className="text-[22px] sm:text-3xl lg:text-4xl text-[#FBF8F2] leading-[1.2]">
+                    Transactions <span className="text-[#B87800]">protected</span> from fraud.
+                  </span>
                 </div>
 
-                {/* Item 2 */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center gap-3 sm:gap-4 text-[#888780] text-sm sm:text-base font-medium pl-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#B87800]/40 shrink-0"></div>
-                    <span className="line-through decoration-[#B87800]/30">Fear of payment scams and fraud</span>
+                <div className="flex items-start sm:items-center gap-4 sm:gap-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#B87800]/5 border border-[#B87800]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(184,120,0,0.1)] mt-1 sm:mt-0">
+                    <Truck className="text-[#B87800]" size={22} />
                   </div>
-                  <div className="flex items-start sm:items-center gap-3 sm:gap-4 text-[22px] sm:text-3xl lg:text-4xl text-[#FBF8F2]">
-                    <ArrowRight className="text-[#B87800] shrink-0 mt-1 sm:mt-0 ml-0.5" size={20} strokeWidth={3} />
-                    <span>Transactions <span className="text-[#B87800]">protected</span> from fraud.</span>
-                  </div>
-                </div>
-
-                {/* Item 3 */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center gap-3 sm:gap-4 text-[#888780] text-sm sm:text-base font-medium pl-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#B87800]/40 shrink-0"></div>
-                    <span className="line-through decoration-[#B87800]/30">Unreliable riders and missed schedules</span>
-                  </div>
-                  <div className="flex items-start sm:items-center gap-3 sm:gap-4 text-[22px] sm:text-3xl lg:text-4xl text-[#FBF8F2]">
-                    <ArrowRight className="text-[#B87800] shrink-0 mt-1 sm:mt-0 ml-0.5" size={20} strokeWidth={3} />
-                    <span>Deliveries <span className="text-[#B87800]">guaranteed</span> on schedule.</span>
-                  </div>
+                  <span className="text-[22px] sm:text-3xl lg:text-4xl text-[#FBF8F2] leading-[1.2]">
+                    Deliveries <span className="text-[#B87800]">guaranteed</span> on schedule.
+                  </span>
                 </div>
               </div>
               
