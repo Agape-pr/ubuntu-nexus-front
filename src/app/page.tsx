@@ -224,14 +224,14 @@ export default function ComingSoonPage() {
               Commerce that operates 24/7.<br />
               Transactions protected from fraud.<br />
               Deliveries guaranteed on schedule.<br />
-              <span className="text-[#B87800] inline-block mt-5 sm:mt-8">We&apos;re building the Tech-infrastructure for all three.</span>
+              <span className="text-[#B87800] block w-full text-center mt-5 sm:mt-8">We&apos;re building the Tech-infrastructure for all three.</span>
             </h1>
 
             <p
               ref={addRevealRef}
               className="reveal reveal-delay-2 text-base text-[#888780] leading-relaxed mb-8 max-w-2xl mx-auto"
             >
-              UbuntuNow is the <strong className="text-[#B87800]">Trust Layer</strong> for
+              UbuntuNow is the <strong className="text-[#FBF8F2]">Trust Layer</strong> for
               commerce in Rwanda — storefronts, escrow payments, and built-in logistics
               so sellers and buyers can trade with confidence, not worry.
             </p>
