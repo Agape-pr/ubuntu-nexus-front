@@ -220,9 +220,9 @@ export default function ComingSoonPage() {
               className="reveal reveal-delay-1 text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.1] tracking-tight mb-4"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
-              Selling should run 24/7.<br className="hidden sm:block" />
-              Buying shouldn&apos;t mean losing money.<br className="hidden sm:block" />
-              Delivery should show up on time.<br />
+              Commerce that operates 24/7.<br className="hidden sm:block" />
+              Transactions protected from fraud.<br className="hidden sm:block" />
+              Deliveries guaranteed on schedule.<br />
               <span className="text-[#B87800]">We&apos;re building the infrastructure for all three.</span>
             </h1>
 
