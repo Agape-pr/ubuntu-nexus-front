@@ -207,23 +207,25 @@ export default function ComingSoonPage() {
       <section className="pt-24 pb-10 sm:pt-28 sm:pb-14">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
           <div className="max-w-2xl">
-            {/* Slogan */}
-            <p
+            {/* Status Pill */}
+            <div
               ref={addRevealRef}
-              className="reveal text-xs font-semibold text-[#B87800] uppercase tracking-[0.15em] mb-4"
+              className="reveal flex items-center gap-2 mb-6"
             >
-              Built on Trust. Powered by Community.
-            </p>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#B87800]/20 bg-[#B87800]/10 text-xs font-semibold text-[#B87800]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#F0B800] animate-pulse"></span>
+                Systems in testing phase
+              </div>
+            </div>
 
             <h1
               ref={addRevealRef}
-              className="reveal reveal-delay-1 text-[24px] leading-[1.35] sm:text-4xl lg:text-5xl font-black sm:leading-[1.1] tracking-tight mb-4"
+              className="reveal reveal-delay-1 text-3xl sm:text-5xl lg:text-[56px] font-black leading-[1.1] tracking-tight mb-5"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
-              Commerce that operates 24/7.<br />
-              Transactions protected from fraud.<br />
-              Deliveries guaranteed on schedule.<br />
-              <span className="text-[#B87800] inline-block mt-1 sm:mt-2">We&apos;re building the infrastructure for all three.</span>
+              Always-on storefronts.<br />
+              Fraud-proof payments.<br />
+              Precision logistics.
             </h1>
 
             <p
