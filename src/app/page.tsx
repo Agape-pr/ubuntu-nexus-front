@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import {
   ArrowRight,
   ExternalLink,
   CheckCircle2,
@@ -10,6 +9,9 @@ import {
   Zap,
   Store,
   Truck,
+  Wallet,
+  MapPin,
+  ShoppingBag,
 } from "lucide-react";
 
 // ─── Imigongo SVG Pattern ───────────────────────────────────────────────────────
@@ -321,6 +323,95 @@ export default function ComingSoonPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section className="py-14 sm:py-20">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8">
+          <div ref={addRevealRef} className="reveal text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#FBF8F2] mb-3 font-['Nunito'] tracking-tight">
+              How It Works
+            </h2>
+            <p className="text-[#888780] max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+              A unified ecosystem designed for the Rwandan market. We connect the dots between selling, paying, and moving goods.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 relative">
+            {/* Connecting line for desktop */}
+            <div className="hidden md:block absolute top-10 left-[16%] right-[16%] h-px bg-gradient-to-r from-transparent via-[#B87800]/30 to-transparent z-0"></div>
+            
+            {[
+              {
+                step: "01",
+                icon: Store,
+                title: "Launch Your Store",
+                desc: "Sign up and list your products in minutes. No technical skills required, zero setup fees to start.",
+              },
+              {
+                step: "02",
+                icon: Wallet,
+                title: "Secure Payments",
+                desc: "Customers pay via MoMo or Card. Funds are securely locked in escrow until the item is delivered.",
+              },
+              {
+                step: "03",
+                icon: Truck,
+                title: "Automated Fulfillment",
+                desc: "Our integrated logistics network automatically dispatches a rider to pick up and deliver directly to the buyer.",
+              },
+            ].map((item, i) => (
+              <div key={item.step} ref={addRevealRef} className={`reveal reveal-delay-${i + 1} relative z-10 flex flex-col items-center text-center`}>
+                <div className="w-20 h-20 rounded-2xl bg-[#151514] border border-white/5 flex items-center justify-center mb-6 relative group hover:border-[#B87800]/40 hover:bg-[#1A1A19] transition-all duration-300">
+                  <div className="absolute -top-3 -left-2 text-[11px] font-black text-[#B87800]/60 tracking-wider bg-[#111110] px-1">{item.step}</div>
+                  <item.icon size={28} className="text-[#B87800] group-hover:scale-110 transition-transform duration-300" />
+                </div>
+                <h3 className="text-[17px] font-bold text-[#FBF8F2] mb-2">{item.title}</h3>
+                <p className="text-[14px] text-[#888780] leading-relaxed max-w-[280px]">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Imigongo Divider ── */}
+      <div className="max-w-4xl mx-auto px-8">
+        <ImigongoPattern className="w-full h-8 opacity-40" />
+      </div>
+
+      {/* ── WHY BUYERS LOVE IT ── */}
+      <section className="py-14 sm:py-20">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8">
+          <div ref={addRevealRef} className="reveal text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#FBF8F2] mb-3 font-['Nunito'] tracking-tight">
+              Why Buyers Love It
+            </h2>
+            <p className="text-[#888780] max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+              Online shopping in Rwanda has always carried a risk. We are eliminating that risk entirely.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div ref={addRevealRef} className="reveal reveal-delay-1 bg-white/[0.02] border border-white/5 rounded-2xl p-6 sm:p-8 hover:bg-white/[0.04] transition-colors duration-300 group">
+              <div className="w-12 h-12 rounded-xl bg-[#B87800]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <ShieldCheck className="text-[#B87800]" size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-[#FBF8F2] mb-3">100% Fraud Protection</h3>
+              <p className="text-[14px] text-[#888780] leading-relaxed">
+                Your money is held securely by our escrow system. The seller does not get paid until the item is in your hands and you have confirmed it matches the description.
+              </p>
+            </div>
+            <div ref={addRevealRef} className="reveal reveal-delay-2 bg-white/[0.02] border border-white/5 rounded-2xl p-6 sm:p-8 hover:bg-white/[0.04] transition-colors duration-300 group">
+              <div className="w-12 h-12 rounded-xl bg-[#B87800]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <MapPin className="text-[#B87800]" size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-[#FBF8F2] mb-3">Live Delivery Tracking</h3>
+              <p className="text-[14px] text-[#888780] leading-relaxed">
+                No more wondering when your package will arrive or calling the delivery rider five times. Watch your delivery move on the map in real-time, exactly when you expect it.
+              </p>
+            </div>
           </div>
         </div>
       </section>
