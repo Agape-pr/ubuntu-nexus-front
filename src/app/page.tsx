@@ -196,7 +196,7 @@ export default function ComingSoonPage() {
               alt="UbuntuNow"
               className="h-10 sm:h-14 w-auto object-contain"
             />
-            <span className="text-[8px] sm:text-[10px] font-bold text-[#B87800] uppercase tracking-[0.1em] sm:tracking-[0.15em] pl-3 sm:pl-6 border-l border-white/10 mt-1 leading-tight sm:leading-normal max-w-[130px] sm:max-w-none">
+            <span className="text-[7px] min-[400px]:text-[8px] sm:text-[10px] font-bold text-[#B87800] uppercase tracking-[0.05em] sm:tracking-[0.15em] pl-3 sm:pl-6 border-l border-white/10 mt-1 whitespace-nowrap">
               Built on Trust. Powered by Community.
             </span>
           </div>
@@ -223,7 +223,7 @@ export default function ComingSoonPage() {
               Commerce that operates 24/7.<br />
               Transactions protected from fraud.<br />
               Deliveries guaranteed on schedule.<br />
-              <span className="text-[#B87800] inline-block mt-1 sm:mt-2">We&apos;re building the infrastructure for all three.</span>
+              <span className="text-[#B87800] inline-block mt-5 sm:mt-8">We&apos;re building the Tech-infrastructure for all three.</span>
             </h1>
 
             <p
@@ -257,7 +257,7 @@ export default function ComingSoonPage() {
                   </div>
                   <form
                     onSubmit={handleWaitlistSubmit}
-                    className="flex flex-col items-center sm:flex-row sm:items-stretch justify-center gap-2"
+                    className="flex flex-row items-stretch justify-center gap-2 w-full"
                   >
                     <input
                       type="email"
@@ -265,12 +265,12 @@ export default function ComingSoonPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="w-full sm:flex-1 bg-[#1A1A19] border border-white/10 rounded-lg px-4 py-2.5 text-sm text-center sm:text-left text-white placeholder:text-white/25 outline-none focus:border-[#B87800]/40 transition-colors"
+                      className="w-full min-w-0 bg-[#1A1A19] border border-white/10 rounded-lg px-3 sm:px-4 py-2.5 text-[11px] sm:text-sm text-left text-white placeholder:text-white/25 outline-none focus:border-[#B87800]/40 transition-colors"
                     />
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-auto flex items-center justify-center gap-2 bg-[#B87800] text-[#111110] px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-[#F0B800] transition-colors whitespace-nowrap disabled:opacity-70"
+                      className="shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 bg-[#B87800] text-[#111110] px-4 sm:px-6 py-2.5 rounded-lg font-bold text-[11px] sm:text-sm hover:bg-[#F0B800] transition-colors whitespace-nowrap disabled:opacity-70"
                     >
                       {loading ? "Joining..." : "Join Waitlist"}
                       <ArrowRight size={14} strokeWidth={3} />
