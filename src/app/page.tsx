@@ -215,17 +215,6 @@ export default function ComingSoonPage() {
       <section className="pt-24 pb-10 sm:pt-28 sm:pb-14">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 text-center flex flex-col items-center">
           <div className="max-w-4xl flex flex-col items-center">
-            {/* Status Pill */}
-            <div
-              ref={addRevealRef}
-              className="reveal flex items-center justify-center gap-2 mb-6"
-            >
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#B87800]/20 bg-[#B87800]/10 text-xs font-semibold text-[#B87800]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F0B800] animate-pulse"></span>
-                Systems in testing phase
-              </div>
-            </div>
-
             <h1
               ref={addRevealRef}
               className="reveal reveal-delay-1 text-[24px] leading-[1.35] sm:text-4xl lg:text-5xl font-black sm:leading-[1.1] tracking-tight mb-5"
@@ -241,7 +230,7 @@ export default function ComingSoonPage() {
               ref={addRevealRef}
               className="reveal reveal-delay-2 text-base text-[#888780] leading-relaxed mb-8 max-w-2xl mx-auto"
             >
-              UbuntuNow is the <strong className="text-[#FBF8F2]">Trust Layer</strong> for
+              UbuntuNow is the <strong className="text-[#B87800]">Trust Layer</strong> for
               commerce in Rwanda — storefronts, escrow payments, and built-in logistics
               so sellers and buyers can trade with confidence, not worry.
             </p>
@@ -260,7 +249,12 @@ export default function ComingSoonPage() {
                   </span>
                 </div>
               ) : (
-                <div className="w-full max-w-[320px] sm:max-w-md mx-auto">
+                <div className="w-full max-w-[320px] sm:max-w-md mx-auto flex flex-col items-center">
+                  {/* Refined Status Pill */}
+                  <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full border border-white/5 bg-white/[0.02] text-[10px] sm:text-[11px] uppercase tracking-widest font-bold text-[#B87800]/80">
+                    <span className="w-1 h-1 rounded-full bg-[#B87800] animate-pulse"></span>
+                    System in testing phase
+                  </div>
                   <form
                     onSubmit={handleWaitlistSubmit}
                     className="flex flex-col items-center sm:flex-row sm:items-stretch justify-center gap-2"
