@@ -176,7 +176,7 @@ export default function ComingSoonPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#111110] text-[#FBF8F2] overflow-x-hidden">
+    <div className="min-h-screen bg-[#111110] text-[#FBF8F2] overflow-x-hidden ambient-bg">
 
       {/* ── NAV with Imigongo accent ── */}
       <nav
@@ -297,7 +297,7 @@ export default function ComingSoonPage() {
               <div
                 key={feature.title}
                 ref={addRevealRef}
-                className={`reveal reveal-delay-${i + 1} flex items-start gap-4 py-5 px-1 sm:px-4 ${
+                className={`reveal reveal-delay-${i + 1} flex items-start gap-4 py-5 px-4 sm:px-4 hover:bg-white/[0.02] transition-colors duration-300 rounded-xl cursor-default ${
                   i < FEATURES.length - 2
                     ? "border-b border-white/5"
                     : i === FEATURES.length - 2
@@ -306,7 +306,7 @@ export default function ComingSoonPage() {
                 } ${i % 2 === 0 ? "sm:border-r sm:border-white/5" : ""}`}
               >
                 <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${i % 2 === 0 ? 'animate-float-slow' : 'animate-float-delayed'}`}
                   style={{ backgroundColor: `${feature.accent}12` }}
                 >
                   <feature.icon size={18} style={{ color: feature.accent }} />
