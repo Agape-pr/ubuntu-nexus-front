@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Zap,
   Store,
+  Truck,
 } from "lucide-react";
 
 // ─── Imigongo SVG Pattern ───────────────────────────────────────────────────────
@@ -56,6 +57,42 @@ function ImigongoPattern({ className = "" }: { className?: string }) {
   );
 }
 
+// Compact Imigongo line for the nav bottom accent
+function ImigongoLine({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 800 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <linearGradient id="imi-nav" x1="0" y1="0" x2="800" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#B87800" stopOpacity="0" />
+          <stop offset="30%" stopColor="#B87800" stopOpacity="0.6" />
+          <stop offset="50%" stopColor="#F0B800" stopOpacity="0.8" />
+          <stop offset="70%" stopColor="#B87800" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#B87800" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M0 6 L20 2 L40 6 L60 2 L80 6 L100 2 L120 6 L140 2 L160 6 L180 2 L200 6 L220 2 L240 6 L260 2 L280 6 L300 2 L320 6 L340 2 L360 6 L380 2 L400 6 L420 2 L440 6 L460 2 L480 6 L500 2 L520 6 L540 2 L560 6 L580 2 L600 6 L620 2 L640 6 L660 2 L680 6 L700 2 L720 6 L740 2 L760 6 L780 2 L800 6"
+        stroke="url(#imi-nav)"
+        strokeWidth="1.5"
+        fill="none"
+      />
+      <path
+        d="M0 6 L20 10 L40 6 L60 10 L80 6 L100 10 L120 6 L140 10 L160 6 L180 10 L200 6 L220 10 L240 6 L260 10 L280 6 L300 10 L320 6 L340 10 L360 6 L380 10 L400 6 L420 10 L440 6 L460 10 L480 6 L500 10 L520 6 L540 10 L560 6 L580 10 L600 6 L620 10 L640 6 L660 10 L680 6 L700 10 L720 6 L740 10 L760 6 L780 10 L800 6"
+        stroke="url(#imi-nav)"
+        strokeWidth="1.5"
+        fill="none"
+      />
+    </svg>
+  );
+}
+
 // ─── Constants ──────────────────────────────────────────────────────────────────
 
 const SURVEY_LINK =
@@ -65,20 +102,26 @@ const FEATURES = [
   {
     icon: Store,
     title: "Seller Storefronts",
-    desc: "Your own branded shop, live in minutes. No tech skills needed.",
+    desc: "Launch your own branded shop in minutes — no tech skills, no fees to start.",
     accent: "#B87800",
   },
   {
     icon: ShieldCheck,
     title: "Escrow Protection",
-    desc: "Every payment held safe until you confirm delivery. Zero risk.",
+    desc: "Payments held safe until buyers confirm delivery. Sellers get paid, buyers stay protected.",
     accent: "#16A34A",
   },
   {
-    icon: Zap,
-    title: "2-Hour Delivery",
-    desc: "Local sellers, lightning-fast fulfillment across Kigali.",
+    icon: Truck,
+    title: "Built-In Logistics",
+    desc: "From local deliveries to business fulfillment — we handle the movement so you focus on selling.",
     accent: "#F0B800",
+  },
+  {
+    icon: Zap,
+    title: "Fast Fulfillment",
+    desc: "Same-day and 2-hour delivery across Kigali. Your customers get what they want, when they want it.",
+    accent: "#E05A00",
   },
 ];
 
@@ -91,7 +134,6 @@ export default function ComingSoonPage() {
   const [navSolid, setNavSolid] = useState(false);
   const revealRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Nav background on scroll
   useEffect(() => {
     const handleScroll = () => {
       setNavSolid(window.scrollY > 40);
@@ -100,7 +142,6 @@ export default function ComingSoonPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Intersection observer for reveal animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -112,11 +153,9 @@ export default function ComingSoonPage() {
       },
       { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
     );
-
     revealRefs.current.forEach((ref) => {
       if (ref) observer.observe(ref);
     });
-
     return () => observer.disconnect();
   }, []);
 
@@ -139,11 +178,11 @@ export default function ComingSoonPage() {
   return (
     <div className="min-h-screen bg-[#111110] text-[#FBF8F2] overflow-x-hidden">
 
-      {/* ── NAV ── */}
+      {/* ── NAV with Imigongo accent ── */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           navSolid
-            ? "bg-[#111110]/80 backdrop-blur-xl border-b border-white/5"
+            ? "bg-[#111110]/90 backdrop-blur-xl"
             : "bg-transparent"
         }`}
       >
@@ -155,69 +194,85 @@ export default function ComingSoonPage() {
           />
           <a
             href="#waitlist"
-            className="hidden sm:inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 text-sm font-semibold text-[#FBF8F2] hover:bg-white/5 transition-colors"
+            className="hidden sm:inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#B87800]/30 text-sm font-semibold text-[#FBF8F2] hover:bg-[#B87800]/10 transition-colors"
           >
             Join Waitlist
           </a>
         </div>
+        {/* Imigongo accent line below nav */}
+        <ImigongoLine className={`w-full h-[6px] transition-opacity duration-300 ${navSolid ? "opacity-60" : "opacity-0"}`} />
       </nav>
 
       {/* ── HERO ── */}
-      <section className="pt-24 pb-12 sm:pt-28 sm:pb-16">
+      <section className="pt-24 pb-10 sm:pt-28 sm:pb-14">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
           <div className="max-w-2xl">
+            {/* Slogan */}
+            <p
+              ref={addRevealRef}
+              className="reveal text-xs font-semibold text-[#B87800] uppercase tracking-[0.15em] mb-4"
+            >
+              Built on Trust. Powered by Community.
+            </p>
+
             <h1
               ref={addRevealRef}
-              className="reveal text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.1] tracking-tight mb-4"
+              className="reveal reveal-delay-1 text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.1] tracking-tight mb-4"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
-              The <span className="text-[#B87800]">trust layer</span> African
-              commerce has been waiting for.
+              Selling online shouldn&apos;t mean losing money to fraud.{" "}
+              <span className="text-[#B87800]">We&apos;re fixing that.</span>
             </h1>
 
             <p
               ref={addRevealRef}
-              className="reveal reveal-delay-1 text-base text-[#888780] leading-relaxed mb-6 max-w-lg"
+              className="reveal reveal-delay-2 text-base text-[#888780] leading-relaxed mb-6 max-w-lg"
             >
-              We&apos;re building the tech infrastructure that empowers sellers
-              and guarantees trust for every transaction in Rwanda.
+              UbuntuNow is the <strong className="text-[#FBF8F2]">Trust Layer</strong> for
+              commerce in Rwanda — storefronts, escrow payments, and built-in logistics
+              so sellers and buyers can trade with confidence, not worry.
             </p>
 
-            {/* Waitlist form */}
+            {/* Waitlist form — refined */}
             <div
               ref={addRevealRef}
-              className="reveal reveal-delay-2"
+              className="reveal reveal-delay-3"
               id="waitlist"
             >
               {submitted ? (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl flex items-center gap-3 max-w-md text-emerald-400">
-                  <CheckCircle2 size={20} />
-                  <span className="font-bold text-sm">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-lg flex items-center gap-3 max-w-md text-emerald-400">
+                  <CheckCircle2 size={18} />
+                  <span className="font-semibold text-sm">
                     You&apos;re on the list! We&apos;ll be in touch soon.
                   </span>
                 </div>
               ) : (
-                <form
-                  onSubmit={handleWaitlistSubmit}
-                  className="bg-[#1A1A19] border border-white/10 p-1.5 pl-5 rounded-full flex flex-col sm:flex-row items-center justify-between max-w-md gap-2"
-                >
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    className="bg-transparent border-none outline-none text-white w-full text-sm placeholder:text-white/25 h-10"
-                  />
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex items-center justify-center gap-2 bg-[#B87800] text-[#111110] px-5 py-2.5 rounded-full font-bold text-sm hover:bg-[#F0B800] transition-colors whitespace-nowrap w-full sm:w-auto disabled:opacity-70"
+                <div className="max-w-md">
+                  <form
+                    onSubmit={handleWaitlistSubmit}
+                    className="flex flex-col sm:flex-row gap-2"
                   >
-                    {loading ? "Joining..." : "Join Waitlist"}{" "}
-                    <ArrowRight size={14} strokeWidth={3} />
-                  </button>
-                </form>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="flex-1 bg-[#1A1A19] border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-[#B87800]/40 transition-colors"
+                    />
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="flex items-center justify-center gap-2 bg-[#B87800] text-[#111110] px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-[#F0B800] transition-colors whitespace-nowrap disabled:opacity-70"
+                    >
+                      {loading ? "Joining..." : "Join Waitlist"}
+                      <ArrowRight size={14} strokeWidth={3} />
+                    </button>
+                  </form>
+                  <p className="text-[11px] text-[#888780]/60 mt-2">
+                    Be first to know when we launch. No spam.
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -232,22 +287,24 @@ export default function ComingSoonPage() {
       {/* ── FEATURES ── */}
       <section className="py-10 sm:py-14">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
             {FEATURES.map((feature, i) => (
               <div
                 key={feature.title}
                 ref={addRevealRef}
-                className={`reveal reveal-delay-${i + 1} flex items-start gap-4 py-5 md:flex-col md:gap-0 md:px-5 md:py-0 ${
-                  i < FEATURES.length - 1
-                    ? "border-b border-white/5 md:border-b-0 md:border-r"
+                className={`reveal reveal-delay-${i + 1} flex items-start gap-4 py-5 px-1 sm:px-4 ${
+                  i < FEATURES.length - 2
+                    ? "border-b border-white/5"
+                    : i === FEATURES.length - 2
+                    ? "border-b border-white/5 sm:border-b-0"
                     : ""
-                }`}
+                } ${i % 2 === 0 ? "sm:border-r sm:border-white/5" : ""}`}
               >
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 md:mb-3"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                   style={{ backgroundColor: `${feature.accent}12` }}
                 >
-                  <feature.icon size={20} style={{ color: feature.accent }} />
+                  <feature.icon size={18} style={{ color: feature.accent }} />
                 </div>
                 <div>
                   <h3 className="text-[15px] font-bold text-[#FBF8F2] mb-0.5">
@@ -268,48 +325,53 @@ export default function ComingSoonPage() {
         <ImigongoPattern className="w-full h-8 opacity-40" />
       </div>
 
-      {/* ── SELLER CTA ── */}
+      {/* ── SELLER CTA — refined ── */}
       <section className="py-10 sm:py-14">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
           <div
             ref={addRevealRef}
-            className="reveal bg-[#1A1A19] border border-white/8 rounded-xl p-6 sm:p-8"
+            className="reveal flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 py-6 sm:py-0"
           >
-            <h2
-              className="text-xl sm:text-2xl font-black tracking-tight mb-2"
-              style={{ fontFamily: "'Nunito', sans-serif" }}
-            >
-              Are you a seller in Rwanda?
-            </h2>
-            <p className="text-sm text-[#888780] leading-relaxed mb-5 max-w-md">
-              Help us build a platform that works for you. Your insights shape
-              everything. Takes 3 minutes.
-            </p>
+            <div className="max-w-md">
+              <h2
+                className="text-lg sm:text-xl font-black tracking-tight mb-1"
+                style={{ fontFamily: "'Nunito', sans-serif" }}
+              >
+                Sell in Rwanda? We want to hear from you.
+              </h2>
+              <p className="text-sm text-[#888780] leading-relaxed">
+                Whether you sell online, in a shop, or need delivery for your business —
+                your insights will shape how UbuntuNow works. Takes 3 minutes.
+              </p>
+            </div>
             <a
               href={SURVEY_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/5 border border-white/10 text-[#FBF8F2] hover:bg-white/10 transition-colors font-semibold text-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#B87800] text-[#111110] hover:bg-[#F0B800] transition-colors font-bold text-sm shrink-0"
             >
-              <Sparkles size={14} className="text-[#B87800]" />
               Take the Survey
-              <ExternalLink size={12} className="text-white/30" />
+              <ExternalLink size={13} />
             </a>
           </div>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-white/5 py-5">
-        <div className="max-w-5xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <img
-            src="/logo.png"
-            alt="UbuntuNow"
-            className="h-10 w-auto object-contain"
-          />
-          <p className="text-xs text-[#888780]">
-            © 2025 UbuntuNow · Kigali, Rwanda
-          </p>
+      <footer className="py-5">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8">
+          {/* Imigongo accent above footer */}
+          <ImigongoLine className="w-full h-[6px] opacity-30 mb-5" />
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <img
+              src="/logo.png"
+              alt="UbuntuNow"
+              className="h-10 w-auto object-contain"
+            />
+            <p className="text-[11px] text-[#888780]">
+              © 2025 UbuntuNow · Kigali, Rwanda · Built on Trust. Powered by Community.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
