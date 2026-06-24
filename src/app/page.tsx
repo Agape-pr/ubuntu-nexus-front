@@ -196,8 +196,9 @@ export default function ComingSoonPage() {
               alt="UbuntuNow"
               className="h-10 sm:h-14 w-auto object-contain"
             />
-            <span className="text-[7px] min-[400px]:text-[8px] sm:text-[10px] font-bold text-[#B87800] uppercase tracking-[0.05em] sm:tracking-[0.15em] pl-3 sm:pl-6 border-l border-white/10 mt-1 whitespace-nowrap">
-              Built on Trust. Powered by Community.
+            <span className="text-[7px] min-[400px]:text-[8px] sm:text-[10px] font-bold text-[#B87800] uppercase tracking-[0.05em] sm:tracking-[0.15em] pl-3 sm:pl-6 border-l border-white/10 mt-1 leading-tight whitespace-nowrap">
+              Built on Trust.<br />
+              Powered by Community.
             </span>
           </div>
           <a
@@ -217,7 +218,7 @@ export default function ComingSoonPage() {
           <div className="max-w-4xl flex flex-col items-center">
             <h1
               ref={addRevealRef}
-              className="reveal reveal-delay-1 text-[24px] leading-[1.35] sm:text-4xl lg:text-5xl font-black sm:leading-[1.1] tracking-tight mb-5"
+              className="reveal reveal-delay-1 text-left w-full text-[24px] leading-[1.35] sm:text-4xl lg:text-5xl font-black sm:leading-[1.1] tracking-tight mb-5"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
               Commerce that operates 24/7.<br />
@@ -464,8 +465,9 @@ export default function ComingSoonPage() {
               alt="UbuntuNow"
               className="h-10 w-auto object-contain"
             />
-            <p className="text-[11px] text-[#888780] text-center sm:text-left mt-2 sm:mt-0">
-              © 2026 UbuntuNow · Kigali, Rwanda · Built on Trust. Powered by Community.
+            <p className="text-[11px] text-[#888780] text-center sm:text-right mt-2 sm:mt-0 leading-relaxed">
+              © 2026 UbuntuNow · Kigali, Rwanda<br />
+              Built on Trust. Powered by Community.
             </p>
           </div>
         </div>
