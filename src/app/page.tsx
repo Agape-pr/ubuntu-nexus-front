@@ -187,8 +187,8 @@ export default function ComingSoonPage() {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           navSolid
-            ? "bg-[#111110]/95 backdrop-blur-xl border-b border-white/5"
-            : "bg-[#111110]"
+            ? "bg-black/95 backdrop-blur-xl"
+            : "bg-black"
         }`}
       >
         <div className="max-w-5xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
@@ -216,114 +216,116 @@ export default function ComingSoonPage() {
 
       {/* ── HERO ── */}
       <section className="pt-24 pb-10 sm:pt-28 sm:pb-14">
-        <div className="max-w-4xl mx-auto px-5 sm:px-8 flex flex-col items-start">
-          <div ref={addRevealRef} className="reveal reveal-delay-1 w-full">
-            <div className="flex flex-col gap-6 sm:gap-8 w-full mb-8">
-              <div className="flex items-start gap-4 sm:gap-6">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#B87800]/8 border border-[#B87800]/25 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(184,120,0,0.12)]">
-                  <Store className="text-[#B87800] w-6 h-6 sm:w-8 sm:h-8" strokeWidth={1.5} />
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 text-center flex flex-col items-center">
+          <div className="max-w-4xl flex flex-col items-center">
+            <h1
+              ref={addRevealRef}
+              className="reveal reveal-delay-1 text-left w-full font-black tracking-tight mb-8"
+              style={{ fontFamily: "'Nunito', sans-serif" }}
+            >
+              <div className="flex flex-col gap-6 sm:gap-8 w-full max-w-3xl">
+                <div className="flex items-center gap-4 sm:gap-6 text-left">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#B87800]/5 border border-[#B87800]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(184,120,0,0.1)]">
+                    <Store className="text-[#B87800] w-6 h-6 sm:w-8 sm:h-8" />
+                  </div>
+                  <div className="flex flex-col gap-0.5 sm:gap-1">
+                    <span className="text-[11px] sm:text-xs text-[#888780] font-semibold uppercase tracking-widest line-through decoration-[#B87800]/30">
+                      Losing sales when closed
+                    </span>
+                    <span className="text-[20px] sm:text-3xl lg:text-4xl text-[#FBF8F2] leading-[1.1]">
+                      Commerce that operates <span className="text-[#B87800]">24/7</span>.
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1 sm:gap-2 pt-1">
-                  <span className="text-[10px] sm:text-xs text-[#888780] font-semibold uppercase tracking-widest line-through decoration-[#B87800]/50">
-                    Losing sales when closed
+                
+                <div className="flex items-center gap-4 sm:gap-6 text-left">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#B87800]/5 border border-[#B87800]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(184,120,0,0.1)]">
+                    <ShieldCheck className="text-[#B87800] w-6 h-6 sm:w-8 sm:h-8" />
+                  </div>
+                  <div className="flex flex-col gap-0.5 sm:gap-1">
+                    <span className="text-[11px] sm:text-xs text-[#888780] font-semibold uppercase tracking-widest line-through decoration-[#B87800]/30">
+                      Fear of scams and fraud
+                    </span>
+                    <span className="text-[20px] sm:text-3xl lg:text-4xl text-[#FBF8F2] leading-[1.1]">
+                      Transactions <span className="text-[#B87800]">protected</span> from fraud.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 sm:gap-6 text-left">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#B87800]/5 border border-[#B87800]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(184,120,0,0.1)]">
+                    <Truck className="text-[#B87800] w-6 h-6 sm:w-8 sm:h-8" />
+                  </div>
+                  <div className="flex flex-col gap-0.5 sm:gap-1">
+                    <span className="text-[11px] sm:text-xs text-[#888780] font-semibold uppercase tracking-widest line-through decoration-[#B87800]/30">
+                      Unreliable delivery riders
+                    </span>
+                    <span className="text-[20px] sm:text-3xl lg:text-4xl text-[#FBF8F2] leading-[1.1]">
+                      Deliveries <span className="text-[#B87800]">guaranteed</span> on schedule.
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <span className="text-[#B87800] block w-full text-center mt-8 sm:mt-12 text-[20px] sm:text-3xl lg:text-4xl">We&apos;re building the Tech-infrastructure for all three.</span>
+            </h1>
+
+            <p
+              ref={addRevealRef}
+              className="reveal reveal-delay-2 text-base text-[#888780] leading-relaxed mb-8 max-w-2xl mx-auto"
+            >
+              UbuntuNow is the <strong className="text-[#FBF8F2]">Trust Layer</strong> for
+              commerce in Rwanda — storefronts, escrow payments, and built-in logistics
+              so sellers and buyers can trade with confidence, not worry.
+            </p>
+
+            {/* Waitlist form — refined */}
+            <div
+              ref={addRevealRef}
+              className="reveal reveal-delay-3"
+              id="waitlist"
+            >
+              {submitted ? (
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-lg flex items-center justify-center gap-3 w-full max-w-md mx-auto text-emerald-400">
+                  <CheckCircle2 size={18} />
+                  <span className="font-semibold text-sm">
+                    You&apos;re on the list! We&apos;ll be in touch soon.
                   </span>
-                  <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-[#FBF8F2] leading-[1.1]" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                    Commerce that operates <span className="text-[#B87800]">24/7</span>.
-                  </h2>
                 </div>
-              </div>
-
-              <div className="flex items-start gap-4 sm:gap-6">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#B87800]/8 border border-[#B87800]/25 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(184,120,0,0.12)]">
-                  <ShieldCheck className="text-[#B87800] w-6 h-6 sm:w-8 sm:h-8" strokeWidth={1.5} />
-                </div>
-                <div className="flex flex-col gap-1 sm:gap-2 pt-1">
-                  <span className="text-[10px] sm:text-xs text-[#888780] font-semibold uppercase tracking-widest line-through decoration-[#B87800]/50">
-                    Fear of scams and fraud
-                  </span>
-                  <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-[#FBF8F2] leading-[1.1]" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                    Transactions <span className="text-[#B87800]">protected</span> from fraud.
-                  </h2>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4 sm:gap-6">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#B87800]/8 border border-[#B87800]/25 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(184,120,0,0.12)]">
-                  <Truck className="text-[#B87800] w-6 h-6 sm:w-8 sm:h-8" strokeWidth={1.5} />
-                </div>
-                <div className="flex flex-col gap-1 sm:gap-2 pt-1">
-                  <span className="text-[10px] sm:text-xs text-[#888780] font-semibold uppercase tracking-widest line-through decoration-[#B87800]/50">
-                    Unreliable delivery riders
-                  </span>
-                  <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-[#FBF8F2] leading-[1.1]" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                    Deliveries <span className="text-[#B87800]">guaranteed</span> on schedule.
-                  </h2>
-                </div>
-              </div>
-            </div>
-
-            <div className="w-full pt-4 sm:pt-6 border-t border-white/10">
-              <p className="text-lg sm:text-2xl lg:text-3xl font-black text-[#B87800] leading-[1.2]" style={{ fontFamily: "'Nunito', sans-serif" }}>We&apos;re building the Tech-infrastructure for all three.</p>
-            </div>
-          </div>
-
-          <p
-            ref={addRevealRef}
-            className="reveal reveal-delay-2 text-base sm:text-lg text-[#888780] leading-relaxed mb-10 max-w-2xl"
-          >
-            UbuntuNow is the <strong className="text-[#FBF8F2]">Trust Layer</strong> for
-            commerce in Rwanda — storefronts, escrow payments, and built-in logistics
-            so sellers and buyers can trade with confidence, not worry.
-          </p>
-
-          {/* Waitlist form — fixed alignment */}
-          <div
-            ref={addRevealRef}
-            className="reveal reveal-delay-3 w-full max-w-md"
-            id="waitlist"
-          >
-            {submitted ? (
-              <div className="bg-emerald-500/15 border border-emerald-500/30 p-4 rounded-lg flex items-center gap-3 text-emerald-300">
-                <CheckCircle2 size={20} strokeWidth={1.5} className="shrink-0" />
-                <div>
-                  <p className="font-semibold text-sm">You&apos;re on the list!</p>
-                  <p className="text-xs text-emerald-200/70">We&apos;ll be in touch soon.</p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {/* Status Pill */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#B87800]/20 bg-[#B87800]/5 text-[10px] sm:text-[11px] uppercase tracking-widest font-bold text-[#B87800]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#B87800] animate-pulse"></span>
-                  System in testing phase
-                </div>
-                {/* Form */}
-                <form
-                  onSubmit={handleWaitlistSubmit}
-                  className="flex flex-col sm:flex-row items-stretch gap-2 w-full"
-                >
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="flex-1 bg-[#1A1A19] border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-[#B87800]/40 transition-colors"
-                  />
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="shrink-0 flex items-center justify-center gap-2 bg-[#B87800] text-[#111110] px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#F0B800] transition-colors whitespace-nowrap disabled:opacity-70"
+              ) : (
+                <div className="w-full max-w-[320px] sm:max-w-md mx-auto flex flex-col items-center">
+                  {/* Refined Status Pill */}
+                  <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full border border-white/5 bg-white/[0.02] text-[10px] sm:text-[11px] uppercase tracking-widest font-bold text-[#B87800]/80">
+                    <span className="w-1 h-1 rounded-full bg-[#B87800] animate-pulse"></span>
+                    System in testing phase
+                  </div>
+                  <form
+                    onSubmit={handleWaitlistSubmit}
+                    className="flex flex-row items-stretch justify-center gap-2 w-full"
                   >
-                    {loading ? "Joining..." : "Join Waitlist"}
-                    <ArrowRight size={16} strokeWidth={2.5} />
-                  </button>
-                </form>
-                <p className="text-xs text-[#888780]/70">
-                  Be first to know when we launch. No spam.
-                </p>
-              </div>
-            )}
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="w-full min-w-0 bg-[#1A1A19] border border-white/10 rounded-lg px-3 sm:px-4 py-2.5 text-[11px] sm:text-sm text-left text-white placeholder:text-white/25 outline-none focus:border-[#B87800]/40 transition-colors"
+                    />
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 bg-[#B87800] text-[#111110] px-4 sm:px-6 py-2.5 rounded-lg font-bold text-[11px] sm:text-sm hover:bg-[#F0B800] transition-colors whitespace-nowrap disabled:opacity-70"
+                    >
+                      {loading ? "Joining..." : "Join Waitlist"}
+                      <ArrowRight size={14} strokeWidth={3} />
+                    </button>
+                  </form>
+                  <p className="text-[11px] text-[#888780]/60 mt-2">
+                    Be first to know when we launch. No spam.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -496,7 +498,7 @@ export default function ComingSoonPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="py-8 border-t border-white/5 mt-12">
+      <footer className="py-5 bg-black mt-10">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
           {/* Imigongo accent above footer */}
           <ImigongoLine className="w-full h-[6px] opacity-30 mb-5" />
