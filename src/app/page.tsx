@@ -10,13 +10,11 @@ import {
   Zap,
   Store,
   Truck,
-  Home,
-  ShoppingBag,
-  User,
-  Search,
-  Globe,
-  MapPin,
   Wallet,
+  MapPin,
+  ShoppingBag,
+  X,
+  Check,
 } from "lucide-react";
 
 // ─── Imigongo SVG Pattern ───────────────────────────────────────────────────────
@@ -64,72 +62,113 @@ function ImigongoPattern({ className = "" }: { className?: string }) {
   );
 }
 
+// Compact Imigongo line for the nav bottom accent
+function ImigongoLine({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 800 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <linearGradient id="imi-nav" x1="0" y1="0" x2="800" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#B87800" stopOpacity="0" />
+          <stop offset="30%" stopColor="#B87800" stopOpacity="0.6" />
+          <stop offset="50%" stopColor="#F0B800" stopOpacity="0.8" />
+          <stop offset="70%" stopColor="#B87800" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#B87800" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M0 6 L20 2 L40 6 L60 2 L80 6 L100 2 L120 6 L140 2 L160 6 L180 2 L200 6 L220 2 L240 6 L260 2 L280 6 L300 2 L320 6 L340 2 L360 6 L380 2 L400 6 L420 2 L440 6 L460 2 L480 6 L500 2 L520 6 L540 2 L560 6 L580 2 L600 6 L620 2 L640 6 L660 2 L680 6 L700 2 L720 6 L740 2 L760 6 L780 2 L800 6"
+        stroke="url(#imi-nav)"
+        strokeWidth="1.5"
+        fill="none"
+      />
+      <path
+        d="M0 6 L20 10 L40 6 L60 10 L80 6 L100 10 L120 6 L140 10 L160 6 L180 10 L200 6 L220 10 L240 6 L260 10 L280 6 L300 10 L320 6 L340 10 L360 6 L380 10 L400 6 L420 10 L440 6 L460 10 L480 6 L500 10 L520 6 L540 10 L560 6 L580 10 L600 6 L620 10 L640 6 L660 10 L680 6 L700 10 L720 6 L740 10 L760 6 L780 10 L800 6"
+        stroke="url(#imi-nav)"
+        strokeWidth="1.5"
+        fill="none"
+      />
+    </svg>
+  );
+}
+
 // ─── Constants ──────────────────────────────────────────────────────────────────
 
-const SELLERS = [
-  {
-    id: 1,
-    name: "Premium Electronics",
-    location: "Kigali, Rwanda",
-    verified: true,
-    featured: true,
-    gradient: "from-blue-600 to-blue-800",
-    icon: "📱",
-  },
-  {
-    id: 2,
-    name: "Fashion & Apparel",
-    location: "Kigali, Rwanda",
-    verified: true,
-    featured: true,
-    gradient: "from-purple-600 to-pink-600",
-    icon: "👗",
-  },
-  {
-    id: 3,
-    name: "Home & Living",
-    location: "Kigali, Rwanda",
-    verified: true,
-    featured: true,
-    gradient: "from-green-600 to-emerald-600",
-    icon: "🏠",
-  },
-  {
-    id: 4,
-    name: "Beauty & Care",
-    location: "Kigali, Rwanda",
-    verified: true,
-    featured: false,
-    gradient: "from-rose-600 to-red-600",
-    icon: "💄",
-  },
-];
+const SURVEY_LINK =
+  "https://docs.google.com/forms/d/e/1FAIpQLSelEh_KeKRiNVo4YvtQbyVAMOgrkuxYQl3oB8edthADpUm-sg/viewform?usp=header";
 
 const FEATURES = [
   {
     icon: Store,
-    title: "Shop from Trusted Stores",
-    desc: "Verified and trusted businesses with guaranteed quality",
+    title: "Seller Storefronts",
+    desc: "Launch your own branded shop in minutes — no tech skills, no fees to start.",
+    accent: "#B87800",
   },
   {
     icon: ShieldCheck,
-    title: "100% Protected",
-    desc: "Escrow payments protect both buyers and sellers",
+    title: "Escrow Protection",
+    desc: "Payments held safe with a 2-hour dispute window after receiving delivery. Sellers get paid, buyers stay protected.",
+    accent: "#16A34A",
+  },
+  {
+    icon: Truck,
+    title: "Built-In Logistics",
+    desc: "From local deliveries to business fulfillment with live tracking — we handle the movement so you focus on selling.",
+    accent: "#F0B800",
   },
   {
     icon: Zap,
-    title: "2-Hour Delivery",
-    desc: "Fast fulfillment across Kigali with live tracking",
+    title: "Fast Fulfillment",
+    desc: "Same-day and 2-hour delivery across Kigali. Your customers get what they want, when they want it.",
+    accent: "#E05A00",
   },
 ];
 
 // ─── Main Page ──────────────────────────────────────────────────────────────────
 
-export default function HomePage() {
+export default function ComingSoonPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
+  const [navSolid, setNavSolid] = useState(false);
+  const revealRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setNavSolid(window.scrollY > 40);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+    );
+    revealRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  const addRevealRef = useCallback((el: HTMLDivElement | null) => {
+    if (el && !revealRefs.current.includes(el)) {
+      revealRefs.current.push(el);
+    }
+  }, []);
 
   const handleWaitlistSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,248 +181,338 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#111110] text-[#FBF8F2] overflow-x-hidden flex flex-col">
-      {/* ══ HEADER ══════════════════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-40 bg-[#111110]/95 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          {/* Top bar: Logo + Language */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="text-2xl font-black">
-                <span className="text-[#FBF8F2]">Ubuntu</span>
-                <span className="text-[#111110] bg-gradient-to-br from-[#B87800] to-[#F0B800] px-2 py-0.5 rounded ml-1 italic">
-                  Now
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-sm">
-                <Globe size={16} />
-                <span>RW</span>
-              </button>
-              <div className="text-sm font-semibold">🇷🇼 RWF</div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#111110] text-[#FBF8F2] overflow-x-hidden ambient-bg">
 
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#888780]" size={18} />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search products..."
-              className="w-full bg-[#1A1A19] border border-white/10 rounded-full pl-12 pr-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#B87800]/40 transition-colors"
+      {/* ── NAV with Imigongo accent ── */}
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          navSolid
+            ? "bg-[#111110]/95 backdrop-blur-xl border-b border-white/5"
+            : "bg-[#111110]"
+        }`}
+      >
+        <div className="max-w-5xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3 sm:gap-6">
+            <img
+              src="/logo.png"
+              alt="UbuntuNow"
+              className="h-10 sm:h-14 w-auto object-contain"
             />
+            <span className="text-[7px] min-[400px]:text-[8px] sm:text-[10px] font-bold text-[#B87800] uppercase tracking-[0.05em] sm:tracking-[0.15em] pl-3 sm:pl-6 border-l border-white/10 mt-1 leading-tight whitespace-nowrap">
+              Built on Trust.<br />
+              Powered by Community.
+            </span>
           </div>
+          <a
+            href="#waitlist"
+            className="hidden sm:inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#B87800]/30 text-sm font-semibold text-[#FBF8F2] hover:bg-[#B87800]/10 transition-colors"
+          >
+            Join Waitlist
+          </a>
         </div>
-      </header>
+        {/* Imigongo accent line below nav */}
+        <ImigongoLine className="w-full h-[6px] opacity-50" />
+      </nav>
 
-      {/* ══ MAIN CONTENT ════════════════════════════════════════════════════ */}
-      <main className="flex-1">
-        {/* ── HERO BANNER ── */}
-        <section className="bg-gradient-to-br from-[#1C1A16] to-[#151412] border-b border-white/5">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-              {/* Left: Copy */}
-              <div>
-                <h1 className="text-4xl sm:text-5xl font-black leading-tight mb-6" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                  Shop from <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F0B800] via-[#B87800] to-[#F0B800]">trusted stores</span>. Delivered to your door.
-                </h1>
-                <p className="text-lg text-[#888780] mb-8 leading-relaxed max-w-md">
-                  Discover unique products from verified local sellers with guaranteed escrow protection and fast delivery across Kigali.
-                </p>
-
-                {/* CTAs */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#B87800] to-[#F0B800] text-[#111110] px-8 py-4 rounded-lg font-bold hover:shadow-xl transition-all hover:-translate-y-0.5">
-                    <ShoppingBag size={20} />
-                    Shop Now
-                  </button>
-                  <button className="flex items-center justify-center gap-2 border-2 border-[#B87800]/40 text-[#FBF8F2] px-8 py-4 rounded-lg font-bold hover:border-[#B87800]/70 hover:bg-[#B87800]/10 transition-all">
-                    <Store size={20} />
-                    Create a Store
-                  </button>
+      {/* ── HERO ── */}
+      <section className="pt-24 pb-10 sm:pt-28 sm:pb-14">
+        <div className="max-w-4xl mx-auto px-5 sm:px-8 flex flex-col items-start">
+          <div ref={addRevealRef} className="reveal reveal-delay-1 w-full">
+            <div className="flex flex-col gap-6 sm:gap-8 w-full mb-8">
+              <div className="flex items-start gap-4 sm:gap-6">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#B87800]/8 border border-[#B87800]/25 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(184,120,0,0.12)]">
+                  <Store className="text-[#B87800] w-6 h-6 sm:w-8 sm:h-8" strokeWidth={1.5} />
                 </div>
-
-                {/* Secondary CTA */}
-                <div className="mt-8 pt-8 border-t border-white/10">
-                  <a href="#" className="inline-flex items-center gap-2 text-[#F0B800] hover:text-[#F0B800]/80 transition-colors font-semibold">
-                    <span>Become a Field Agent</span>
-                    <ArrowRight size={18} />
-                  </a>
+                <div className="flex flex-col gap-1 sm:gap-2 pt-1">
+                  <span className="text-[10px] sm:text-xs text-[#888780] font-semibold uppercase tracking-widest line-through decoration-[#B87800]/50">
+                    Losing sales when closed
+                  </span>
+                  <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-[#FBF8F2] leading-[1.1]" style={{ fontFamily: "'Nunito', sans-serif" }}>
+                    Commerce that operates <span className="text-[#B87800]">24/7</span>.
+                  </h2>
                 </div>
               </div>
 
-              {/* Right: Visual element */}
-              <div className="hidden lg:block">
-                <div className="aspect-square rounded-3xl bg-gradient-to-br from-[#B87800]/20 to-[#F0B800]/10 border border-[#B87800]/20 flex items-center justify-center text-6xl">
-                  📦
+              <div className="flex items-start gap-4 sm:gap-6">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#B87800]/8 border border-[#B87800]/25 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(184,120,0,0.12)]">
+                  <ShieldCheck className="text-[#B87800] w-6 h-6 sm:w-8 sm:h-8" strokeWidth={1.5} />
+                </div>
+                <div className="flex flex-col gap-1 sm:gap-2 pt-1">
+                  <span className="text-[10px] sm:text-xs text-[#888780] font-semibold uppercase tracking-widest line-through decoration-[#B87800]/50">
+                    Fear of scams and fraud
+                  </span>
+                  <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-[#FBF8F2] leading-[1.1]" style={{ fontFamily: "'Nunito', sans-serif" }}>
+                    Transactions <span className="text-[#B87800]">protected</span> from fraud.
+                  </h2>
                 </div>
               </div>
+
+              <div className="flex items-start gap-4 sm:gap-6">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#B87800]/8 border border-[#B87800]/25 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(184,120,0,0.12)]">
+                  <Truck className="text-[#B87800] w-6 h-6 sm:w-8 sm:h-8" strokeWidth={1.5} />
+                </div>
+                <div className="flex flex-col gap-1 sm:gap-2 pt-1">
+                  <span className="text-[10px] sm:text-xs text-[#888780] font-semibold uppercase tracking-widest line-through decoration-[#B87800]/50">
+                    Unreliable delivery riders
+                  </span>
+                  <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-[#FBF8F2] leading-[1.1]" style={{ fontFamily: "'Nunito', sans-serif" }}>
+                    Deliveries <span className="text-[#B87800]">guaranteed</span> on schedule.
+                  </h2>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full pt-4 sm:pt-6 border-t border-white/10">
+              <p className="text-lg sm:text-2xl lg:text-3xl font-black text-[#B87800] leading-[1.2]" style={{ fontFamily: "'Nunito', sans-serif" }}>We&apos;re building the Tech-infrastructure for all three.</p>
             </div>
           </div>
-        </section>
 
-        {/* ── FEATURED SELLERS ── */}
-        <section className="py-16 sm:py-24 border-b border-white/5">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="flex items-center justify-between mb-12">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">👑</span>
-                  <span className="text-sm font-bold text-[#B87800] uppercase tracking-widest">Premium</span>
+          <p
+            ref={addRevealRef}
+            className="reveal reveal-delay-2 text-base sm:text-lg text-[#888780] leading-relaxed mb-10 max-w-2xl"
+          >
+            UbuntuNow is the <strong className="text-[#FBF8F2]">Trust Layer</strong> for
+            commerce in Rwanda — storefronts, escrow payments, and built-in logistics
+            so sellers and buyers can trade with confidence, not worry.
+          </p>
+
+          {/* Waitlist form — fixed alignment */}
+          <div
+            ref={addRevealRef}
+            className="reveal reveal-delay-3 w-full max-w-md"
+            id="waitlist"
+          >
+            {submitted ? (
+              <div className="bg-emerald-500/15 border border-emerald-500/30 p-4 rounded-lg flex items-center gap-3 text-emerald-300">
+                <CheckCircle2 size={20} strokeWidth={1.5} className="shrink-0" />
+                <div>
+                  <p className="font-semibold text-sm">You&apos;re on the list!</p>
+                  <p className="text-xs text-emerald-200/70">We&apos;ll be in touch soon.</p>
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-black" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                  Featured Sellers
-                </h2>
-                <p className="text-[#888780] mt-2">Shop from verified and trusted businesses</p>
               </div>
-              <a href="#" className="text-[#B87800] hover:text-[#F0B800] font-semibold flex items-center gap-1 transition-colors">
-                View all <ArrowRight size={18} />
-              </a>
-            </div>
-
-            {/* Sellers Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {SELLERS.map((seller) => (
-                <div
-                  key={seller.id}
-                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1C1A16] to-[#151412] border border-white/5 hover:border-[#B87800]/40 transition-all cursor-pointer hover:shadow-xl hover:-translate-y-1"
+            ) : (
+              <div className="flex flex-col gap-4">
+                {/* Status Pill */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#B87800]/20 bg-[#B87800]/5 text-[10px] sm:text-[11px] uppercase tracking-widest font-bold text-[#B87800]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#B87800] animate-pulse"></span>
+                  System in testing phase
+                </div>
+                {/* Form */}
+                <form
+                  onSubmit={handleWaitlistSubmit}
+                  className="flex flex-col sm:flex-row items-stretch gap-2 w-full"
                 >
-                  {/* Background gradient */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${seller.gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
-
-                  {/* Content */}
-                  <div className="relative p-6 flex flex-col h-full">
-                    <div className="mb-auto">
-                      <div className="text-5xl mb-4">{seller.icon}</div>
-                      <h3 className="font-bold text-lg text-[#FBF8F2] mb-2">{seller.name}</h3>
-                      <p className="text-sm text-[#888780] flex items-center gap-1">
-                        <MapPin size={14} />
-                        {seller.location}
-                      </p>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="pt-4 border-t border-white/10">
-                      {seller.verified && (
-                        <div className="flex items-center gap-1 text-xs font-semibold text-emerald-400 mb-4">
-                          <CheckCircle2 size={14} />
-                          Verified Seller
-                        </div>
-                      )}
-                      <button className="w-full bg-[#B87800] text-[#111110] py-2.5 rounded-lg font-bold text-sm hover:bg-[#F0B800] transition-colors">
-                        Visit Shop →
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── WHY UBUNTU NOW ── */}
-        <section className="py-16 sm:py-24 border-b border-white/5">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="mb-16">
-              <h2 className="text-3xl sm:text-4xl font-black mb-3" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                Why Ubuntu Now?
-              </h2>
-              <p className="text-[#888780] text-lg">The trust layer for African commerce</p>
-            </div>
-
-            {/* Features Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {FEATURES.map((feature, i) => (
-                <div
-                  key={i}
-                  className="group bg-gradient-to-br from-[#1C1A16] to-[#151412] border border-white/5 rounded-2xl p-8 hover:border-[#B87800]/40 transition-all hover:shadow-xl"
-                >
-                  <div className="w-14 h-14 rounded-xl bg-[#B87800]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <feature.icon className="text-[#B87800]" size={28} />
-                  </div>
-                  <h3 className="font-bold text-xl text-[#FBF8F2] mb-3">{feature.title}</h3>
-                  <p className="text-[#888780] leading-relaxed">{feature.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── EARLY ACCESS ── */}
-        <section className="py-16 sm:py-24">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6">
-            <div className="bg-gradient-to-br from-[#1C1A16] to-[#151412] border border-[#B87800]/20 rounded-2xl p-8 sm:p-12">
-              <h2 className="text-3xl font-black mb-4 text-center" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                Be First to Launch
-              </h2>
-              <p className="text-center text-[#888780] mb-8 max-w-md mx-auto">
-                Join our waitlist to get early access and shape the future of commerce in Rwanda.
-              </p>
-
-              {submitted ? (
-                <div className="bg-emerald-500/15 border border-emerald-500/30 rounded-lg p-4 flex items-center gap-3 text-emerald-300">
-                  <CheckCircle2 size={24} strokeWidth={1.5} />
-                  <div>
-                    <p className="font-semibold">You&apos;re on the list!</p>
-                    <p className="text-sm text-emerald-200/70">We&apos;ll be in touch soon.</p>
-                  </div>
-                </div>
-              ) : (
-                <form onSubmit={handleWaitlistSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    className="flex-1 bg-[#1A1A19] border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#B87800]/40 transition-colors"
+                    placeholder="you@example.com"
+                    className="flex-1 bg-[#1A1A19] border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-[#B87800]/40 transition-colors"
                   />
                   <button
                     type="submit"
                     disabled={loading}
-                    className="bg-[#B87800] text-[#111110] px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#F0B800] transition-colors whitespace-nowrap disabled:opacity-70"
+                    className="shrink-0 flex items-center justify-center gap-2 bg-[#B87800] text-[#111110] px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#F0B800] transition-colors whitespace-nowrap disabled:opacity-70"
                   >
                     {loading ? "Joining..." : "Join Waitlist"}
+                    <ArrowRight size={16} strokeWidth={2.5} />
                   </button>
                 </form>
-              )}
+                <p className="text-xs text-[#888780]/70">
+                  Be first to know when we launch. No spam.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Imigongo Divider ── */}
+      <div className="max-w-4xl mx-auto px-8">
+        <ImigongoPattern className="w-full h-8 opacity-50" />
+      </div>
+
+      {/* ── FEATURES ── */}
+      <section className="py-10 sm:py-14">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
+            {FEATURES.map((feature, i) => (
+              <div
+                key={feature.title}
+                ref={addRevealRef}
+                className={`reveal reveal-delay-${i + 1} flex items-start gap-4 py-5 px-4 sm:px-4 hover:bg-white/[0.02] transition-colors duration-300 rounded-xl cursor-default ${
+                  i < FEATURES.length - 2
+                    ? "border-b border-white/5"
+                    : i === FEATURES.length - 2
+                    ? "border-b border-white/5 sm:border-b-0"
+                    : ""
+                } ${i % 2 === 0 ? "sm:border-r sm:border-white/5" : ""}`}
+              >
+                <div
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${i % 2 === 0 ? 'animate-float-slow' : 'animate-float-delayed'}`}
+                  style={{ backgroundColor: `${feature.accent}12` }}
+                >
+                  <feature.icon size={18} style={{ color: feature.accent }} />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-bold text-[#FBF8F2] mb-0.5">
+                    {feature.title}
+                  </h3>
+                  <p className="text-[13px] text-[#888780] leading-relaxed">
+                    {feature.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section className="py-14 sm:py-20">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8">
+          <div ref={addRevealRef} className="reveal text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#B87800] mb-3 font-['Nunito'] tracking-tight">
+              How It Works
+            </h2>
+            <p className="text-[#888780] max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+              A unified ecosystem designed for the Rwandan market. We connect the dots between selling, paying, and moving goods.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 relative">
+            {/* Connecting line for desktop */}
+            <div className="hidden md:block absolute top-10 left-[16%] right-[16%] h-px bg-gradient-to-r from-transparent via-[#B87800]/30 to-transparent z-0"></div>
+            
+            {[
+              {
+                step: "01",
+                icon: Store,
+                title: "Launch Your Store",
+                desc: "Sign up and list your products in minutes. No technical skills required, zero setup fees to start.",
+              },
+              {
+                step: "02",
+                icon: Wallet,
+                title: "Secure Payments",
+                desc: "Customers pay via MoMo or Card. Funds are securely locked in escrow until the item is delivered.",
+              },
+              {
+                step: "03",
+                icon: Truck,
+                title: "Automated Fulfillment",
+                desc: "Our integrated logistics network automatically dispatches a rider to pick up and deliver directly to the buyer.",
+              },
+            ].map((item, i) => (
+              <div key={item.step} ref={addRevealRef} className={`reveal reveal-delay-${i + 1} relative z-10 flex flex-col items-center text-center`}>
+                <div className="w-20 h-20 rounded-2xl bg-[#151514] border border-white/5 flex items-center justify-center mb-6 relative group hover:border-[#B87800]/40 hover:bg-[#1A1A19] transition-all duration-300">
+                  <div className="absolute -top-3 -left-2 text-[11px] font-black text-[#B87800]/60 tracking-wider bg-[#111110] px-1">{item.step}</div>
+                  <item.icon size={28} className="text-[#B87800] group-hover:scale-110 transition-transform duration-300" />
+                </div>
+                <h3 className="text-[17px] font-bold text-[#FBF8F2] mb-2">{item.title}</h3>
+                <p className="text-[14px] text-[#888780] leading-relaxed max-w-[280px]">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Imigongo Divider ── */}
+      <div className="max-w-4xl mx-auto px-8">
+        <ImigongoPattern className="w-full h-8 opacity-40" />
+      </div>
+
+      {/* ── WHY BUYERS LOVE IT ── */}
+      <section className="py-14 sm:py-20">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8">
+          <div ref={addRevealRef} className="reveal text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#B87800] mb-3 font-['Nunito'] tracking-tight">
+              Do you usually order anything online?
+            </h2>
+            <p className="text-[#888780] max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+              Online shopping in Rwanda has always carried a risk. We are eliminating that risk entirely.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div ref={addRevealRef} className="reveal reveal-delay-1 bg-white/[0.02] border border-white/5 rounded-2xl p-6 sm:p-8 hover:bg-white/[0.04] transition-colors duration-300 group">
+              <div className="w-12 h-12 rounded-xl bg-[#B87800]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <ShieldCheck className="text-[#B87800]" size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-[#FBF8F2] mb-3">100% Fraud Protection</h3>
+              <p className="text-[14px] text-[#888780] leading-relaxed">
+                Your money is held securely by our escrow system. The seller does not get paid until the item is in your hands and you have confirmed it matches the description.
+              </p>
+            </div>
+            <div ref={addRevealRef} className="reveal reveal-delay-2 bg-white/[0.02] border border-white/5 rounded-2xl p-6 sm:p-8 hover:bg-white/[0.04] transition-colors duration-300 group">
+              <div className="w-12 h-12 rounded-xl bg-[#B87800]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <MapPin className="text-[#B87800]" size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-[#FBF8F2] mb-3">Live Delivery Tracking</h3>
+              <p className="text-[14px] text-[#888780] leading-relaxed">
+                No more wondering when your package will arrive or calling the delivery rider five times. Watch your delivery move on the map in real-time, exactly when you expect it.
+              </p>
             </div>
           </div>
-        </section>
-      </main>
-
-      {/* ══ BOTTOM NAVIGATION ══════════════════════════════════════════════ */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#111110]/95 backdrop-blur-xl border-t border-white/5 sm:hidden">
-        <div className="flex items-center justify-around h-20">
-          <a href="#" className="flex flex-col items-center justify-center gap-1 text-[#B87800]">
-            <Home size={24} />
-            <span className="text-[10px] font-semibold">Home</span>
-          </a>
-          <a href="#" className="flex flex-col items-center justify-center gap-1 text-[#888780] hover:text-[#FBF8F2] transition-colors">
-            <ShoppingBag size={24} />
-            <span className="text-[10px] font-semibold">Products</span>
-          </a>
-          <a href="#" className="flex flex-col items-center justify-center gap-1 text-[#888780] hover:text-[#FBF8F2] transition-colors">
-            <Store size={24} />
-            <span className="text-[10px] font-semibold">Shops</span>
-          </a>
-          <a href="#" className="flex flex-col items-center justify-center gap-1 text-[#888780] hover:text-[#FBF8F2] transition-colors relative">
-            <Wallet size={24} />
-            <span className="text-[10px] font-semibold">Cart</span>
-            <span className="absolute top-2 right-2 w-5 h-5 bg-red-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold">1</span>
-          </a>
-          <a href="#" className="flex flex-col items-center justify-center gap-1 text-[#888780] hover:text-[#FBF8F2] transition-colors">
-            <User size={24} />
-            <span className="text-[10px] font-semibold">Profile</span>
-          </a>
         </div>
-      </nav>
+      </section>
 
-      {/* Spacer for mobile bottom nav */}
-      <div className="h-20 sm:h-0" />
+      {/* ── Imigongo Divider ── */}
+      <div className="max-w-4xl mx-auto px-8">
+        <ImigongoPattern className="w-full h-8 opacity-40" />
+      </div>
+
+      {/* ── SELLER CTA — refined ── */}
+      <section className="py-10 sm:py-14">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8">
+          <div
+            ref={addRevealRef}
+            className="reveal flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 py-6 sm:py-0"
+          >
+            <div className="max-w-md">
+              <h2
+                className="text-lg sm:text-xl font-black text-[#B87800] tracking-tight mb-1"
+                style={{ fontFamily: "'Nunito', sans-serif" }}
+              >
+                Sell in Rwanda? We want to hear from you.
+              </h2>
+              <p className="text-sm text-[#888780] leading-relaxed">
+                Whether you sell online, in a shop, or need delivery for your business —
+                your insights will shape how UbuntuNow works. Takes 3 minutes.
+              </p>
+            </div>
+            <a
+              href={SURVEY_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#B87800] text-[#111110] hover:bg-[#F0B800] transition-colors font-bold text-sm shrink-0"
+            >
+              Take the Survey
+              <ExternalLink size={13} />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="py-8 border-t border-white/5 mt-12">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8">
+          {/* Imigongo accent above footer */}
+          <ImigongoLine className="w-full h-[6px] opacity-30 mb-5" />
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <img
+              src="/logo.png"
+              alt="UbuntuNow"
+              className="h-10 w-auto object-contain"
+            />
+            <p className="text-[11px] text-[#888780] text-center sm:text-right mt-2 sm:mt-0 leading-relaxed">
+              © 2026 UbuntuNow · Kigali, Rwanda<br />
+              Built on Trust. Powered by Community.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
