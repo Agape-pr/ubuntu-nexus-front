@@ -71,8 +71,8 @@ const ProductCard = ({
       return (
         <span key={i} className="relative inline-block">
           <Star
-            size={9}
-            className="text-white/15"
+            size={12}
+            className="text-white/20"
             fill="currentColor"
           />
           {(filled || partial) && (
@@ -80,7 +80,7 @@ const ProductCard = ({
               className="absolute inset-0 overflow-hidden"
               style={{ width: filled ? "100%" : `${(value % 1) * 100}%` }}
             >
-              <Star size={9} className="text-[#F0B800]" fill="currentColor" />
+              <Star size={12} className="text-accent" fill="currentColor" />
             </span>
           )}
         </span>
@@ -150,10 +150,10 @@ const ProductCard = ({
       </Link>
 
       {/* ── Info — flex-col + flex-1 so bottom content is always flush ── */}
-      <div className="flex flex-col flex-1 px-2.5 pt-2 pb-2.5 gap-1">
+      <div className="flex flex-col flex-1 px-3 pt-2.5 pb-3 gap-1.5">
         {/* Product name — clamps to 2 lines, reserves space */}
         <Link href={productHref}>
-          <h3 className="text-[12.5px] text-[#FBF8F2] font-medium leading-snug line-clamp-2 hover:text-[#F0B800] transition-colors min-h-[2.6em]">
+          <h3 className="text-sm text-foreground font-semibold leading-snug line-clamp-2 hover:text-accent transition-colors min-h-[2.8em]">
             {name}
           </h3>
         </Link>
@@ -162,7 +162,7 @@ const ProductCard = ({
         {storeName && storeSlug ? (
           <Link
             href={`/store/${storeSlug}`}
-            className="text-[10px] text-[#666560] hover:text-[#B87800] transition-colors truncate"
+            className="text-xs text-muted-foreground hover:text-primary transition-colors truncate"
           >
             {storeName}
           </Link>
@@ -175,17 +175,17 @@ const ProductCard = ({
               {renderStars(rating)}
             </div>
             {typeof reviewCount === "number" && reviewCount > 0 && (
-              <span className="text-[10px] text-[#555450]">({reviewCount})</span>
+              <span className="text-xs text-muted-foreground/60">({reviewCount})</span>
             )}
           </div>
         )}
 
         {/* Price row + Add to cart — mt-auto keeps it at the bottom without a spacer gap */}
-        <div className="flex items-center justify-between mt-auto pt-2">
-          <div className="flex items-baseline gap-0.5 min-w-0">
-            <span className="text-[10px] text-[#666560] shrink-0">{currency}</span>
+        <div className="flex items-center justify-between mt-auto pt-2.5 border-t border-border/30">
+          <div className="flex items-baseline gap-1 min-w-0">
+            <span className="text-xs text-muted-foreground shrink-0">{currency}</span>
             <span
-              className="text-[15px] font-black text-[#F0B800] leading-none tracking-tight truncate"
+              className="text-base font-black text-accent leading-none tracking-tight truncate"
               style={{ fontFamily: "Nunito, sans-serif" }}
             >
               {formattedPrice}
@@ -197,15 +197,15 @@ const ProductCard = ({
             onClick={handleAddToCart}
             disabled={!inStock}
             className="
-              h-7 w-7 shrink-0 rounded-full
-              bg-[#B87800] flex items-center justify-center
-              hover:bg-[#F0B800] active:scale-95
+              h-8 w-8 shrink-0 rounded-full
+              bg-primary flex items-center justify-center
+              hover:bg-accent hover:scale-110 active:scale-95
               transition-all duration-150
               disabled:opacity-25 disabled:cursor-not-allowed
-              shadow-[0_2px_8px_rgba(184,120,0,0.4)]
+              shadow-sm hover:shadow-md
             "
           >
-            <Plus size={14} strokeWidth={3} className="text-[#111110]" />
+            <Plus size={16} strokeWidth={3} className="text-primary-foreground" />
           </button>
         </div>
       </div>

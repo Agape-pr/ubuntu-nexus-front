@@ -54,73 +54,82 @@ const Navbar = () => {
   const isActive = (to: string) => pathname === to;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/90 backdrop-blur-md">
-      <div className="container flex h-14 items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-card backdrop-blur-lg">
+      <div className="container flex h-16 items-center justify-between gap-4">
 
         {/* ── Logo ── */}
-        <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-200">
-            <span className="text-primary-foreground font-black text-xs">UN</span>
+        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-200">
+            <span className="text-primary-foreground font-black text-sm">UN</span>
           </div>
-          <span className="font-bold text-[15px] text-foreground tracking-tight">
+          <span className="font-black text-base text-foreground tracking-tight">
             Ubuntu<span className="text-accent">Now</span>
           </span>
         </Link>
 
         {/* ── Desktop Centre Nav ── */}
-        <nav className="hidden md:flex items-center gap-0.5 flex-1 ml-6">
+        <nav className="hidden md:flex items-center gap-1 flex-1 ml-8">
           <Link
             href="/home"
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+            className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${
               isActive("/home")
-                ? "text-foreground bg-secondary"
-                : "text-muted-foreground hover:text-foreground hover:bg-secondary/70"
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Learn how it works
+            {isActive("/home") && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full" />
+            )}
           </Link>
 
           <Link
             href={userRole === "seller" ? "/dashboard" : "/auth?tab=register&intent=seller"}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+            className={`relative flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-all duration-200 ${
               isActive("/dashboard") && userRole === "seller"
-                ? "text-foreground bg-secondary"
-                : "text-muted-foreground hover:text-foreground hover:bg-secondary/70"
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Store size={14} />
+            <Store size={16} />
             {userRole === "seller" ? "My Store" : "Start your store"}
+            {isActive("/dashboard") && userRole === "seller" && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full" />
+            )}
           </Link>
 
           {userRole === "admin" && (
             <Link
               href="/admin"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-violet-500 hover:text-violet-400 hover:bg-violet-500/10 transition-all duration-200"
+              className="relative flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-accent hover:text-accent/80 transition-all duration-200"
             >
-              <Shield size={14} />
+              <Shield size={16} />
               Admin
+              {isActive("/admin") && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full" />
+              )}
             </Link>
           )}
         </nav>
 
         {/* ── Desktop Right Actions ── */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden md:flex items-center gap-2">
           {/* Search */}
           <button
             aria-label="Search"
             onClick={openSearch}
             className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200"
           >
-            <Search size={17} />
+            <Search size={20} />
           </button>
 
           {/* Cart — buyers only */}
           {userRole !== "seller" && (
             <Link href="/cart">
               <button className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200">
-                <ShoppingBag size={17} />
+                <ShoppingBag size={20} />
                 {mounted && totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full bg-accent flex items-center justify-center px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-card">
+                  <span className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shadow-sm ring-2 ring-card">
                     {totalItems}
                   </span>
                 )}
@@ -128,36 +137,36 @@ const Navbar = () => {
             </Link>
           )}
 
-          <div className="w-px h-5 bg-border mx-0.5" />
+          <div className="w-px h-6 bg-border mx-1" />
 
           {/* Auth zone */}
           {isLoggedIn ? (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {userRole === "seller" && (
                 <Link href="/dashboard">
-                  <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium gap-1.5">
-                    <User size={14} /> Dashboard
+                  <Button variant="ghost" size="sm" className="h-10 px-3.5 text-sm font-medium gap-2">
+                    <User size={16} /> Dashboard
                   </Button>
                 </Link>
               )}
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-9 px-3 text-sm font-medium text-muted-foreground gap-1.5"
+                className="h-10 px-3.5 text-sm font-medium text-muted-foreground gap-2"
                 onClick={() => logoutMutation.mutate()}
               >
-                <LogOut size={14} /> Sign out
+                <LogOut size={16} /> Sign out
               </Button>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <Link href="/auth">
-                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                <Button variant="ghost" size="sm" className="h-10 px-4 text-sm font-medium">
                   Sign in
                 </Button>
               </Link>
               <Link href="/auth?tab=register">
-                <Button size="sm" className="h-9 px-4 text-sm font-semibold rounded-xl shadow-sm">
+                <Button size="sm" className="h-10 px-5 text-sm font-semibold rounded-xl shadow-sm">
                   Get started
                 </Button>
               </Link>
@@ -166,19 +175,19 @@ const Navbar = () => {
         </div>
 
         {/* ── Mobile Right Icons ── */}
-        <div className="md:hidden flex items-center gap-1">
+        <div className="md:hidden flex items-center gap-2">
           <button
             aria-label="Search"
             onClick={openSearch}
             className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
           >
-            <Search size={18} />
+            <Search size={20} />
           </button>
 
           {/* User avatar / sign-in icon */}
           <Link href={isLoggedIn ? (userRole === "seller" ? "/dashboard" : "/auth") : "/auth"}>
-            <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer">
-              <User size={15} className="text-primary" />
+            <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer">
+              <User size={18} className="text-primary" />
             </div>
           </Link>
 
