@@ -318,25 +318,25 @@ const HomeContent = () => {
           Desktop: wrapping flex row of text pills.
           No duplicate rendering — single element, Tailwind handles layout.
         */}
-        <div className="mb-5 md:mb-8">
+        <div className="mb-6 md:mb-8">
           {/* Mobile scrollable row */}
-          <div className="flex md:hidden overflow-x-auto no-scrollbar gap-3 pb-2 snap-x">
+          <div className="flex md:hidden overflow-x-auto no-scrollbar gap-2.5 pb-2 snap-x">
             {CATEGORIES.map(({ label, emoji }) => (
               <button
                 key={label}
                 onClick={() => setSelectedCategory(label)}
-                className={`flex flex-col items-center gap-1 shrink-0 snap-start`}
+                className={`flex flex-col items-center gap-1.5 shrink-0 snap-start`}
               >
                 <div
-                  className={`w-13 h-13 rounded-2xl flex items-center justify-center text-lg shadow-sm transition-all duration-200 ${
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl shadow-sm transition-all duration-200 hover:scale-105 ${
                     selectedCategory === label
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-primary text-primary-foreground ring-2 ring-primary/50"
                       : "bg-card text-muted-foreground border border-border hover:bg-primary/5"
                   }`}
                 >
                   {emoji}
                 </div>
-                <span className="text-[10.5px] font-medium text-foreground leading-tight text-center max-w-[52px]">
+                <span className="text-xs font-semibold text-foreground leading-snug text-center max-w-[60px]">
                   {label}
                 </span>
               </button>
@@ -344,15 +344,15 @@ const HomeContent = () => {
           </div>
 
           {/* Desktop wrapping pill row */}
-          <div className="hidden md:flex flex-wrap gap-2">
+          <div className="hidden md:flex flex-wrap gap-2.5">
             {CATEGORIES.map(({ label }) => (
               <button
                 key={label}
                 onClick={() => setSelectedCategory(label)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                className={`px-4 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
                   selectedCategory === label
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "bg-card text-muted-foreground border border-border hover:bg-primary/5"
+                    ? "bg-primary text-primary-foreground shadow-sm ring-2 ring-primary/50"
+                    : "bg-card text-muted-foreground border border-border hover:bg-primary/5 hover:border-primary/30"
                 }`}
               >
                 {label}
