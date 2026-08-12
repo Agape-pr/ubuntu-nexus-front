@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Navbar from "@/components/Navbar";
+import { Suspense, useState, useEffect } from "react";
+import { BuyerDashboardShell } from "@/components/BuyerDashboardShell";
 import { useCurrentUser, useUpdateProfile } from "@/lib/api/hooks/useUsers";
 import { useLogout } from "@/lib/api/hooks/useAuth";
 import { User, MapPin, Phone, Mail, Edit3, Save, X, LogOut, ShoppingBag, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
-export default function ProfilePage() {
+function ProfileContent() {
   const { data: userProfile, isLoading } = useCurrentUser();
   const logoutMutation = useLogout();
 
@@ -77,19 +77,26 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-white/40 text-sm">Loading profile…</p>
-      </div>
+      <BuyerDashboardShell>
+        <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+          <div className="h-6 w-32 bg-secondary rounded animate-pulse" />
+          <div className="h-24 bg-card border border-border rounded-2xl animate-pulse" />
+          <div className="h-64 bg-card border border-border rounded-2xl animate-pulse" />
+          <div className="h-48 bg-card border border-border rounded-2xl animate-pulse" />
+        </div>
+      </BuyerDashboardShell>
     );
   }
 
   const email = userProfile?.email || "";
   const displayName = [form.first_name, form.last_name].filter(Boolean).join(" ") || email.split("@")[0];
+  const roleLabel = userProfile?.role
+    ? userProfile.role.charAt(0).toUpperCase() + userProfile.role.slice(1)
+    : "Buyer";
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <Navbar />
-      <div className="max-w-lg mx-auto px-4 pt-6 space-y-6">
+    <BuyerDashboardShell>
+      <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 mb-1">Your account</p>
@@ -107,20 +114,22 @@ export default function ProfilePage() {
             <p className="font-bold text-white text-lg truncate">{displayName}</p>
             <p className="text-sm text-white/40 truncate">{email}</p>
             <span className="mt-1 inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold-bright/20 text-gold-accent border border-gold-bright/30">
-              Buyer
+              {roleLabel}
             </span>
           </div>
         </div>
 
         {/* Quick actions */}
-        <Link href="/my-orders"
+        <Link href={userProfile?.role === "seller" ? "/dashboard" : "/my-orders"}
           className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
           <div className="h-9 w-9 rounded-xl bg-white/5 flex items-center justify-center">
             <ShoppingBag size={17} className="text-gold-accent" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold text-white">My Orders</p>
-            <p className="text-xs text-white/40">Track and manage your purchases</p>
+            <p className="text-sm font-bold text-white">{userProfile?.role === "seller" ? "My Store" : "My Orders"}</p>
+            <p className="text-xs text-white/40">
+              {userProfile?.role === "seller" ? "Manage your products and orders" : "Track and manage your purchases"}
+            </p>
           </div>
           <CheckCircle size={15} className="text-white/20" />
         </Link>
@@ -189,6 +198,14 @@ export default function ProfilePage() {
           <LogOut size={15} /> Sign out
         </button>
       </div>
-    </div>
+    </BuyerDashboardShell>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><p className="text-white/40">Loading...</p></div>}>
+      <ProfileContent />
+    </Suspense>
   );
 }

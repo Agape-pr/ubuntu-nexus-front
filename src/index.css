@@ -54,6 +54,9 @@
     --radius:              0.5rem;
     --shadow-card:         0 2px 8px rgba(17, 17, 16, 0.06);
     --shadow-amber:        0 4px 16px rgba(184, 120, 0, 0.22);
+    --gradient-amber:      linear-gradient(135deg, hsl(var(--gold-bright)), hsl(var(--gold-accent)));
+    --gradient-hero:       linear-gradient(180deg, hsl(var(--background)), hsl(var(--secondary)));
+    --gradient-card:       linear-gradient(160deg, hsl(var(--card)), hsl(var(--secondary)));
   }
 
   .dark {

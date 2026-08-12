@@ -1,7 +1,9 @@
 "use client";
 
 import { Suspense } from "react";
-import Navbar from "@/components/Navbar";
+import Link from "next/link";
+import { BuyerDashboardShell } from "@/components/BuyerDashboardShell";
+import { Button } from "@/components/ui/button";
 import { useBuyerOrders, useConfirmReceipt } from "@/lib/api/hooks/useOrders";
 import { Package, ChevronDown, CheckCircle, Clock, Truck, ShoppingBag } from "lucide-react";
 import { useState } from "react";
@@ -142,17 +144,18 @@ function MyOrdersContent() {
   const { data: orders = [], isLoading } = useBuyerOrders();
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <Navbar />
-      <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
+    <BuyerDashboardShell>
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 mb-1">Your account</p>
           <h1 className="text-2xl font-bold text-white">My Orders</h1>
         </div>
 
         {isLoading ? (
-          <div className="py-16 flex items-center justify-center">
-            <p className="text-white/40 text-sm">Loading orders...</p>
+          <div className="space-y-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-24 bg-card border border-border rounded-2xl animate-pulse" />
+            ))}
           </div>
         ) : orders.length === 0 ? (
           <div className="bg-card border border-border rounded-2xl py-16 flex flex-col items-center text-center px-6">
@@ -160,7 +163,10 @@ function MyOrdersContent() {
               <ShoppingBag size={26} className="text-white/20" />
             </div>
             <h3 className="font-bold text-white/80 text-lg mb-2">No orders yet</h3>
-            <p className="text-sm text-white/40">Start shopping to see your orders here.</p>
+            <p className="text-sm text-white/40 mb-6">Start shopping to see your orders here.</p>
+            <Button asChild className="rounded-xl">
+              <Link href="/dashboard?view=shop">Browse marketplace</Link>
+            </Button>
           </div>
         ) : (
           <div className="space-y-3">
@@ -170,7 +176,7 @@ function MyOrdersContent() {
           </div>
         )}
       </div>
-    </div>
+    </BuyerDashboardShell>
   );
 }
 

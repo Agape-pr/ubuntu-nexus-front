@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { BuyerDashboardShell } from "@/components/BuyerDashboardShell";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/store/cartStore";
 import { PaymentOptions } from "@/components/ui/PaymentOptions";
@@ -12,11 +11,11 @@ import {
 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api/config";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/lib/api/hooks/useUsers";
 
-export default function CartPage() {
+function CartContent() {
   const { items, removeItem, getTotalPrice, updateQuantity, clearCart } = useCartStore();
   const totalPrice = getTotalPrice();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -138,10 +137,8 @@ export default function CartPage() {
   }, [clearCart, router]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0e0e0d]">
-      <Navbar />
-
-      <main className="flex-1 w-full">
+    <BuyerDashboardShell>
+      <div className="flex flex-col bg-[#0e0e0d] min-h-full">
 
         {/* ── Empty state ── */}
         {items.length === 0 ? (
@@ -153,11 +150,9 @@ export default function CartPage() {
             <p className="text-[#666560] mb-8 max-w-xs">
               Discover products from local sellers across Rwanda.
             </p>
-            <Link href="/marketplace">
-              <Button className="bg-[#B87800] hover:bg-[#F0B800] text-[#111110] font-bold rounded-xl px-6 border-0">
-                Browse Marketplace
-              </Button>
-            </Link>
+            <Button asChild className="bg-[#B87800] hover:bg-[#F0B800] text-[#111110] font-bold rounded-xl px-6 border-0">
+              <Link href="/dashboard?view=shop">Browse Marketplace</Link>
+            </Button>
           </div>
         ) : (
           /* ── Desktop two-panel layout ── */
@@ -291,7 +286,7 @@ export default function CartPage() {
                 {/* Back to shopping — desktop only */}
                 <div className="mt-6 hidden lg:block">
                   <Link
-                    href="/marketplace"
+                    href="/dashboard?view=shop"
                     className="inline-flex items-center gap-1.5 text-sm text-[#555450] hover:text-[#FBF8F2] transition-colors"
                   >
                     ← Continue shopping
@@ -378,10 +373,11 @@ export default function CartPage() {
                     )}
                   </button>
 
-                  <Link href="/marketplace" className="block lg:hidden">
-                    <button className="w-full h-10 rounded-xl text-sm font-medium text-[#666560] hover:text-[#FBF8F2] border border-white/8 hover:border-white/16 hover:bg-white/4 transition-all duration-200">
-                      Continue Shopping
-                    </button>
+                  <Link
+                    href="/dashboard?view=shop"
+                    className="block lg:hidden w-full h-10 rounded-xl text-sm font-medium text-[#666560] hover:text-[#FBF8F2] border border-white/8 hover:border-white/16 hover:bg-white/4 transition-all duration-200 flex items-center justify-center"
+                  >
+                    Continue Shopping
                   </Link>
                 </div>
 
@@ -402,9 +398,8 @@ export default function CartPage() {
 
           </div>
         )}
-      </main>
-      <Footer />
-      
+      </div>
+
       {/* Pesapal Payment Popup Modal */}
       {paymentIframeUrl && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6">
@@ -428,7 +423,15 @@ export default function CartPage() {
           </div>
         </div>
       )}
-    </div>
+    </BuyerDashboardShell>
+  );
+}
+
+export default function CartPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><p className="text-white/40">Loading...</p></div>}>
+      <CartContent />
+    </Suspense>
   );
 }
 

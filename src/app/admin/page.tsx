@@ -120,6 +120,7 @@ function UserDrawer({ userId, onClose }: { userId: number; onClose: () => void }
                         <Link
                           href={`https://www.ubuntunow.rw/shop/${user.store.slug}`}
                           target="_blank"
+                          rel="noopener noreferrer"
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-200 transition-colors"
                         >
                           /shop/{user.store.slug} <ExternalLink size={12} />

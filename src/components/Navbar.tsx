@@ -41,7 +41,8 @@ const Navbar = () => {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
-    router.push(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+    const query = encodeURIComponent(searchQuery.trim());
+    router.push(isLoggedIn ? `/dashboard?search=${query}` : `/auth?tab=register&search=${query}`);
     setSearchOpen(false);
     setSearchQuery("");
   };
@@ -69,19 +70,33 @@ const Navbar = () => {
 
         {/* ── Desktop Centre Nav ── */}
         <nav className="hidden md:flex items-center gap-0.5 flex-1 ml-6">
-          <Link
-            href="/home"
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-              isActive("/home")
-                ? "text-foreground bg-secondary"
-                : "text-muted-foreground hover:text-foreground hover:bg-secondary/70"
-            }`}
-          >
-            Learn how it works
-          </Link>
+          {userRole !== "seller" && (
+            <>
+              <Link
+                href="/#about"
+                className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/70 transition-all duration-200"
+              >
+                About
+              </Link>
+
+              <Link
+                href="/#how-it-works"
+                className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/70 transition-all duration-200"
+              >
+                Learn how it works
+              </Link>
+
+              <Link
+                href="/#contact"
+                className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/70 transition-all duration-200"
+              >
+                Contact
+              </Link>
+            </>
+          )}
 
           <Link
-            href={userRole === "seller" ? "/dashboard" : "/auth?tab=register&intent=seller"}
+            href={userRole === "seller" ? "/dashboard" : "/auth?tab=register&role=seller"}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
               isActive("/dashboard") && userRole === "seller"
                 ? "text-foreground bg-secondary"
@@ -109,22 +124,24 @@ const Navbar = () => {
           <button
             aria-label="Search"
             onClick={openSearch}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200"
+            className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <Search size={17} />
           </button>
 
-          {/* Cart — buyers only */}
-          {userRole !== "seller" && (
-            <Link href="/cart">
-              <button className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200">
-                <ShoppingBag size={17} />
-                {mounted && totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full bg-accent flex items-center justify-center px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-card">
-                    {totalItems}
-                  </span>
-                )}
-              </button>
+          {/* Cart — signed-in buyers only; guests can't add to cart yet */}
+          {isLoggedIn && userRole !== "seller" && (
+            <Link
+              href="/cart"
+              aria-label={mounted && totalItems > 0 ? `Cart, ${totalItems} item${totalItems !== 1 ? "s" : ""}` : "Cart"}
+              className="relative p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              <ShoppingBag size={17} />
+              {mounted && totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full bg-accent flex items-center justify-center px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-card">
+                  {totalItems}
+                </span>
+              )}
             </Link>
           )}
 
@@ -133,12 +150,12 @@ const Navbar = () => {
           {/* Auth zone */}
           {isLoggedIn ? (
             <div className="flex items-center gap-1">
-              {userRole === "seller" && (
-                <Link href="/dashboard">
-                  <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium gap-1.5">
+              {userRole !== "seller" && (
+                <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium gap-1.5">
+                  <Link href="/dashboard">
                     <User size={14} /> Dashboard
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               )}
               <Button
                 variant="ghost"
@@ -151,16 +168,12 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="flex items-center gap-1.5">
-              <Link href="/auth">
-                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
-                  Sign in
-                </Button>
-              </Link>
-              <Link href="/auth?tab=register">
-                <Button size="sm" className="h-9 px-4 text-sm font-semibold rounded-xl shadow-sm">
-                  Get started
-                </Button>
-              </Link>
+              <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                <Link href="/auth">Sign in</Link>
+              </Button>
+              <Button asChild size="sm" className="h-9 px-4 text-sm font-semibold rounded-xl shadow-sm">
+                <Link href="/auth?tab=register">Get started</Link>
+              </Button>
             </div>
           )}
         </div>
@@ -170,23 +183,28 @@ const Navbar = () => {
           <button
             aria-label="Search"
             onClick={openSearch}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+            className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <Search size={18} />
           </button>
 
-          {/* User avatar / sign-in icon */}
-          <Link href={isLoggedIn ? (userRole === "seller" ? "/dashboard" : "/auth") : "/auth"}>
-            <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer">
+          {/* Account avatar — signed-in users only; guests use Sign in / Get started in the menu */}
+          {isLoggedIn && (
+            <Link
+              href={userRole === "seller" ? "/dashboard" : "/profile"}
+              aria-label="Account"
+              className="h-9 w-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center hover:bg-primary/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
               <User size={15} className="text-primary" />
-            </div>
-          </Link>
+            </Link>
+          )}
 
           {/* Hamburger */}
           <button
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+            className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
+            aria-expanded={isOpen}
           >
             {isOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -197,20 +215,36 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden border-t border-border bg-card animate-fade-up">
           <div className="container py-4 flex flex-col gap-1">
-            <Link
-              href="/home"
-              onClick={() => setIsOpen(false)}
-              className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                isActive("/home")
-                  ? "bg-secondary text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-              }`}
-            >
-              💡 Learn how it works
-            </Link>
+            {userRole !== "seller" && (
+              <>
+                <Link
+                  href="/#about"
+                  onClick={() => setIsOpen(false)}
+                  className="px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                >
+                  About us
+                </Link>
+
+                <Link
+                  href="/#how-it-works"
+                  onClick={() => setIsOpen(false)}
+                  className="px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                >
+                  💡 Learn how it works
+                </Link>
+
+                <Link
+                  href="/#contact"
+                  onClick={() => setIsOpen(false)}
+                  className="px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                >
+                  Contact
+                </Link>
+              </>
+            )}
 
             <Link
-              href={userRole === "seller" ? "/dashboard" : "/auth?tab=register&intent=seller"}
+              href={userRole === "seller" ? "/dashboard" : "/auth?tab=register&role=seller"}
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
             >
@@ -218,7 +252,7 @@ const Navbar = () => {
               {userRole === "seller" ? "My Store / Dashboard" : "Start your store"}
             </Link>
 
-            {userRole !== "seller" && (
+            {isLoggedIn && userRole !== "seller" && (
               <Link
                 href="/cart"
                 onClick={() => setIsOpen(false)}
@@ -239,18 +273,18 @@ const Navbar = () => {
               {isLoggedIn ? (
                 <>
                   {userRole === "admin" && (
-                    <Link href="/admin" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" className="w-full gap-1.5 border-violet-200 text-violet-500">
+                    <Button asChild variant="outline" className="w-full gap-1.5 border-violet-200 text-violet-500">
+                      <Link href="/admin" onClick={() => setIsOpen(false)}>
                         <Shield size={16} /> Admin Panel
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   )}
-                  {userRole === "seller" && (
-                    <Link href="/dashboard" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" className="w-full gap-1.5">
+                  {userRole !== "seller" && (
+                    <Button asChild variant="outline" className="w-full gap-1.5">
+                      <Link href="/dashboard" onClick={() => setIsOpen(false)}>
                         <User size={16} /> Dashboard
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   )}
                   <Button
                     className="w-full gap-1.5"
@@ -262,12 +296,12 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <Link href="/auth" onClick={() => setIsOpen(false)}>
-                    <Button variant="outline" className="w-full">Sign in</Button>
-                  </Link>
-                  <Link href="/auth?tab=register" onClick={() => setIsOpen(false)}>
-                    <Button className="w-full font-semibold">Get started free</Button>
-                  </Link>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/auth" onClick={() => setIsOpen(false)}>Sign in</Link>
+                  </Button>
+                  <Button asChild className="w-full font-semibold">
+                    <Link href="/auth?tab=register" onClick={() => setIsOpen(false)}>Get started free</Link>
+                  </Button>
                 </>
               )}
             </div>
@@ -297,8 +331,9 @@ const Navbar = () => {
               />
               <button
                 type="button"
+                aria-label="Close search"
                 onClick={() => setSearchOpen(false)}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md p-0.5"
               >
                 <X size={18} />
               </button>

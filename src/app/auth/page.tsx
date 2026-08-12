@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, Timer } from "lucide-react";
 import { useLogin, useRegister, useVerifyOTP, useResendOTP } from "@/lib/api/hooks/useAuth";
 import { toast } from "sonner";
+import marketImage from "@/assets/kigali-market.jpg";
 
 // ── OTP_EXPIRY and RESEND_COOLDOWN match auth-service/apps/authentication/services/otp_service.py
 const OTP_EXPIRY_SECONDS = 5 * 60; // 5 minutes
@@ -224,7 +226,16 @@ const AuthContent = () => {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left panel — brand */}
-      <div className="hidden lg:flex w-1/2 gradient-hero relative flex-col justify-between p-12 overflow-hidden">
+      <div className="hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden">
+        <Image
+          src={marketImage}
+          alt="A local market in Kigali"
+          fill
+          priority
+          sizes="(min-width: 1024px) 50vw, 0px"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/75 to-background/95" />
         <div className="absolute top-0 right-0 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
         <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-emerald/10 blur-3xl" />
 
@@ -232,28 +243,28 @@ const AuthContent = () => {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground font-bold">
             UN
           </div>
-          <span className="font-bold text-xl text-primary-foreground">
+          <span className="font-bold text-xl text-foreground">
             Ubuntu<span className="text-accent">Now</span>
           </span>
         </Link>
 
         <div className="relative z-10">
-          <blockquote className="text-3xl font-bold text-primary-foreground leading-snug mb-6">
+          <blockquote className="text-3xl font-bold text-foreground leading-snug mb-6">
             "I am because we are."
           </blockquote>
-          <p className="text-primary-foreground/60 text-lg">
+          <p className="text-foreground/60 text-lg">
             Join a community of entrepreneurs and shoppers building the future of African commerce together.
           </p>
-          <div className="mt-10 flex gap-4">
-            {["🛍️ 18,000+ products", "🏪 2,400+ sellers", "🇷🇼 Made in Kigali"].map((item) => (
-              <div key={item} className="px-3 py-1.5 rounded-full bg-primary-foreground/10 text-primary-foreground text-xs font-medium border border-primary-foreground/20">
+          <div className="mt-10 flex flex-wrap gap-3">
+            {["🔒 Escrow-protected payments", "🚚 Same-day Kigali delivery", "🇷🇼 Made in Kigali"].map((item) => (
+              <div key={item} className="px-3 py-1.5 rounded-full bg-foreground/10 text-foreground text-xs font-medium border border-foreground/20">
                 {item}
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-primary-foreground/30 text-xs relative z-10">© 2025 UbuntuNow Ltd, Kigali</p>
+        <p className="text-foreground/30 text-xs relative z-10">© 2025 UbuntuNow Ltd, Kigali</p>
       </div>
 
       {/* Right panel — form */}
@@ -510,9 +521,9 @@ const AuthContent = () => {
               <div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  <button type="button" className="text-xs text-accent hover:underline">
+                  <Link href="/contact" className="text-xs text-accent hover:underline">
                     Forgot password?
-                  </button>
+                  </Link>
                 </div>
                 <div className="relative mt-1.5">
                   <Input
@@ -562,9 +573,9 @@ const AuthContent = () => {
           )}
 
           <p className="text-center text-xs text-muted-foreground mt-4">
-            By continuing, you agree to UbuntuNow's{" "}
-            <a href="#" className="underline">Terms</a> &{" "}
-            <a href="#" className="underline">Privacy</a>
+            By continuing, you agree to UbuntuNow&apos;s{" "}
+            <Link href="/terms-of-service" className="underline">Terms</Link> &{" "}
+            <Link href="/privacy-policy" className="underline">Privacy</Link>
           </p>
         </div>
       </div>
@@ -574,7 +585,7 @@ const AuthContent = () => {
 
 const Auth = () => {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">Loading…</div>}>
       <AuthContent />
     </Suspense>
   );

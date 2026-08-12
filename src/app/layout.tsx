@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="font-sans antialiased md:pb-0 pb-14">
+      <body className="font-sans antialiased">
         <Providers>
           {children}
           <MobileNav />

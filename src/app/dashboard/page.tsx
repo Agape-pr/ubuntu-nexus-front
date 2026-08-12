@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
@@ -13,16 +13,20 @@ import {
   CheckCircle, Edit3, Trash2, ShoppingBag, AlertCircle, Loader2,
   Eye, LayoutDashboard, Wallet, LogOut, ChevronRight, ChevronDown, Search,
   Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star, Truck, Bell, Zap, Link2,
+  ArrowLeft, User, MapPin, Mail, Phone,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateProduct, useUpdateProduct, useSellerProducts, useDeleteProduct } from "@/lib/api/hooks/useProducts";
 import { useSellerOrders, useUpdateOrderStatus } from "@/lib/api/hooks/useOrders";
+import { useLogout } from "@/lib/api/hooks/useAuth";
 
-import { useCurrentUser, useUpdateStore } from "@/lib/api/hooks/useUsers";
+import { useCurrentUser, useUpdateStore, useUpdateProfile } from "@/lib/api/hooks/useUsers";
 import { toast } from "sonner";
 import { CloudImage } from "@/components/ui/CloudImage";
+import { BuyerDashboard } from "@/components/BuyerDashboard";
 
-type DashView = "overview" | "products" | "orders" | "store-settings";
+type DashView = "overview" | "products" | "orders" | "settings" | "profile-settings" | "store-settings";
+const SETTINGS_VIEWS: DashView[] = ["settings", "profile-settings", "store-settings"];
 
 // Removed dummy REAL_ORDERS constant
 
@@ -259,9 +263,8 @@ function OrderCard({ order, s, step, itemCount, updateStatus, isUpdatingOrder }:
   );
 }
 
-export default function SellerDashboard() {
+function SellerDashboardView() {
 
-  const router = useRouter();
   const [view, setView] = useState<DashView>("overview");
   const [copied, setCopied] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
@@ -283,16 +286,16 @@ export default function SellerDashboard() {
   });
   const [storeForm, setStoreForm] = useState({ name: "", description: "" });
   const [isSavingProduct, setIsSavingProduct] = useState(false);
-
+  const [profileForm, setProfileForm] = useState({
+    first_name: "", last_name: "", phone_number: "",
+    address_line1: "", address_line2: "", city: "", country: "Rwanda",
+  });
   const deleteProductMutation = useDeleteProduct();
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
   const updateStoreMutation = useUpdateStore();
-
-  useEffect(() => {
-    const role = localStorage.getItem("user_role");
-    if (role !== "seller") router.push("/marketplace");
-  }, [router]);
+  const updateProfileMutation = useUpdateProfile();
+  const logoutMutation = useLogout();
 
   useEffect(() => {
     if (userProfile?.store) {
@@ -301,7 +304,30 @@ export default function SellerDashboard() {
         description: userProfile.store.store_description || "",
       });
     }
+    if (userProfile) {
+      setProfileForm({
+        first_name: userProfile.first_name || "",
+        last_name: userProfile.last_name || "",
+        phone_number: userProfile.phone_number || "",
+        address_line1: userProfile.address_line1 || "",
+        address_line2: userProfile.address_line2 || "",
+        city: userProfile.city || "",
+        country: userProfile.country || "Rwanda",
+      });
+    }
   }, [userProfile]);
+
+  const handleSaveProfile = () => {
+    updateProfileMutation.mutate({
+      first_name: profileForm.first_name,
+      last_name: profileForm.last_name,
+      phone_number: profileForm.phone_number,
+      address_line1: profileForm.address_line1,
+      address_line2: profileForm.address_line2,
+      city: profileForm.city,
+      country: profileForm.country,
+    });
+  };
 
 
 
@@ -439,8 +465,10 @@ export default function SellerDashboard() {
     { id: "overview" as DashView, label: "Overview", icon: LayoutDashboard },
     { id: "products" as DashView, label: "My Products", icon: Package },
     { id: "orders" as DashView, label: "Orders", icon: ShoppingBag },
-    { id: "store-settings" as DashView, label: "Store Settings", icon: Settings },
+    { id: "settings" as DashView, label: "Settings", icon: Settings },
   ];
+  const isNavItemActive = (itemId: DashView) =>
+    itemId === "settings" ? SETTINGS_VIEWS.includes(view) : view === itemId;
 
   const totalRevenue = REAL_ORDERS.reduce((sum: number, order: any) => sum + (parseFloat(order?.total_amount) || 0), 0);
   const pendingOrders = REAL_ORDERS.filter((o: any) => o.status === "pending").length;
@@ -455,54 +483,6 @@ export default function SellerDashboard() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-
-      {/* -- Mobile/Tablet Tab Bar -- shown below Navbar, hidden on lg+ -- */}
-      <div className="lg:hidden sticky top-14 z-30 bg-background border-b border-border shadow-sm">
-        <div className="flex w-full px-2 py-2 gap-1">
-          {navItems.map(item => {
-            const isActive = view === item.id;
-            // Labels shortened for the inactive compact state
-            const shortLabel = item.label === "My Products" ? "Products"
-              : item.label === "Store Settings" ? "Settings"
-              : item.label;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setView(item.id)}
-                style={{ flex: isActive ? "2 1 0%" : "1 1 0%" }}
-                className={`relative flex flex-col items-center justify-center rounded-2xl transition-all duration-300 overflow-hidden ${
-                  isActive
-                    ? "bg-slate-900 py-2.5 px-3 min-w-0"
-                    : "bg-transparent py-2 min-w-0 hover:bg-slate-50"
-                }`}
-              >
-                {isActive ? (
-                  /* -- Active: icon + label side by side in pill -- */
-                  <div className="flex items-center gap-1.5 whitespace-nowrap">
-                    <item.icon size={15} className="text-gold-accent shrink-0" />
-                    <span className="text-white text-xs font-bold tracking-wide truncate">
-                      {shortLabel}
-                    </span>
-                  </div>
-                ) : (
-                  /* -- Inactive: icon only + tiny label below -- */
-                  <>
-                    <item.icon size={17} className="text-white/40" />
-                    <span className="text-[9px] font-semibold text-white/40 mt-0.5 tracking-wide">
-                      {shortLabel}
-                    </span>
-                  </>
-                )}
-                {/* Amber accent dot at bottom of active tab */}
-                {isActive && (
-                  <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-gold-accent" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
 
       <div className="flex flex-1">
         {/* -- Sidebar ---------------------------------- */}
@@ -530,13 +510,13 @@ export default function SellerDashboard() {
               </div>
               <div className="min-w-0">
                 <div className="font-bold text-white text-sm truncate">{isUserLoading ? "Loading..." : storeName}</div>
-                <div className="text-[11px] text-white/40 font-medium">Verified Seller ✦</div>
+                <div className="text-[11px] text-white/40 font-medium">UbuntuNow Seller</div>
               </div>
             </div>
 
             {/* Store link pill */}
             {storeUrl ? (
-              <Link href={storeUrl} target="_blank"
+              <Link href={storeUrl} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all group">
                 <ExternalLink size={12} className="text-white/40 group-hover:text-white/60 flex-shrink-0" />
                 <span className="text-[11px] text-white/50 truncate flex-1">{storeUrlDisplay}</span>
@@ -551,42 +531,48 @@ export default function SellerDashboard() {
 
           {/* Nav */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {navItems.map(item => (
-              <button key={item.id} onClick={() => setView(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
-                  view === item.id
-                    ? "bg-amber-500 text-black font-bold shadow-md"
-                    : "text-white/50 hover:text-white hover:bg-white/10"
-                }`}>
-                <item.icon size={16} className={view === item.id ? "text-black" : ""} />
-                {item.label}
-                {view === item.id && <ChevronRight size={14} className="ml-auto" />}
-              </button>
-            ))}
+            {navItems.map(item => {
+              const isActive = isNavItemActive(item.id);
+              return (
+                <button key={item.id} onClick={() => setView(item.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
+                    isActive
+                      ? "bg-primary text-primary-foreground font-bold shadow-md"
+                      : "text-white/50 hover:text-white hover:bg-white/10"
+                  }`}>
+                  <item.icon size={16} className={isActive ? "text-primary-foreground" : ""} />
+                  {item.label}
+                  {isActive && <ChevronRight size={14} className="ml-auto" />}
+                </button>
+              );
+            })}
           </nav>
 
           {/* View Store CTA */}
           <div className="p-4 border-t border-border">
             {storeUrl ? (
-              <Link href={storeUrl} target="_blank">
-                <Button variant="outline" className="w-full rounded-2xl h-10 text-sm font-semibold gap-2 border-white/10 hover:border-white/20 hover:bg-white/5 text-white hover:text-white">
+              <Button asChild variant="outline" className="w-full rounded-2xl h-10 text-sm font-semibold gap-2 border-white/10 hover:border-white/20 hover:bg-white/5 text-white hover:text-white">
+                <Link href={storeUrl} target="_blank" rel="noopener noreferrer">
                   <Eye size={14} /> Preview My Store
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             ) : (
               <Button variant="outline" disabled className="w-full rounded-2xl h-10 text-sm font-semibold gap-2 border-white/10 bg-white/5 text-white/50 opacity-60 cursor-not-allowed">
                 {isUserLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
                 {isUserLoading ? "Loading store…" : "Preview unavailable"}
               </Button>
             )}
-            <button className="flex items-center gap-2 w-full mt-2 px-4 py-2 text-xs text-white/40 hover:text-rose-500 transition-colors">
+            <button
+              onClick={() => logoutMutation.mutate()}
+              className="flex items-center gap-2 w-full mt-2 px-4 py-2 text-xs text-white/40 hover:text-rose-400 transition-colors"
+            >
               <LogOut size={13} /> Sign out
             </button>
           </div>
         </aside>
 
         {/* -- Main content ----------------------------- */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10 bg-background">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10 bg-background pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-10">
 
           {/* -- OVERVIEW ------------------------------- */}
           {view === "overview" && (
@@ -649,16 +635,16 @@ export default function SellerDashboard() {
                       <Button
                         onClick={() => { if (!storeSlug) return; navigator.clipboard.writeText(`${window.location.origin}/shop/${storeSlug}`); setCopied(true); setTimeout(() => setCopied(false), 2000); toast.success("Link copied! 🔗"); }}
                         disabled={!storeSlug}
-                        className="bg-gold-accent text-white hover:bg-amber-300 rounded-xl font-bold gap-2 h-10 px-4 text-sm disabled:opacity-50 transition-all">
+                        className="bg-gold-accent text-near-black hover:opacity-90 rounded-xl font-bold gap-2 h-10 px-4 text-sm disabled:opacity-50 transition-all">
                         {copied ? <CheckCircle size={14} /> : <Copy size={14} />}
                         {copied ? "Copied!" : "Copy link"}
                       </Button>
                       {storeUrl ? (
-                        <Link href={storeUrl} target="_blank">
-                          <Button variant="outline" className="rounded-xl border-white/20 text-white bg-foreground/5 hover:bg-foreground/15 h-10 px-4 gap-2 text-sm">
+                        <Button asChild variant="outline" className="rounded-xl border-white/20 text-white bg-foreground/5 hover:bg-foreground/15 h-10 px-4 gap-2 text-sm">
+                          <Link href={storeUrl} target="_blank" rel="noopener noreferrer">
                             <Eye size={14} /> Preview
-                          </Button>
-                        </Link>
+                          </Link>
+                        </Button>
                       ) : (
                         <Button variant="outline" disabled className="rounded-xl border-white/10 text-white/30 bg-foreground/5 h-10 px-4 gap-2 text-sm cursor-not-allowed">
                           {isUserLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />} Preview
@@ -675,7 +661,7 @@ export default function SellerDashboard() {
                   <div className="flex items-center gap-2">
                     <ShoppingBag size={15} className="text-white/40" />
                     <h2 className="font-bold text-white text-sm">Recent Orders</h2>
-                    {REAL_ORDERS.length > 0 && <span className="text-xs font-bold bg-slate-100 text-white/50 px-2 py-0.5 rounded-full">{REAL_ORDERS.length}</span>}
+                    {REAL_ORDERS.length > 0 && <span className="text-xs font-bold bg-white/10 text-white/60 px-2 py-0.5 rounded-full">{REAL_ORDERS.length}</span>}
                   </div>
                   <button onClick={() => setView("orders")} className="text-xs font-semibold text-white/40 hover:text-white flex items-center gap-1 transition-colors">
                     View all <ChevronRight size={12} />
@@ -684,14 +670,14 @@ export default function SellerDashboard() {
 
                 {REAL_ORDERS.length === 0 ? (
                   <div className="px-6 py-12 flex flex-col items-center text-center">
-                    <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center mb-4 shadow-inner">
+                    <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
                       <ShoppingBag size={22} className="text-white/30" />
                     </div>
                     <p className="font-bold text-white/80 mb-1">No orders yet — but they're coming!</p>
                     <p className="text-sm text-white/40 max-w-xs leading-relaxed">Share your store link on WhatsApp and Instagram to get your first order today.</p>
                     {storeUrl && (
                       <button onClick={() => { if (storeSlug) navigator.clipboard.writeText(`${window.location.origin}/shop/${storeSlug}`); toast.success("Link copied! Share it now 🚀"); }}
-                        className="mt-4 flex items-center gap-2 text-xs font-bold text-gold-primary hover:text-amber-700 transition-colors">
+                        className="mt-4 flex items-center gap-2 text-xs font-bold text-gold-accent hover:text-accent transition-colors">
                         <Copy size={12} /> Copy store link
                       </button>
                     )}
@@ -702,23 +688,23 @@ export default function SellerDashboard() {
                       const s = statusConfig[order.status];
                       const isPending = order.status === "pending";
                       return (
-                        <div key={order.id} className={`px-5 py-4 flex items-center gap-4 transition-colors ${ isPending ? "bg-amber-50/40" : "hover:bg-card/60" }`}>
+                        <div key={order.id} className={`px-5 py-4 flex items-center gap-4 transition-colors ${ isPending ? "bg-gold-bright/10" : "hover:bg-white/5" }`}>
                           <div className={`h-10 w-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${
-                            order.status === "completed" ? "bg-emerald-100" :
-                            order.status === "shipped" ? "bg-blue-100" : "bg-gold-tint"
+                            order.status === "completed" ? "bg-emerald-500/15" :
+                            order.status === "shipped" ? "bg-blue-500/15" : "bg-gold-bright/15"
                           }`}>
                             {order.status === "completed" ? "✅" : order.status === "shipped" ? "🚚" : "📦"}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-sm text-white">Order #{order.id}</span>
-                              {isPending && <span className="text-[9px] font-black uppercase tracking-wider bg-gold-accent text-white px-1.5 py-0.5 rounded-full">Action needed</span>}
+                              {isPending && <span className="text-[9px] font-black uppercase tracking-wider bg-gold-accent text-near-black px-1.5 py-0.5 rounded-full">Action needed</span>}
                             </div>
                             <div className="text-xs text-white/40 truncate mt-0.5">{order.items?.map((i: any) => i.product_name).join(', ')}</div>
                           </div>
                           <div className="text-right shrink-0">
                             <div className="font-black text-sm text-white">{parseFloat(order.total_amount).toLocaleString()} <span className="text-[10px] font-bold text-white/40">RWF</span></div>
-                            <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s?.color || 'bg-slate-100 text-white/50'}`}>{order.status?.replace('_', ' ')}</span>
+                            <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s?.color || 'bg-white/10 text-white/60'}`}>{order.status?.replace('_', ' ')}</span>
                           </div>
                         </div>
                       );
@@ -751,7 +737,7 @@ export default function SellerDashboard() {
                     </Button>
                   ) : (
                     <Button onClick={() => { setEditingProductId(null); setProductForm({ name: "", price: "", stock_quantity: "", category: "", description: "", in_stock: null, variations: [] }); setProductImages([]); setProductImagePreviews([]); setShowAddProduct(true); }}
-                      className="bg-slate-900 text-white rounded-2xl px-6 h-11 gap-2 font-semibold shadow-md hover:-translate-y-0.5 transition-all">
+                      className="bg-primary text-primary-foreground hover:bg-accent rounded-2xl px-6 h-11 gap-2 font-semibold shadow-md hover:-translate-y-0.5 transition-all">
                       <Plus size={16} /> Add Product
                     </Button>
                   )}
@@ -767,7 +753,7 @@ export default function SellerDashboard() {
                         ? <><Edit3 size={20} className="text-gold-bright"/> {productForm.name || 'Product'}</>
                         : <><Sparkles size={20} className="text-gold-bright"/> New Product</>}
                     </h2>
-                    <button onClick={() => { setShowAddProduct(false); setEditingProductId(null); }} className="h-8 w-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
+                    <button onClick={() => { setShowAddProduct(false); setEditingProductId(null); }} className="h-8 w-8 rounded-xl bg-white/8 hover:bg-white/15 flex items-center justify-center transition-colors">
                       <X size={15} className="text-white/50" />
                     </button>
                   </div>
@@ -838,8 +824,8 @@ export default function SellerDashboard() {
                               onClick={() => setProductForm({ ...productForm, in_stock: true })}
                               className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl border-2 text-sm font-semibold transition-all ${
                                 productForm.in_stock === true
-                                  ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                                  : "border-slate-200 bg-slate-50 text-white/50 hover:border-emerald-300 hover:bg-emerald-50/30"
+                                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                  : "border-white/10 bg-white/5 text-white/50 hover:border-emerald-500/40 hover:bg-emerald-500/5"
                               }`}
                             >
                               ✅ Yes — Ready for quick delivery
@@ -849,8 +835,8 @@ export default function SellerDashboard() {
                               onClick={() => setProductForm({ ...productForm, in_stock: false })}
                               className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl border-2 text-sm font-semibold transition-all ${
                                 productForm.in_stock === false
-                                  ? "border-blue-500 bg-blue-50 text-blue-700"
-                                  : "border-slate-200 bg-slate-50 text-white/50 hover:border-blue-300 hover:bg-blue-50/30"
+                                  ? "border-blue-500 bg-blue-500/10 text-blue-300"
+                                  : "border-white/10 bg-white/5 text-white/50 hover:border-blue-500/40 hover:bg-blue-500/5"
                               }`}
                             >
                               📦 No — Confirm & deliver same day
@@ -929,7 +915,7 @@ export default function SellerDashboard() {
                     <div>
                       <h3 className="text-sm font-bold uppercase tracking-wider text-white border-b border-border pb-2 mb-5">Product Photos</h3>
                       <div className="space-y-3">
-                        <div className="relative border-2 border-dashed border-white/20 rounded-2xl p-8 text-center hover:border-amber-400 hover:bg-amber-50/20 transition-all cursor-pointer group">
+                        <div className="relative border-2 border-dashed border-white/20 rounded-2xl p-8 text-center hover:border-gold-accent hover:bg-gold-accent/5 transition-all cursor-pointer group">
                           <input type="file" multiple accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                             onChange={e => handleImageChange(e.target.files)} />
                           <ImagePlus size={28} className="mx-auto text-white/30 group-hover:text-gold-accent transition-colors mb-3" />
@@ -941,7 +927,7 @@ export default function SellerDashboard() {
                         {productImagePreviews.length > 0 && (
                           <div className="flex gap-3 flex-wrap mt-4">
                             {productImagePreviews.map((src, i) => (
-                              <div key={i} className="h-24 w-24 rounded-2xl overflow-hidden border-2 border-slate-100 bg-slate-50 shadow-sm">
+                              <div key={i} className="h-24 w-24 rounded-2xl overflow-hidden border-2 border-white/10 bg-white/5">
                                 <img src={src} alt="" className="w-full h-full object-cover" />
                               </div>
                             ))}
@@ -955,12 +941,12 @@ export default function SellerDashboard() {
                   <div className="flex gap-3 px-6 py-5 border-t border-border bg-background/50">
                     <Button onClick={handleSaveProduct}
                       disabled={isSavingProduct || createProductMutation.isPending || updateProductMutation.isPending}
-                      className="bg-slate-900 text-white rounded-2xl px-8 h-12 font-semibold gap-2 shadow-sm hover:-translate-y-0.5 transition-all">
+                      className="bg-primary text-primary-foreground hover:bg-accent rounded-2xl px-8 h-12 font-semibold gap-2 shadow-sm hover:-translate-y-0.5 transition-all">
                       {(isSavingProduct || createProductMutation.isPending || updateProductMutation.isPending) ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                       {editingProductId ? "Update Product" : "Publish Product"}
                     </Button>
                     <Button variant="ghost" onClick={() => { setShowAddProduct(false); setEditingProductId(null); }}
-                      className="rounded-2xl px-6 h-12 text-white/50 font-semibold hover:bg-slate-200">
+                      className="rounded-2xl px-6 h-12 text-white/50 font-semibold hover:bg-white/10">
                       Cancel
                     </Button>
                   </div>
@@ -970,17 +956,17 @@ export default function SellerDashboard() {
               {/* -- Product List (always visible when not loading) -- */}
               {isProductsLoading ? (
                 <div className="space-y-3">
-                  {[1, 2, 3].map(i => <div key={i} className="h-24 rounded-2xl bg-slate-100 animate-pulse" />)}
+                  {[1, 2, 3].map(i => <div key={i} className="h-24 rounded-2xl bg-white/5 animate-pulse" />)}
                 </div>
               ) : !sellerProducts || sellerProducts.length === 0 ? (
                 !showAddProduct && (
                   <div className="bg-card rounded-3xl border border-border p-16 text-center">
-                    <div className="h-20 w-20 rounded-3xl bg-slate-100 flex items-center justify-center mx-auto mb-6">
+                    <div className="h-20 w-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
                       <Package size={32} className="text-white/30" />
                     </div>
                     <h3 className="text-2xl font-bold text-white mb-2">Your store is ready</h3>
                     <p className="text-white/50 max-w-sm mx-auto mb-8">Add your first product and start sharing it with thousands of buyers across Rwanda.</p>
-                    <Button onClick={() => setShowAddProduct(true)} className="bg-slate-900 text-white rounded-2xl px-8 h-12 gap-2 font-semibold">
+                    <Button onClick={() => setShowAddProduct(true)} className="bg-primary text-primary-foreground hover:bg-accent rounded-2xl px-8 h-12 gap-2 font-semibold">
                       <Plus size={16} /> Add First Product
                     </Button>
                   </div>
@@ -1000,10 +986,10 @@ export default function SellerDashboard() {
                       const isEditing = editingProductId === String(product.id);
                       return (
                         <div key={product.id} className={`flex items-center gap-4 px-6 py-4 transition-colors ${
-                          isEditing ? "bg-amber-50/60 border-l-4 border-amber-400" : "hover:bg-card/60"
+                          isEditing ? "bg-gold-bright/10 border-l-4 border-gold-bright" : "hover:bg-white/5"
                         }`}>
                           {/* Thumbnail */}
-                          <div className="h-16 w-16 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                          <div className="h-16 w-16 rounded-2xl overflow-hidden bg-white/5 shrink-0 border border-white/10">
                             {img ? (
                               <CloudImage
                                 publicId={img}
@@ -1023,7 +1009,7 @@ export default function SellerDashboard() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap mb-0.5">
                               <span className="font-bold text-white truncate">{product.name}</span>
-                              {isEditing && <span className="text-[10px] font-bold bg-gold-tint text-amber-700 px-2 py-0.5 rounded-full">Editing…</span>}
+                              {isEditing && <span className="text-[10px] font-bold bg-gold-bright/20 text-gold-accent px-2 py-0.5 rounded-full">Editing…</span>}
                             </div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-xs text-white/40">{product.category}</span>
@@ -1031,9 +1017,9 @@ export default function SellerDashboard() {
                               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                                 inStock ? statusConfig.active.color : statusConfig["out-of-stock"].color
                               }`}>{inStock ? "In stock" : "Out of stock"}</span>
-                              {lowStock && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1"><AlertCircle size={9}/> Low</span>}
-                              {product.in_stock === true && <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">⚡ Quick delivery</span>}
-                              {product.in_stock === false && <span className="text-[10px] font-semibold text-blue-500 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">📦 Same day</span>}
+                              {lowStock && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold-bright/15 text-gold-accent border border-gold-bright/30 flex items-center gap-1"><AlertCircle size={9}/> Low</span>}
+                              {product.in_stock === true && <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">⚡ Quick delivery</span>}
+                              {product.in_stock === false && <span className="text-[10px] font-semibold text-blue-300 bg-blue-500/15 border border-blue-500/30 px-2 py-0.5 rounded-full">📦 Same day</span>}
                             </div>
                           </div>
 
@@ -1047,7 +1033,7 @@ export default function SellerDashboard() {
                           <div className="flex items-center gap-2 shrink-0">
                             <button
                               onClick={() => handleEditClick(product)}
-                              className="h-9 px-4 rounded-2xl bg-slate-900 text-white text-xs font-semibold flex items-center gap-1.5 hover:bg-slate-700 transition-colors">
+                              className="h-9 px-4 rounded-2xl bg-white/10 text-white text-xs font-semibold flex items-center gap-1.5 hover:bg-white/15 transition-colors">
                               <Edit3 size={13} /> Edit
                             </button>
                             <button
@@ -1059,7 +1045,7 @@ export default function SellerDashboard() {
                                   });
                                 }
                               }}
-                              className="h-9 w-9 rounded-2xl border border-slate-200 bg-white text-white/40 flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 transition-colors">
+                              className="h-9 w-9 rounded-2xl border border-white/10 bg-white/5 text-white/40 flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30 transition-colors">
                               <Trash2 size={13} />
                             </button>
                           </div>
@@ -1139,9 +1125,151 @@ export default function SellerDashboard() {
             );
           })()}
 
-          {/* -- STORE SETTINGS ------------------------- */}
+          {/* -- SETTINGS HUB ----------------------------- */}
+          {view === "settings" && (
+            <div className="max-w-2xl mx-auto space-y-6 animate-fade-up">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/40 mb-1">Configuration</p>
+                <h1 className="text-3xl font-bold text-white">Settings</h1>
+                <p className="text-white/50 mt-1">Manage your store, profile, and account preferences.</p>
+              </div>
+
+              <div className="bg-card rounded-3xl border border-border shadow-sm divide-y divide-border overflow-hidden">
+                <button
+                  onClick={() => setView("store-settings")}
+                  className="w-full flex items-center gap-4 px-6 py-5 text-left hover:bg-white/5 transition-colors"
+                >
+                  <div className="h-11 w-11 rounded-2xl bg-gold-bright/15 border border-gold-bright/25 flex items-center justify-center shrink-0">
+                    <Store size={19} className="text-gold-accent" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-white">Store Settings</p>
+                    <p className="text-sm text-white/40">Store name, logo, description, and public URL</p>
+                  </div>
+                  <ChevronRight size={18} className="text-white/25 shrink-0" />
+                </button>
+
+                <button
+                  onClick={() => setView("profile-settings")}
+                  className="w-full flex items-center gap-4 px-6 py-5 text-left hover:bg-white/5 transition-colors"
+                >
+                  <div className="h-11 w-11 rounded-2xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center shrink-0">
+                    <User size={19} className="text-blue-300" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-white">Profile Settings</p>
+                    <p className="text-sm text-white/40">Your name, phone number, and delivery address</p>
+                  </div>
+                  <ChevronRight size={18} className="text-white/25 shrink-0" />
+                </button>
+
+                <button
+                  onClick={() => logoutMutation.mutate()}
+                  className="w-full flex items-center gap-4 px-6 py-5 text-left hover:bg-rose-500/5 transition-colors"
+                >
+                  <div className="h-11 w-11 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0">
+                    <LogOut size={19} className="text-rose-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-rose-400">Sign out</p>
+                    <p className="text-sm text-white/40">End your session on this device</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* -- PROFILE SETTINGS ------------------------ */}
+          {view === "profile-settings" && (
+            <div className="max-w-2xl mx-auto space-y-6 animate-fade-up">
+              <button
+                onClick={() => setView("settings")}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-white/50 hover:text-white transition-colors"
+              >
+                <ArrowLeft size={16} /> Back to Settings
+              </button>
+
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/40 mb-1">Configuration</p>
+                <h1 className="text-3xl font-bold text-white">Profile Settings</h1>
+                <p className="text-white/50 mt-1">Your personal information and delivery address.</p>
+              </div>
+
+              <div className="bg-card rounded-3xl border border-border shadow-sm p-8 space-y-8">
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-white/50 flex items-center gap-1.5">
+                    <Mail size={12} /> Email
+                  </Label>
+                  <p className="text-sm text-white/60 font-medium">{userProfile?.email || "—"}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-white/50">First Name</Label>
+                    <Input value={profileForm.first_name} onChange={e => setProfileForm({ ...profileForm, first_name: e.target.value })}
+                      placeholder="e.g. Amina" className="rounded-2xl h-11 border-white/20 bg-white/5 text-white" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-white/50">Last Name</Label>
+                    <Input value={profileForm.last_name} onChange={e => setProfileForm({ ...profileForm, last_name: e.target.value })}
+                      placeholder="e.g. Uwase" className="rounded-2xl h-11 border-white/20 bg-white/5 text-white" />
+                  </div>
+                  <div className="md:col-span-2 space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-white/50 flex items-center gap-1.5">
+                      <Phone size={12} /> Phone Number
+                    </Label>
+                    <Input value={profileForm.phone_number} onChange={e => setProfileForm({ ...profileForm, phone_number: e.target.value })}
+                      placeholder="+250 7XX XXX XXX" className="rounded-2xl h-11 border-white/20 bg-white/5 text-white" />
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-border">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-white/50 flex items-center gap-1.5 mb-4">
+                    <MapPin size={12} /> Delivery Address
+                  </Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2 space-y-2">
+                      <Label className="text-xs text-white/40">Street / Address line 1</Label>
+                      <Input value={profileForm.address_line1} onChange={e => setProfileForm({ ...profileForm, address_line1: e.target.value })}
+                        placeholder="e.g. KG 123 St" className="rounded-2xl h-11 border-white/20 bg-white/5 text-white" />
+                    </div>
+                    <div className="md:col-span-2 space-y-2">
+                      <Label className="text-xs text-white/40">Apartment / Suite (optional)</Label>
+                      <Input value={profileForm.address_line2} onChange={e => setProfileForm({ ...profileForm, address_line2: e.target.value })}
+                        placeholder="e.g. Floor 2, Apt 3" className="rounded-2xl h-11 border-white/20 bg-white/5 text-white" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-white/40">City</Label>
+                      <Input value={profileForm.city} onChange={e => setProfileForm({ ...profileForm, city: e.target.value })}
+                        placeholder="e.g. Kigali" className="rounded-2xl h-11 border-white/20 bg-white/5 text-white" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-white/40">Country</Label>
+                      <Input value={profileForm.country} onChange={e => setProfileForm({ ...profileForm, country: e.target.value })}
+                        placeholder="Rwanda" className="rounded-2xl h-11 border-white/20 bg-white/5 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                <Button onClick={handleSaveProfile} disabled={updateProfileMutation.isPending}
+                  className="w-full bg-primary text-primary-foreground hover:bg-accent rounded-2xl h-12 font-bold gap-2 hover:-translate-y-0.5 transition-all">
+                  {updateProfileMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* -- STORE SETTINGS --------------------------- */}
           {view === "store-settings" && (
-            <div className="max-w-2xl mx-auto space-y-8 animate-fade-up">
+            <div className="max-w-2xl mx-auto space-y-6 animate-fade-up">
+              <button
+                onClick={() => setView("settings")}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-white/50 hover:text-white transition-colors"
+              >
+                <ArrowLeft size={16} /> Back to Settings
+              </button>
+
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/40 mb-1">Configuration</p>
                 <h1 className="text-3xl font-bold text-white">Store Settings</h1>
@@ -1152,7 +1280,7 @@ export default function SellerDashboard() {
                 {/* Logo */}
                 <div className="flex items-center gap-6 pb-8 border-b border-border">
                   <div className="relative group cursor-pointer flex-shrink-0">
-                    <div className="h-24 w-24 rounded-2xl border-2 border-dashed border-white/20 overflow-hidden bg-white/5 flex items-center justify-center hover:border-amber-400 transition-colors">
+                    <div className="h-24 w-24 rounded-2xl border-2 border-dashed border-white/20 overflow-hidden bg-white/5 flex items-center justify-center hover:border-gold-accent transition-colors">
                       {storeLogoPreview ? (
                         <img src={storeLogoPreview} alt="Logo preview" className="w-full h-full object-cover" />
                       ) : (
@@ -1189,8 +1317,8 @@ export default function SellerDashboard() {
                 {/* Store URL (read-only) */}
                 <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase tracking-wider text-white/50">Store URL</Label>
-                  <div className="flex rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden h-12">
-                    <span className="flex items-center px-4 text-white/40 text-sm bg-slate-100 border-r border-slate-200 flex-shrink-0">
+                  <div className="flex rounded-2xl border border-white/10 bg-white/5 overflow-hidden h-12">
+                    <span className="flex items-center px-4 text-white/40 text-sm bg-white/5 border-r border-white/10 flex-shrink-0">
                       ubuntunow.rw/shop/
                     </span>
                     <input value={storeSlug} readOnly className="bg-transparent px-4 text-sm font-mono text-white/60 w-full outline-none" />
@@ -1207,7 +1335,7 @@ export default function SellerDashboard() {
 
                 {/* Save */}
                 <Button onClick={handleSaveStoreSettings} disabled={updateStoreMutation.isPending}
-                  className="w-full bg-slate-900 text-white rounded-2xl h-12 font-bold gap-2 hover:-translate-y-0.5 transition-all">
+                  className="w-full bg-primary text-primary-foreground hover:bg-accent rounded-2xl h-12 font-bold gap-2 hover:-translate-y-0.5 transition-all">
                   {updateStoreMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                   Save Changes
                 </Button>
@@ -1215,7 +1343,7 @@ export default function SellerDashboard() {
 
               {/* Preview CTA */}
               {storeUrl ? (
-                <Link href={storeUrl} target="_blank">
+                <Link href={storeUrl} target="_blank" rel="noopener noreferrer">
                   <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 flex items-center gap-4 hover:opacity-90 transition-opacity cursor-pointer">
                     <div className="h-12 w-12 rounded-2xl bg-gold-accent flex items-center justify-center flex-shrink-0">
                       <Eye size={22} className="text-white" />
@@ -1242,6 +1370,70 @@ export default function SellerDashboard() {
           )}
         </main>
       </div>
+
+      {/* -- Mobile bottom tab bar -- */}
+      <nav
+        aria-label="Dashboard"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-card border-t border-border/40 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_rgba(0,0,0,0.08)]"
+      >
+        <div className="flex items-center justify-around h-14">
+          {navItems.map((item) => {
+            const isActive = isNavItemActive(item.id);
+            return (
+              <button
+                key={item.id}
+                onClick={() => setView(item.id)}
+                aria-current={isActive ? "page" : undefined}
+                className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                <span className="text-[10px] font-medium leading-none">
+                  {item.label === "My Products" ? "Products" : item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="h-14 border-b border-border" />
+      <div className="flex flex-1">
+        <div className="hidden lg:block w-64 xl:w-72 border-r border-border" />
+        <div className="flex-1 p-6 lg:p-10 space-y-4">
+          <div className="h-8 w-56 bg-secondary rounded-lg animate-pulse" />
+          <div className="h-24 bg-secondary rounded-2xl animate-pulse" />
+          <div className="h-24 bg-secondary rounded-2xl animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function DashboardPage() {
+  const router = useRouter();
+  const [role, setRole] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    if (!localStorage.getItem("access_token")) {
+      router.replace("/auth");
+      return;
+    }
+    setRole(localStorage.getItem("user_role"));
+  }, [router]);
+
+  if (role === undefined) return <DashboardSkeleton />;
+  if (role === "seller") return <SellerDashboardView />;
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <BuyerDashboard />
+    </Suspense>
   );
 }

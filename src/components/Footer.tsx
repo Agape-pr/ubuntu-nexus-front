@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Twitter, Instagram, Linkedin, Mail, ArrowRight, Zap, Shield, Clock, TrendingUp, CheckCircle2 } from "lucide-react";
+import { Twitter, Instagram, Linkedin, Mail, ArrowRight, CheckCircle2 } from "lucide-react";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -16,7 +16,7 @@ const NAV_COLUMNS = [
   {
     title: "Platform",
     links: [
-      { label: "Marketplace",    href: "/marketplace"                    },
+      { label: "Marketplace",    href: "/"                                },
       { label: "Start selling",  href: "/auth?tab=register&role=seller"  },
       { label: "Buyer guide",    href: "/guide/buyer"                    },
       { label: "Seller guide",   href: "/guide/seller"                   },
@@ -26,10 +26,10 @@ const NAV_COLUMNS = [
   {
     title: "Company",
     links: [
-      { label: "About us",       href: "/about"    },
+      { label: "About us",       href: "/#about"   },
       { label: "Blog",           href: "/blog"     },
       { label: "Careers",        href: "/careers"  },
-      { label: "Contact",        href: "/contact"  },
+      { label: "Contact",        href: "/#contact" },
       { label: "Press kit",      href: "/press"    },
     ],
   },
@@ -52,13 +52,6 @@ const NAV_COLUMNS = [
       { label: "Cookie policy",   href: "/cookie-policy"     },
     ],
   },
-];
-
-const TRUST_CARDS = [
-  { Icon: Clock,       label: "2-hour escrow protection",  sub: "Safe & secured"       },
-  { Icon: Shield,      label: "100% secure payments",      sub: "Powered by Pesapal"   },
-  { Icon: Zap,         label: "Fast payouts",              sub: "Same-day transfers"   },
-  { Icon: TrendingUp,  label: "Trusted local commerce",    sub: "10,000+ sellers"      },
 ];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -112,35 +105,6 @@ function FooterLink({ label, href }: { label: string; href: string }) {
   );
 }
 
-function TrustCard({ Icon, label, sub }: { Icon: React.ElementType; label: string; sub: string }) {
-  return (
-    <div className="
-      group flex items-center gap-3 px-4 py-3.5
-      rounded-2xl border border-white/8
-      bg-white/[0.03]
-      hover:bg-white/[0.06]
-      hover:border-amber-400/20
-      hover:-translate-y-0.5
-      transition-all duration-300
-    ">
-      <div className="
-        h-8 w-8 shrink-0 rounded-xl
-        bg-amber-400/10 border border-amber-400/20
-        flex items-center justify-center
-        text-amber-400
-        group-hover:shadow-[0_0_12px_rgba(251,191,36,0.2)]
-        transition-all duration-300
-      ">
-        <Icon size={15} />
-      </div>
-      <div>
-        <p className="text-xs font-semibold text-white/80 leading-none">{label}</p>
-        <p className="text-[11px] text-white/35 mt-0.5">{sub}</p>
-      </div>
-    </div>
-  );
-}
-
 // ─── Pre-CTA Section ─────────────────────────────────────────────────────────
 
 export function FooterCTA() {
@@ -154,7 +118,7 @@ export function FooterCTA() {
       <div className="container relative text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-amber-400/20 bg-amber-400/8 mb-6">
           <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-xs font-medium text-amber-400 tracking-wide">Join 10,000+ sellers across Rwanda</span>
+          <span className="text-xs font-medium text-amber-400 tracking-wide">Join sellers building their stores across Rwanda</span>
         </div>
 
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
@@ -180,7 +144,7 @@ export function FooterCTA() {
             <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform duration-200" />
           </Link>
           <Link
-            href="/marketplace"
+            href="/"
             className="
               inline-flex items-center gap-2 px-7 py-3.5
               border border-white/12 text-white/70
@@ -215,22 +179,6 @@ const Footer = () => {
       </div>
 
       <div className="container relative py-14 md:py-20">
-
-        {/* ══ TRUST INDICATORS ══════════════════════════════════════════════ */}
-        {/* Use mt/mb instead of py so the border sits with proper breathing room */}
-        <div className="mt-2 mb-2">
-          <p className="text-xs font-bold uppercase tracking-widest text-white/25 mb-5 text-center">
-            Why merchants choose UbuntuNow
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {TRUST_CARDS.map((card) => (
-              <TrustCard key={card.label} {...card} />
-            ))}
-          </div>
-        </div>
-
-        {/* Divider with generous vertical margin */}
-        <div className="my-10 border-t border-white/8" />
 
         {/* ══ APP DOWNLOAD BUTTONS ══════════════════════════════════════════ */}
         <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">

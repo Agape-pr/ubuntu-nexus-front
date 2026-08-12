@@ -76,7 +76,7 @@ export const useVerifyOTP = () => {
       if (redirectTo) {
         router.push(redirectTo);
       } else {
-        router.push(role === 'seller' ? '/dashboard' : '/marketplace');
+        router.push(role === 'seller' ? '/dashboard' : '/');
       }
     },
     onError: (error: { message?: string }) => {
@@ -104,7 +104,7 @@ export const useLogin = () => {
       if (redirectTo) {
         router.push(redirectTo);
       } else {
-        router.push(role === 'seller' ? '/dashboard' : '/marketplace');
+        router.push(role === 'seller' ? '/dashboard' : '/');
       }
     },
     onError: (error: { message?: string }) => {
