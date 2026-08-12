@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 import { useLogout } from "@/lib/api/hooks/useAuth";
 
 /**
@@ -17,14 +17,7 @@ export function DashboardNavbar() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-card/90 backdrop-blur-md">
       <div className="container flex h-14 items-center justify-between gap-4">
-        <Link href="/dashboard" className="flex items-center gap-2 group shrink-0">
-          <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-200">
-            <span className="text-primary-foreground font-black text-xs">UN</span>
-          </div>
-          <span className="font-bold text-[15px] text-foreground tracking-tight">
-            Ubuntu<span className="text-accent">Now</span>
-          </span>
-        </Link>
+        <Logo href="/dashboard" />
 
         <Button
           variant="ghost"

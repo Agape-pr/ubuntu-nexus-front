@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, ShoppingCart, User, Package, LayoutDashboard, ClipboardList } from "lucide-react";
-import { useCartStore } from "@/lib/store/cartStore";
+import { Home, LayoutGrid, Package, LayoutDashboard } from "lucide-react";
 import { useSellerOrders } from "@/lib/api/hooks/useOrders";
 import { useEffect, useState } from "react";
 
@@ -28,7 +27,6 @@ const MobileNav = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [lastSeenId, setLastSeenId] = useState(0);
-  const totalItems = useCartStore((state) => state.getTotalItems());
 
   useEffect(() => {
     const checkAuth = () => {
@@ -55,31 +53,19 @@ const MobileNav = () => {
       (o: any) => o.id > lastSeenId && (o.status === "pending" || o.status === "confirmed")
     ).length ?? 0;
 
-  // The buyer dashboard shell (Overview/Shop/My Orders/Cart/Profile) has its own
-  // complete in-page navigation (sidebar + tab bar) — a second, redundant bottom
-  // bar would be confusing on any page that renders it.
-  const SHELL_PREFIXES = ["/auth", "/dashboard", "/my-orders", "/cart", "/profile"];
-  if (SHELL_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return null;
+  // Buyers get their navigation entirely from BuyerDashboardShell (Shop, My Orders,
+  // Cart, Overview, Profile — the single unified buyer nav). This bar now only
+  // serves signed-in sellers browsing outside their dashboard — /dashboard already
+  // has its own complete mobile tab bar, so a second one here would duplicate it.
+  if (!mounted || !isLoggedIn || !isSeller) return null;
+  if (pathname.startsWith("/dashboard")) return null;
 
-  // Guests get sign-in/sell entry points from the top Navbar — no bottom bar needed.
-  if (!mounted || !isLoggedIn) return null;
-
-  // ── Seller nav: Home · Categories · Orders · Dashboard ──────────────
-  // ── Buyer nav:  Home · Categories · My Orders · Cart · Profile ──────
-  const navItems = isSeller
-    ? [
-        { label: "Home",      icon: Home,           href: "/" },
-        { label: "Categories",icon: LayoutGrid,     href: "/#categories" },
-        { label: "Orders",    icon: Package,        href: "/dashboard", badgeCount },
-        { label: "Dashboard", icon: LayoutDashboard,href: "/dashboard" },
-      ]
-    : [
-        { label: "Home",      icon: Home,           href: "/" },
-        { label: "Categories",icon: LayoutGrid,     href: "/#categories" },
-        { label: "My Orders", icon: ClipboardList,  href: "/my-orders" },
-        { label: "Cart",      icon: ShoppingCart,   href: "/cart", badgeCount: totalItems },
-        { label: "Profile",   icon: User,           href: "/profile" },
-      ];
+  const navItems = [
+    { label: "Home",      icon: Home,           href: "/" },
+    { label: "Categories",icon: LayoutGrid,     href: "/#categories" },
+    { label: "Orders",    icon: Package,        href: "/dashboard", badgeCount },
+    { label: "Dashboard", icon: LayoutDashboard,href: "/dashboard" },
+  ];
 
   return (
     <>

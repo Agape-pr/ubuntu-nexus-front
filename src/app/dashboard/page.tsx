@@ -24,6 +24,7 @@ import { useCurrentUser, useUpdateStore, useUpdateProfile } from "@/lib/api/hook
 import { toast } from "sonner";
 import { CloudImage } from "@/components/ui/CloudImage";
 import { BuyerDashboard } from "@/components/BuyerDashboard";
+import { resolveCategoryName } from "@/lib/categories";
 
 type DashView = "overview" | "products" | "orders" | "settings" | "profile-settings" | "store-settings";
 const SETTINGS_VIEWS: DashView[] = ["settings", "profile-settings", "store-settings"];
@@ -482,7 +483,10 @@ function SellerDashboardView() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+      {/* Top navbar is desktop-only — the mobile bottom tab bar below covers navigation */}
+      <div className="hidden lg:block">
+        <Navbar />
+      </div>
 
       <div className="flex flex-1">
         {/* -- Sidebar ---------------------------------- */}
@@ -1012,7 +1016,7 @@ function SellerDashboardView() {
                               {isEditing && <span className="text-[10px] font-bold bg-gold-bright/20 text-gold-accent px-2 py-0.5 rounded-full">Editing…</span>}
                             </div>
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs text-white/40">{product.category}</span>
+                              <span className="text-xs text-white/40">{resolveCategoryName(product.category)}</span>
                               <span className="text-white/30">·</span>
                               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                                 inStock ? statusConfig.active.color : statusConfig["out-of-stock"].color

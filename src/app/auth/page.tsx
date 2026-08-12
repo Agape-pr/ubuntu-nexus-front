@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, Timer } from "lucide-react";
 import { useLogin, useRegister, useVerifyOTP, useResendOTP } from "@/lib/api/hooks/useAuth";
 import { toast } from "sonner";
+import { Logo } from "@/components/Logo";
 import marketImage from "@/assets/kigali-market.jpg";
 
 // ── OTP_EXPIRY and RESEND_COOLDOWN match auth-service/apps/authentication/services/otp_service.py
@@ -239,14 +240,7 @@ const AuthContent = () => {
         <div className="absolute top-0 right-0 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
         <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-emerald/10 blur-3xl" />
 
-        <Link href="/" className="flex items-center gap-2.5 z-10 relative">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground font-bold">
-            UN
-          </div>
-          <span className="font-bold text-xl text-foreground">
-            Ubuntu<span className="text-accent">Now</span>
-          </span>
-        </Link>
+        <Logo href="/" size="lg" className="z-10 relative" />
 
         <div className="relative z-10">
           <blockquote className="text-3xl font-bold text-foreground leading-snug mb-6">

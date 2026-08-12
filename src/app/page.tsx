@@ -20,15 +20,16 @@ import { ShieldCheck, Sparkles, Zap, Star, ArrowRight } from "lucide-react";
 
 const HomeContent = () => {
   const router = useRouter();
-  const { isLoggedIn, mounted } = useAuthState();
+  const { isLoggedIn, userRole, mounted } = useAuthState();
 
   // Signed-in users (buyers and sellers alike) get the sidebar dashboard, not
   // the marketing landing page — "/" is the guest-facing storefront pitch.
+  // Buyers land straight on the Shop tab; sellers land on their Overview.
   useEffect(() => {
     if (mounted && isLoggedIn) {
-      router.replace("/dashboard");
+      router.replace(userRole === "seller" ? "/dashboard" : "/dashboard?view=shop");
     }
-  }, [mounted, isLoggedIn, router]);
+  }, [mounted, isLoggedIn, userRole, router]);
 
   if (!mounted || isLoggedIn) return <HomeSkeleton />;
 

@@ -71,6 +71,7 @@ export function ProductCarousel() {
                   storeSlug={makeStoreSlug(product.store_name)}
                   category={product.category}
                   inStock={product.stock_quantity > 0}
+                  stockQuantity={product.stock_quantity}
                   sellerHasStock={(product as { in_stock?: boolean }).in_stock}
                 />
               </div>

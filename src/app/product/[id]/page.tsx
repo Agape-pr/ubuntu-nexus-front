@@ -10,13 +10,16 @@ import { Button } from "@/components/ui/button";
 import { PaymentOptions } from "@/components/ui/PaymentOptions";
 import { useProduct, useProducts } from "@/lib/api/hooks/useProducts";
 import { useCartStore } from "@/lib/store/cartStore";
+import { useFavoritesStore } from "@/lib/store/favoritesStore";
 import { useAuthState } from "@/hooks/useAuthState";
 import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 import { CloudImage } from "@/components/ui/CloudImage";
+import { resolveCategoryName } from "@/lib/categories";
 import { toast } from "sonner";
 import {
   ArrowLeft, Heart, Store, Truck, MapPin, Clock, Share2, Plus, Minus,
   CheckCircle, XCircle, Mail, PackageSearch, ChevronLeft, ChevronRight, Lock,
+  ShoppingCart, Banknote, Landmark,
 } from "lucide-react";
 
 // SEED DATA FALLBACK
@@ -45,9 +48,15 @@ function GallerySkeleton() {
   );
 }
 
-function ProductChrome({ useShell, children }: { useShell: boolean; children: React.ReactNode }) {
+function ProductChrome({
+  useShell,
+  children,
+}: {
+  useShell: boolean;
+  children: React.ReactNode;
+}) {
   if (useShell) {
-    return <BuyerDashboardShell>{children}</BuyerDashboardShell>;
+    return <BuyerDashboardShell hideMobileBottomNav>{children}</BuyerDashboardShell>;
   }
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -66,6 +75,7 @@ function ProductPageContent() {
   const { data: apiProduct, isLoading: isApiLoading } = useProduct(isSeed ? "" : idStr);
   const { data: allProducts = [] } = useProducts();
   const addItem = useCartStore((state) => state.addItem);
+  const cartCount = useCartStore((state) => state.getTotalItems());
   const { isLoggedIn, userRole } = useAuthState();
   const useShell = isLoggedIn && userRole !== "seller";
   const { trackRef: relatedTrackRef, scrollByCard: scrollRelated } = useHorizontalScroll();
@@ -74,7 +84,6 @@ function ProductPageContent() {
   const [mounted, setMounted] = useState(false);
   const [selectedVariations, setSelectedVariations] = useState<Record<string, string>>({});
   const [activeImage, setActiveImage] = useState(0);
-  const [wishlisted, setWishlisted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -105,10 +114,15 @@ function ProductPageContent() {
 
   const relatedProducts = useMemo(() => {
     if (!product || isSeed) return [];
+    const category = resolveCategoryName(product.category);
     return allProducts
-      .filter((p) => p.category === product.category && String(p.id) !== String(product.id))
+      .filter((p) => resolveCategoryName(p.category) === category && String(p.id) !== String(product.id))
       .slice(0, 6);
   }, [allProducts, product, isSeed]);
+
+  const favoriteId = product ? (isSeed ? idStr : String(product.id)) : "";
+  const wishlisted = useFavoritesStore((s) => s.isFavorite(favoriteId));
+  const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite);
 
   if (!mounted) return null;
 
@@ -155,30 +169,45 @@ function ProductPageContent() {
   }
 
   // Product Data Extraction
+  const actualId = isSeed ? idStr : String(product.id);
   const name = product.name;
   const price = Number(product.price);
   const formattedPrice = new Intl.NumberFormat("en-RW").format(price);
   const stock = Number(product.stock_quantity);
   const inStock = stock > 0;
   const description = product.description || "No description provided.";
-  const catName = product.category;
+  const catName = resolveCategoryName(product.category);
   const sellerHasStock: boolean | undefined = product.in_stock;
 
   // The list endpoint (used for relatedProducts) reliably returns store_name;
   // fall back to it if this product's own detail response omits the field.
+  // Some products' store_name genuinely comes back null from the API with no
+  // way to resolve it client-side — in that case we show a plain label instead
+  // of a link, rather than sending buyers to a /shop/[slug] that can't exist.
   const listMatch = !isSeed
     ? allProducts.find((p) => String(p.id) === String(product.id) || p.slug === idStr)
     : undefined;
-  const storeName =
-    product.store?.store_name || product.store_name || listMatch?.store_name || "Unknown Store";
-  // The API never returns a store slug — every other page derives it from the
-  // store name the same way, so /shop/[slug] links resolve correctly.
-  const storeSlug = product.store?.slug || product.storeSlug || makeStoreSlug(storeName);
+  const resolvedStoreName: string | null =
+    product.store?.store_name || product.store_name || listMatch?.store_name || null;
+  const storeName = resolvedStoreName || "Store info unavailable";
+  const storeSlug = product.store?.slug || product.storeSlug || (resolvedStoreName ? makeStoreSlug(resolvedStoreName) : null);
 
   const images: string[] = (product.images ?? [])
     .map((img: any) => img?.image)
     .filter(Boolean);
   const coverImage = images[activeImage] ?? images[0];
+
+  const handleToggleFavorite = () => {
+    toggleFavorite({
+      id: favoriteId,
+      name,
+      price,
+      image: coverImage,
+      storeName: resolvedStoreName || undefined,
+      storeSlug: storeSlug || undefined,
+      slug: isSeed ? undefined : product.slug,
+    });
+  };
 
   const renderImage = (src: string, alt: string, className: string) =>
     isSeed ? (
@@ -195,7 +224,6 @@ function ProductPageContent() {
 
   const handleAddToCart = () => {
     if (!inStock) return;
-    const actualId = isSeed ? idStr : String(product.id);
     const cartItemId =
       Object.keys(selectedVariations).length > 0
         ? `${actualId}-${JSON.stringify(selectedVariations)}`
@@ -239,8 +267,8 @@ function ProductPageContent() {
   return (
     <ProductChrome useShell={useShell}>
       <>
-        {/* Breadcrumb Header */}
-        <div className="bg-secondary/30 border-b border-border/50">
+        {/* Breadcrumb Header — desktop only; mobile shows the image immediately, back/cart float on it */}
+        <div className="hidden lg:block bg-secondary/30 border-b border-border/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-2 text-sm text-muted-foreground overflow-x-auto no-scrollbar">
             <Link href="/" className="hover:text-foreground transition-colors shrink-0">Marketplace</Link>
             {catName && (
@@ -254,7 +282,7 @@ function ProductPageContent() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-6 md:pb-10 lg:pt-10">
           <Button
             variant="ghost"
             onClick={() => router.back()}
@@ -263,11 +291,11 @@ function ProductPageContent() {
             <ArrowLeft size={18} /> Back
           </Button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-14">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-6 gap-y-0 lg:gap-14">
 
-            {/* LEFT: Image Gallery */}
+            {/* LEFT: Image Gallery — full-bleed on mobile, padded card on desktop */}
             <div className="lg:col-span-5 flex flex-col gap-3">
-              <div className="relative aspect-square rounded-2xl overflow-hidden bg-secondary border border-border group">
+              <div className="relative aspect-[4/5] overflow-hidden bg-secondary -mx-4 sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-border group">
                 {coverImage ? (
                   renderImage(
                     coverImage,
@@ -296,15 +324,42 @@ function ProductPageContent() {
                     >
                       <ChevronRight size={18} />
                     </button>
+                    <span className="absolute bottom-3 right-3 bg-background/70 backdrop-blur-md text-foreground text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {activeImage + 1}/{images.length}
+                    </span>
                   </>
                 )}
+
+                {/* Back — floats on the image, mobile only (desktop uses the Back button above) */}
+                <button
+                  type="button"
+                  aria-label="Back"
+                  onClick={() => router.back()}
+                  className="lg:hidden absolute top-3 left-3 h-10 w-10 rounded-full bg-background/50 backdrop-blur-md flex items-center justify-center text-foreground z-10"
+                >
+                  <ChevronLeft size={22} />
+                </button>
+
+                {/* Cart — floats on the image, mobile only (desktop has it in the top navbar / sidebar) */}
+                <Link
+                  href="/cart"
+                  aria-label={cartCount > 0 ? `Cart, ${cartCount} item${cartCount !== 1 ? "s" : ""}` : "Cart"}
+                  className="lg:hidden absolute top-3 right-3 h-10 w-10 rounded-full bg-background/50 backdrop-blur-md flex items-center justify-center text-foreground z-10"
+                >
+                  <ShoppingCart size={19} />
+                  {cartCount > 0 && (
+                    <span className="absolute top-0.5 right-0.5 h-4 min-w-4 rounded-full bg-accent flex items-center justify-center px-1 text-[9px] font-bold text-near-black">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
 
                 <button
                   type="button"
                   aria-label={wishlisted ? `Remove ${name} from wishlist` : `Add ${name} to wishlist`}
                   aria-pressed={wishlisted}
-                  onClick={() => setWishlisted((v) => !v)}
-                  className={`absolute top-3 right-3 h-11 w-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all shadow-sm border ${
+                  onClick={handleToggleFavorite}
+                  className={`absolute top-3 right-16 lg:right-3 h-11 w-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all shadow-sm border ${
                     wishlisted
                       ? "bg-rose-500/15 border-rose-400/40 text-rose-500"
                       : "bg-card/80 border-border/50 text-muted-foreground hover:text-rose-500"
@@ -323,7 +378,7 @@ function ProductPageContent() {
               </div>
 
               {images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                <div className="hidden lg:flex gap-2 overflow-x-auto no-scrollbar">
                   {images.map((img, i) => (
                     <button
                       type="button"
@@ -344,14 +399,55 @@ function ProductPageContent() {
 
             {/* RIGHT: Product Details */}
             <div className="lg:col-span-7 flex flex-col">
-              <div className="mb-5 border-b border-border/50 pb-5">
-                <Link href={`/shop/${storeSlug}`} className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold hover:underline mb-2">
-                  <Store size={14} /> {storeName}
-                </Link>
+              {/* Price ticket — sits flush under the image on mobile, no gap */}
+              <div className="-mx-4 sm:-mx-6 lg:mx-0 px-4 sm:px-6 lg:px-5 py-3 lg:py-4 bg-primary/5 border-b border-primary/15 lg:border lg:rounded-2xl lg:mb-5">
+                {isLoggedIn ? (
+                  <div className="flex items-end justify-between gap-3 flex-wrap">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-xs text-muted-foreground font-semibold">RWF</span>
+                      <span className="text-3xl font-black text-accent tracking-tight" style={{ fontFamily: "Nunito, sans-serif" }}>
+                        {formattedPrice}
+                      </span>
+                    </div>
+                    <div className="text-right shrink-0">
+                      {sellerHasStock === true && (
+                        <span className="text-primary text-xs font-bold">⚡ Quick delivery</span>
+                      )}
+                      {sellerHasStock === false && (
+                        <span className="text-accent text-xs font-bold">📦 Same-day delivery</span>
+                      )}
+                      {inStock && stock <= 5 ? (
+                        <p className="text-rose-500 font-semibold text-xs mt-0.5">Only {stock} left</p>
+                      ) : (
+                        <p className="text-muted-foreground text-xs mt-0.5">{stock} in stock</p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <Link href="/auth" className="flex items-center gap-2 text-primary font-semibold">
+                    <Lock size={16} /> Sign in to see the price
+                  </Link>
+                )}
+              </div>
+
+              <div className="mb-5 border-b border-border/50 pb-5 pt-5 lg:pt-0">
+                {storeSlug ? (
+                  <Link href={`/shop/${storeSlug}`} className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold hover:underline mb-2">
+                    <Store size={14} /> {storeName}
+                  </Link>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground font-semibold mb-2">
+                    <Store size={14} /> {storeName}
+                  </span>
+                )}
 
                 <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground leading-[1.15] mb-3">
                   {name}
                 </h1>
+
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap mb-3">
+                  {description}
+                </p>
 
                 <div className="flex flex-wrap items-center gap-3 text-sm">
                   {inStock ? (
@@ -364,40 +460,12 @@ function ProductPageContent() {
                     </div>
                   )}
 
-                  {sellerHasStock === true && (
-                    <span className="text-primary font-medium">⚡ Quick delivery</span>
-                  )}
-                  {sellerHasStock === false && (
-                    <span className="text-accent font-medium">📦 Same-day delivery</span>
-                  )}
-
                   <div className="w-1 h-1 rounded-full bg-border hidden sm:block" />
 
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <MapPin size={14} /> Ships from Kigali
                   </div>
                 </div>
-              </div>
-
-              <div className="mb-6">
-                {isLoggedIn ? (
-                  <div className="flex items-end gap-2">
-                    <span className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">{formattedPrice}</span>
-                    <span className="text-lg text-muted-foreground mb-1 font-semibold">RWF</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Lock size={18} />
-                    <Link href="/auth" className="text-lg font-semibold text-primary hover:underline">
-                      Sign in to see the price
-                    </Link>
-                  </div>
-                )}
-                {isLoggedIn && inStock && stock <= 5 && (
-                  <p className="text-rose-500 font-medium text-sm flex items-center gap-1.5 mt-2">
-                    <Clock size={14} /> Only {stock} left in stock
-                  </p>
-                )}
               </div>
 
               {/* Variations */}
@@ -436,60 +504,111 @@ function ProductPageContent() {
 
               {/* Purchase panel */}
               <div className="bg-secondary/30 rounded-2xl p-5 border border-border/50 mb-8">
-                {isLoggedIn ? (
-                  <>
-                    <div className="flex flex-col sm:flex-row gap-3 mb-3">
-                      <div className="flex items-center h-12 bg-card rounded-xl border border-border p-1 self-start">
-                        <button
-                          type="button"
-                          aria-label="Decrease quantity"
-                          onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                          disabled={!inStock}
-                          className="w-11 h-full flex items-center justify-center text-foreground hover:bg-secondary rounded-lg transition-colors disabled:opacity-30"
-                        >
-                          <Minus size={16} />
-                        </button>
-                        <div className="w-10 h-full flex items-center justify-center font-bold text-base tabular-nums">
-                          {inStock ? quantity : 0}
-                        </div>
-                        <button
-                          type="button"
-                          aria-label="Increase quantity"
-                          onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
-                          disabled={!inStock}
-                          className="w-11 h-full flex items-center justify-center text-foreground hover:bg-secondary rounded-lg transition-colors disabled:opacity-30"
-                        >
-                          <Plus size={16} />
-                        </button>
-                      </div>
-
-                      <Button
-                        onClick={handleAddToCart}
+                {isLoggedIn && (
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-semibold text-foreground">Quantity</span>
+                    <div className="flex items-center h-11 bg-card rounded-xl border border-border p-1">
+                      <button
+                        type="button"
+                        aria-label="Decrease quantity"
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                         disabled={!inStock}
-                        size="lg"
-                        variant="outline"
-                        className="flex-1 h-12 rounded-xl font-semibold text-base border-border bg-card hover:bg-secondary"
+                        className="w-10 h-full flex items-center justify-center text-foreground hover:bg-secondary rounded-lg transition-colors disabled:opacity-30"
                       >
-                        Add to order
-                      </Button>
+                        <Minus size={15} />
+                      </button>
+                      <div className="w-10 h-full flex items-center justify-center font-bold text-base tabular-nums">
+                        {inStock ? quantity : 0}
+                      </div>
+                      <button
+                        type="button"
+                        aria-label="Increase quantity"
+                        onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
+                        disabled={!inStock}
+                        className="w-10 h-full flex items-center justify-center text-foreground hover:bg-secondary rounded-lg transition-colors disabled:opacity-30"
+                      >
+                        <Plus size={15} />
+                      </button>
                     </div>
+                  </div>
+                )}
 
-                    <Button
+                {/* Action row — left to right: Store, Favorites, Add to Cart, Buy Now (priority order, Buy Now rightmost) */}
+                <div className="grid grid-cols-4 gap-2">
+                  {storeSlug ? (
+                    <Link
+                      href={`/shop/${storeSlug}`}
+                      className="flex flex-col items-center justify-center gap-1 h-16 rounded-xl border border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors"
+                    >
+                      <Store size={18} />
+                      <span className="text-[10px] font-semibold">Store</span>
+                    </Link>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-1 h-16 rounded-xl border border-border/50 bg-card text-muted-foreground/50 cursor-not-allowed">
+                      <Store size={18} />
+                      <span className="text-[10px] font-semibold">Store</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    aria-pressed={wishlisted}
+                    onClick={handleToggleFavorite}
+                    className={`flex flex-col items-center justify-center gap-1 h-16 rounded-xl border transition-colors ${
+                      wishlisted
+                        ? "border-rose-400/40 bg-rose-500/10 text-rose-400"
+                        : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    }`}
+                  >
+                    <Heart size={18} fill={wishlisted ? "currentColor" : "none"} />
+                    <span className="text-[10px] font-semibold">Favorite</span>
+                  </button>
+
+                  {isLoggedIn ? (
+                    <button
+                      type="button"
+                      onClick={handleAddToCart}
+                      disabled={!inStock}
+                      className="flex flex-col items-center justify-center gap-1 h-16 rounded-xl border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <ShoppingCart size={18} />
+                      <span className="text-[10px] font-bold">Add to Cart</span>
+                    </button>
+                  ) : (
+                    <Link
+                      href="/auth?tab=register"
+                      className="flex flex-col items-center justify-center gap-1 h-16 rounded-xl border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 transition-colors"
+                    >
+                      <Lock size={18} />
+                      <span className="text-[10px] font-bold">Add to Cart</span>
+                    </Link>
+                  )}
+
+                  {isLoggedIn ? (
+                    <button
+                      type="button"
                       onClick={handleBuyNow}
                       disabled={!inStock}
-                      size="lg"
-                      className="w-full h-12 rounded-xl font-bold text-base gradient-amber text-near-black shadow-amber border-0 hover:opacity-95 transition-opacity"
+                      className="flex flex-col items-center justify-center gap-1 h-16 rounded-xl gradient-amber text-near-black shadow-amber border-0 hover:opacity-95 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      {inStock ? "Buy now" : "Currently unavailable"}
-                    </Button>
-                  </>
-                ) : (
-                  <Button asChild size="lg" className="w-full h-12 rounded-xl font-bold text-base gap-2">
-                    <Link href="/auth?tab=register">
-                      <Lock size={16} /> Sign in to buy
+                      <span className="text-[11px] font-black">{inStock ? "Buy Now" : "Sold out"}</span>
+                      <div className="flex items-center gap-1">
+                        <Banknote size={11} />
+                        <span className="h-3.5 w-3.5 rounded-full bg-[#FFCC00] flex items-center justify-center text-black text-[6px] font-black leading-none">M</span>
+                        <span className="h-3.5 w-3.5 rounded-full bg-[#FF0000] flex items-center justify-center text-white text-[6px] font-black leading-none">A</span>
+                        <Landmark size={11} />
+                      </div>
+                    </button>
+                  ) : (
+                    <Link
+                      href="/auth?tab=register"
+                      className="flex flex-col items-center justify-center gap-1 h-16 rounded-xl gradient-amber text-near-black shadow-amber border-0 hover:opacity-95 transition-opacity"
+                    >
+                      <Lock size={16} />
+                      <span className="text-[11px] font-black">Buy Now</span>
                     </Link>
-                  </Button>
-                )}
+                  )}
+                </div>
 
                 <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
                   <Truck size={14} /> Confirmed orders ship same day from Kigali
@@ -497,14 +616,6 @@ function ProductPageContent() {
               </div>
 
               <PaymentOptions />
-
-              {/* Description */}
-              <div className="mt-10">
-                <h3 className="text-lg font-bold text-foreground mb-3">Product details</h3>
-                <div className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {description}
-                </div>
-              </div>
 
               {/* Share & Report */}
               <div className="mt-8 pt-5 border-t border-border flex items-center justify-between text-sm">
@@ -561,6 +672,7 @@ function ProductPageContent() {
                       storeSlug={p.store_name?.toLowerCase().trim().replace(/\s+/g, "-")}
                       category={p.category}
                       inStock={p.stock_quantity > 0}
+                      stockQuantity={p.stock_quantity}
                       sellerHasStock={(p as any).in_stock}
                     />
                   </div>

@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Navbar from "@/components/Navbar";
+import { BuyerDashboardShell } from "@/components/BuyerDashboardShell";
 import ProductCard, { ProductGrid } from "@/components/ProductCard";
 import { CloudImage } from "@/components/ui/CloudImage";
 import { Button } from "@/components/ui/button";
 import { Search, MapPin, Share2, ShoppingBag, PackageSearch } from "lucide-react";
 import { toast } from "sonner";
+import { useAuthState } from "@/hooks/useAuthState";
 
 interface ShopClientProps {
   store: {
@@ -18,8 +20,10 @@ interface ShopClientProps {
   username: string;
 }
 
-export default function ShopClient({ store, initialProducts, username }: ShopClientProps) {
+function ShopContent({ store, initialProducts, username }: ShopClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const { isLoggedIn, userRole } = useAuthState();
+  const useShell = isLoggedIn && userRole !== "seller";
 
   const storeName = store?.store_name || username.replace(/-/g, " ");
   const storeInitials = storeName.slice(0, 2).toUpperCase();
@@ -44,17 +48,14 @@ export default function ShopClient({ store, initialProducts, username }: ShopCli
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navbar />
+  const content = (
+    <>
+      {/* Cover */}
+      <div className="relative h-40 sm:h-56 w-full overflow-hidden bg-gradient-to-br from-secondary via-secondary/60 to-background">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+      </div>
 
-      <main className="flex-1">
-        {/* Cover */}
-        <div className="relative h-40 sm:h-56 w-full overflow-hidden bg-gradient-to-br from-secondary via-secondary/60 to-background">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-        </div>
-
-        <div className="container">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Identity */}
           <div className="relative -mt-14 sm:-mt-16 flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 mb-8">
             <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl border-4 border-background shadow-lg shrink-0 overflow-hidden bg-secondary flex items-center justify-center">
@@ -143,13 +144,32 @@ export default function ShopClient({ store, initialProducts, username }: ShopCli
                   storeSlug: username,
                   category: typeof product.category === "object" ? product.category?.name : product.category,
                   inStock: Number(product.stock_quantity) > 0,
+                  stockQuantity: Number(product.stock_quantity),
                   sellerHasStock: product.in_stock,
                 }))}
               />
             )}
           </div>
         </div>
-      </main>
+    </>
+  );
+
+  if (useShell) {
+    return <BuyerDashboardShell>{content}</BuyerDashboardShell>;
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <Navbar />
+      <main className="flex-1">{content}</main>
     </div>
+  );
+}
+
+export default function ShopClient(props: ShopClientProps) {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <ShopContent {...props} />
+    </Suspense>
   );
 }

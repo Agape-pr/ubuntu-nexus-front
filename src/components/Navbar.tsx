@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, ShoppingBag, Search, User, LogOut, Shield, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 import { useLogout } from "@/lib/api/hooks/useAuth";
 import { useCartStore } from "@/lib/store/cartStore";
 
@@ -59,14 +60,7 @@ const Navbar = () => {
       <div className="container flex h-14 items-center justify-between gap-4">
 
         {/* ── Logo ── */}
-        <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-200">
-            <span className="text-primary-foreground font-black text-xs">UN</span>
-          </div>
-          <span className="font-bold text-[15px] text-foreground tracking-tight">
-            Ubuntu<span className="text-accent">Now</span>
-          </span>
-        </Link>
+        <Logo />
 
         {/* ── Desktop Centre Nav ── */}
         <nav className="hidden md:flex items-center gap-0.5 flex-1 ml-6">

@@ -13,15 +13,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ProductCard, { ProductGrid } from "@/components/ProductCard";
+import { AutoSlideCarousel } from "@/components/AutoSlideCarousel";
+import { PromoBanner, type PromoSlide } from "@/components/PromoBanner";
 import { useProducts } from "@/lib/api/hooks/useProducts";
 import { useBuyerOrders } from "@/lib/api/hooks/useOrders";
 import { useCurrentUser } from "@/lib/api/hooks/useUsers";
 import { useCartStore } from "@/lib/store/cartStore";
-import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
+import { resolveCategoryName } from "@/lib/categories";
 import {
-  Store, ShoppingBag, ShoppingCart, User, ChevronRight, ChevronLeft,
-  Search, SlidersHorizontal, X, Sparkles, Tag,
-  Shirt, Laptop, Home as HomeIcon, Gem, BookOpen, Coffee, Palette, Footprints,
+  Store, ShoppingBag, ShoppingCart, User, ChevronRight,
+  Search, SlidersHorizontal, X, Sparkles, ShieldCheck,
   AlertTriangle, RotateCcw, PackageSearch, ArrowRight, Clock, CheckCircle, Truck,
 } from "lucide-react";
 
@@ -50,23 +51,46 @@ const PRICE_BUCKETS = [
   { label: "Over 30,000", min: 30_000 },
 ] as const;
 
-const CATEGORY_ICON_RULES: [RegExp, IconType][] = [
-  [/cloth|fashion|wear|apparel|textile/i, Shirt],
-  [/electro|gadget|phone|computer|laptop|tech/i, Laptop],
-  [/beauty|cosmetic|skincare|personal care/i, Sparkles],
-  [/bag|accessor|leather/i, ShoppingBag],
-  [/home|living|furniture|decor|kitchen/i, HomeIcon],
-  [/jewel|gem/i, Gem],
-  [/book|stationery/i, BookOpen],
-  [/food|grocery|spice|coffee|drink|snack/i, Coffee],
-  [/art|craft|paint|handmade/i, Palette],
-  [/shoe|footwear|sandal/i, Footprints],
+const PROMO_SLIDES: PromoSlide[] = [
+  {
+    key: "new-arrivals",
+    href: "#new-arrivals",
+    icon: Sparkles,
+    title: "Fresh drops every week",
+    subtitle: "New arrivals from local sellers",
+    cta: "Browse",
+    className: "bg-gradient-to-r from-primary/15 to-accent/5 border-primary/20",
+    iconClassName: "text-primary",
+  },
+  {
+    key: "trusted-sellers",
+    href: "#trusted-sellers",
+    icon: Store,
+    title: "Shop trusted local sellers",
+    subtitle: "Verified stores across Rwanda",
+    cta: "Explore",
+    className: "bg-gradient-to-r from-emerald-500/15 to-emerald-500/5 border-emerald-500/20",
+    iconClassName: "text-emerald-400",
+  },
+  {
+    key: "escrow",
+    icon: ShieldCheck,
+    title: "Escrow-protected payments",
+    subtitle: "Your money is held safe until delivery",
+    className: "bg-gradient-to-r from-sky-500/15 to-sky-500/5 border-sky-500/20",
+    iconClassName: "text-sky-400",
+  },
+  {
+    key: "delivery",
+    href: "/my-orders",
+    icon: Truck,
+    title: "Same-day delivery in Kigali",
+    subtitle: "Track every order in real time",
+    cta: "My orders",
+    className: "bg-gradient-to-r from-violet-500/15 to-violet-500/5 border-violet-500/20",
+    iconClassName: "text-violet-400",
+  },
 ];
-
-const getCategoryIcon = (name: string) => {
-  const rule = CATEGORY_ICON_RULES.find(([pattern]) => pattern.test(name));
-  return rule ? rule[1] : Tag;
-};
 
 const makeStoreSlug = (name?: string) =>
   name ? name.toLowerCase().trim().replace(/\s+/g, "-") : undefined;
@@ -90,7 +114,7 @@ function getOrderStatus(status: string) {
 function ProductCardSkeleton() {
   return (
     <div className="flex flex-col h-full bg-card border border-border/60 rounded-xl overflow-hidden">
-      <div className="aspect-square bg-secondary animate-pulse" />
+      <div className="aspect-[4/3] bg-secondary animate-pulse" />
       <div className="p-2.5 space-y-2">
         <div className="h-3 bg-secondary rounded animate-pulse" />
         <div className="h-3 w-2/3 bg-secondary rounded animate-pulse" />
@@ -123,49 +147,6 @@ function EmptyState({
   );
 }
 
-function CategoryPill({
-  label,
-  count,
-  icon: Icon,
-  colorIndex,
-  active,
-  onClick,
-}: {
-  label: string;
-  count: number;
-  icon: IconType;
-  colorIndex: number;
-  active: boolean;
-  onClick: () => void;
-}) {
-  const color = CATEGORY_COLORS[colorIndex % CATEGORY_COLORS.length];
-  return (
-    <button
-      onClick={onClick}
-      aria-pressed={active}
-      className="flex flex-col items-center gap-1.5 shrink-0 w-[74px] snap-start group"
-    >
-      <div
-        className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-all duration-200 border ${
-          active
-            ? "bg-primary text-primary-foreground border-primary shadow-md"
-            : `${color.bg} ${color.text} border-transparent group-hover:-translate-y-0.5 group-hover:shadow-sm`
-        }`}
-      >
-        <Icon size={20} />
-      </div>
-      <span
-        className={`text-[11px] font-medium leading-tight text-center line-clamp-2 ${
-          active ? "text-foreground" : "text-muted-foreground"
-        }`}
-      >
-        {label}
-      </span>
-      <span className="text-[9px] text-muted-foreground/70 -mt-1">{count}</span>
-    </button>
-  );
-}
-
 export function BuyerDashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -178,7 +159,6 @@ export function BuyerDashboard() {
   const [showFilters, setShowFilters] = useState(false);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [priceBucket, setPriceBucket] = useState<string | null>(null);
-  const { trackRef: newArrivalsTrackRef, scrollByCard: scrollNewArrivals } = useHorizontalScroll();
 
   const { data: userProfile } = useCurrentUser();
   const { data: allProducts = [], isLoading, isError, refetch } = useProducts();
@@ -189,9 +169,8 @@ export function BuyerDashboard() {
   const categories = useMemo(() => {
     const counts = new Map<string, number>();
     allProducts.forEach((p) => {
-      if (p.category && !/^\d+$/.test(p.category)) {
-        counts.set(p.category, (counts.get(p.category) || 0) + 1);
-      }
+      const name = resolveCategoryName(p.category);
+      if (name) counts.set(name, (counts.get(name) || 0) + 1);
     });
     return Array.from(counts.entries())
       .map(([name, count]) => ({ name, count }))
@@ -224,7 +203,7 @@ export function BuyerDashboard() {
       !q ||
       (p.name ?? "").toLowerCase().includes(q) ||
       (p.store_name ?? "").toLowerCase().includes(q);
-    const matchCategory = selectedCategory === "All" || p.category === selectedCategory;
+    const matchCategory = selectedCategory === "All" || resolveCategoryName(p.category) === selectedCategory;
     const matchStock = !inStockOnly || Number(p.stock_quantity) > 0;
     const price = Number(p.price);
     const matchPrice =
@@ -410,90 +389,77 @@ export function BuyerDashboard() {
               )}
             </form>
 
-            {/* Category strip */}
+            {/* Category tabs */}
             {categories.length > 0 && (
-              <section id="categories" className="scroll-mt-16">
-                <h2 className="text-sm font-bold text-foreground mb-3">Shop by category</h2>
-                <div className="flex overflow-x-auto no-scrollbar gap-3 pb-1 -mx-1 px-1 snap-x">
-                  <CategoryPill
-                    label="All"
-                    count={allProducts.length}
-                    icon={Sparkles}
-                    colorIndex={0}
-                    active={selectedCategory === "All"}
-                    onClick={() => setSelectedCategory("All")}
-                  />
-                  {categories.map(({ name, count }, i) => (
-                    <CategoryPill
-                      key={name}
-                      label={name}
-                      count={count}
-                      icon={getCategoryIcon(name)}
-                      colorIndex={i + 1}
-                      active={selectedCategory === name}
-                      onClick={() => setSelectedCategory(name)}
-                    />
-                  ))}
-                </div>
-              </section>
+              <div className="flex items-center gap-5 overflow-x-auto no-scrollbar border-b border-border/60">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory("All")}
+                  className={`relative shrink-0 pb-2.5 text-sm font-semibold whitespace-nowrap transition-colors ${
+                    selectedCategory === "All" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  All
+                  {selectedCategory === "All" && (
+                    <span className="absolute left-0 right-0 -bottom-px h-0.5 rounded-full bg-primary" />
+                  )}
+                </button>
+                {categories.map(({ name }) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => setSelectedCategory(name)}
+                    className={`relative shrink-0 pb-2.5 text-sm font-semibold whitespace-nowrap transition-colors ${
+                      selectedCategory === name ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {name}
+                    {selectedCategory === name && (
+                      <span className="absolute left-0 right-0 -bottom-px h-0.5 rounded-full bg-primary" />
+                    )}
+                  </button>
+                ))}
+              </div>
             )}
 
-            {/* New arrivals rail */}
+            {/* Promo banner — auto-rotates every few seconds */}
+            <PromoBanner slides={PROMO_SLIDES} intervalMs={6000} />
+
+            {/* New arrivals — small auto-sliding carousel */}
             {!isLoading && !isError && newArrivals.length >= 4 && selectedCategory === "All" && !search && (
-              <section>
+              <section id="new-arrivals" className="scroll-mt-20">
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <h2 className="flex items-center gap-2 text-base md:text-lg font-bold text-foreground">
                     <span className="h-2 w-2 rounded-full bg-accent" /> New arrivals
                   </h2>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="hidden sm:inline text-xs text-muted-foreground">Freshly listed by sellers</span>
-                    <div className="hidden sm:flex items-center gap-2">
-                      <button
-                        type="button"
-                        aria-label="Scroll left"
-                        onClick={() => scrollNewArrivals(-1)}
-                        className="h-9 w-9 rounded-xl border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-                      >
-                        <ChevronLeft size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="Scroll right"
-                        onClick={() => scrollNewArrivals(1)}
-                        className="h-9 w-9 rounded-xl border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-                      >
-                        <ChevronRight size={16} />
-                      </button>
-                    </div>
-                  </div>
+                  <span className="hidden sm:inline text-xs text-muted-foreground">Freshly listed by sellers</span>
                 </div>
-                <div
-                  ref={newArrivalsTrackRef}
-                  className="flex overflow-x-auto no-scrollbar gap-3 pb-1 -mx-1 px-1 snap-x scroll-smooth"
-                >
-                  {newArrivals.map((product) => (
-                    <div key={product.id} data-scroll-card className="w-[150px] sm:w-[180px] shrink-0 snap-start">
-                      <ProductCard
-                        id={String(product.id)}
-                        slug={product.slug || String(product.id)}
-                        name={product.name}
-                        price={Number(product.price)}
-                        image={product.images?.[0]?.image}
-                        storeName={product.store_name}
-                        storeSlug={makeStoreSlug(product.store_name)}
-                        category={product.category}
-                        inStock={product.stock_quantity > 0}
-                        sellerHasStock={(product as { in_stock?: boolean }).in_stock}
-                      />
-                    </div>
-                  ))}
-                </div>
+                <AutoSlideCarousel
+                  items={newArrivals}
+                  itemKey={(product) => product.id}
+                  renderItem={(product) => (
+                    <ProductCard
+                      id={String(product.id)}
+                      slug={product.slug || String(product.id)}
+                      name={product.name}
+                      price={Number(product.price)}
+                      image={product.images?.[0]?.image}
+                      storeName={product.store_name}
+                      storeSlug={makeStoreSlug(product.store_name)}
+                      category={product.category}
+                      inStock={product.stock_quantity > 0}
+                      stockQuantity={product.stock_quantity}
+                      sellerHasStock={(product as { in_stock?: boolean }).in_stock}
+                      showAddToCart={false}
+                    />
+                  )}
+                />
               </section>
             )}
 
             {/* Trusted sellers rail */}
             {!isLoading && !isError && stores.length >= 2 && (
-              <section>
+              <section id="trusted-sellers" className="scroll-mt-20">
                 <div className="flex items-baseline justify-between mb-3">
                   <h2 className="flex items-center gap-2 text-base md:text-lg font-bold text-foreground">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" /> Trusted sellers
@@ -587,7 +553,7 @@ export function BuyerDashboard() {
                   </div>
                   {activeFilterCount > 0 && (
                     <button
-                      onClick={() => { setInStockOnly(false); setPriceBucket(null); }}
+                      onClick={() => { setSelectedCategory("All"); setInStockOnly(false); setPriceBucket(null); }}
                       className="text-xs font-medium text-muted-foreground hover:text-foreground ml-auto"
                     >
                       Reset filters
@@ -646,6 +612,7 @@ export function BuyerDashboard() {
                       storeSlug: makeStoreSlug(product.store_name),
                       category: product.category,
                       inStock: product.stock_quantity > 0,
+                      stockQuantity: product.stock_quantity,
                       sellerHasStock: (product as { in_stock?: boolean }).in_stock,
                     }))}
                   />
