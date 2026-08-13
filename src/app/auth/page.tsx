@@ -243,40 +243,40 @@ const AuthContent = () => {
         <Logo href="/" size="lg" className="z-10 relative" />
 
         <div className="relative z-10">
-          <blockquote className="text-3xl font-bold text-foreground leading-snug mb-6">
-            "I am because we are."
-          </blockquote>
-          <p className="text-foreground/60 text-lg">
-            Join a community of entrepreneurs and shoppers building the future of African commerce together.
+          <h2 className="text-2xl font-bold text-foreground leading-snug mb-3">
+            Rwandan Local Commerce Platform
+          </h2>
+          <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
+            Empowering Rwandan sellers and buyers with direct marketplace storefronts and secure escrow payments.
           </p>
-          <div className="mt-10 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-2.5">
             {[
-              { icon: ShieldCheck, label: "Escrow-protected payments" },
-              { icon: Truck, label: "Same-day Kigali delivery" },
-              { icon: MapPin, label: "Made in Kigali" },
+              { icon: ShieldCheck, label: "Escrow-Protected" },
+              { icon: Truck, label: "Kigali Delivery" },
+              { icon: MapPin, label: "Verified Merchants" },
             ].map(({ icon: Icon, label }) => (
-              <div key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/10 text-foreground text-xs font-medium border border-foreground/20">
-                <Icon size={13} className="text-emerald shrink-0" />
+              <div key={label} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary text-foreground text-xs font-semibold border border-border/80">
+                <Icon size={13} className="shrink-0" />
                 {label}
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-foreground/30 text-xs relative z-10">© {new Date().getFullYear()} UbuntuNow Ltd, Kigali</p>
+        <p className="text-muted-foreground text-xs relative z-10">© {new Date().getFullYear()} UbuntuNow Ltd. All rights reserved.</p>
       </div>
 
       {/* Right panel — form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-16 overflow-y-auto">
         <div className="max-w-md w-full mx-auto">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
-            <ArrowLeft size={15} />
-            Back to home
+          <Link href="/" className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground mb-8 transition-colors">
+            <ArrowLeft size={14} />
+            Back to Home
           </Link>
 
           {/* Tabs */}
           {registrationStep === "form" && (
-            <div className="flex bg-secondary rounded-xl p-1 mb-8 w-fit">
+            <div className="flex bg-secondary rounded-lg p-1 mb-8 w-fit border border-border/80">
               {(["login", "register"] as Tab[]).map((t) => (
                 <button
                   key={t}
@@ -285,31 +285,31 @@ const AuthContent = () => {
                     setRegistrationStep("form");
                     setOtp("");
                   }}
-                  className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${tab === t
-                    ? "bg-card shadow-card text-foreground"
+                  className={`px-5 py-2 rounded-md text-xs font-semibold transition-all capitalize ${tab === t
+                    ? "bg-card text-foreground shadow-2xs"
                     : "text-muted-foreground hover:text-foreground"
                     }`}
                 >
-                  {t === "login" ? "Sign in" : "Create account"}
+                  {t === "login" ? "Sign In" : "Create Account"}
                 </button>
               ))}
             </div>
           )}
 
-          <div className="mb-8">
-            <h1 className="font-display text-3xl text-foreground mb-2">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-foreground mb-1.5">
               {registrationStep === "otp"
-                ? "Verify your email"
+                ? "Verify Email Address"
                 : tab === "login"
-                  ? "Welcome back"
-                  : "Join UbuntuNow"}
+                  ? "Welcome Back"
+                  : "Create Account"}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               {registrationStep === "otp"
-                ? `We've sent a verification code to ${form.email}. Please check your inbox.`
+                ? `We sent a 6-digit code to ${form.email}. Enter it below to activate your account.`
                 : tab === "login"
-                  ? "Sign in to access your store and orders."
-                  : "Create your account and start in minutes."}
+                  ? "Sign in with your email address and password."
+                  : "Sign up to start buying or selling on UbuntuNow."}
             </p>
           </div>
 
@@ -318,11 +318,11 @@ const AuthContent = () => {
             <form onSubmit={handleOTPVerify} className="space-y-6">
               {/* Icon + email */}
               <div className="flex flex-col items-center gap-3">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                  <Mail className="h-8 w-8 text-primary" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary border border-border/80">
+                  <Mail className="h-7 w-7 text-foreground" />
                 </div>
-                <p className="text-sm text-muted-foreground text-center">
-                  Code sent to <span className="font-semibold text-foreground">{registrationData?.email}</span>
+                <p className="text-xs text-muted-foreground text-center">
+                  Verification code sent to <span className="font-semibold text-foreground">{registrationData?.email}</span>
                 </p>
               </div>
 
@@ -336,13 +336,13 @@ const AuthContent = () => {
                     <Timer size={12} />
                     Code expires in
                   </span>
-                  <span className={`font-mono font-semibold ${expiryCountdown < 60 ? "text-rose-500" : "text-foreground"}`}>
+                  <span className={`font-mono font-semibold ${expiryCountdown < 60 ? "text-destructive" : "text-foreground"}`}>
                     {fmtTime(expiryCountdown)}
                   </span>
                 </div>
                 <div className="h-1 rounded-full bg-border overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-1000 ${expiryCountdown < 60 ? "bg-rose-500" : "bg-primary"}`}
+                    className={`h-full rounded-full transition-all duration-1000 ${expiryCountdown < 60 ? "bg-destructive" : "bg-primary"}`}
                     style={{ width: `${(expiryCountdown / OTP_EXPIRY_SECONDS) * 100}%` }}
                   />
                 </div>
@@ -351,17 +351,17 @@ const AuthContent = () => {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full h-12 rounded-xl text-base font-semibold"
+                className="w-full h-11 rounded-lg text-sm font-semibold"
                 disabled={otp.length !== 6 || verifyOTPMutation.isPending || expiryCountdown === 0}
               >
-                {verifyOTPMutation.isPending ? "Verifying…" : expiryCountdown === 0 ? "Code expired" : "Verify & create account"}
+                {verifyOTPMutation.isPending ? "Verifying…" : expiryCountdown === 0 ? "Code Expired" : "Verify & Complete Setup"}
               </Button>
 
               <div className="flex items-center justify-between">
                 <button
                   type="button"
                   onClick={handleBackToForm}
-                  className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1.5"
+                  className="text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1.5"
                 >
                   <ArrowLeft size={14} /> Back
                 </button>
@@ -369,13 +369,13 @@ const AuthContent = () => {
                   type="button"
                   onClick={handleResendOTP}
                   disabled={resendCooldown > 0 || resendOTPMutation.isPending}
-                  className="text-sm text-accent hover:underline disabled:text-muted-foreground disabled:no-underline disabled:cursor-not-allowed"
+                  className="text-xs font-semibold text-primary hover:underline disabled:text-muted-foreground disabled:no-underline disabled:cursor-not-allowed"
                 >
                   {resendOTPMutation.isPending
                     ? "Sending…"
                     : resendCooldown > 0
-                      ? `Resend in ${resendCooldown}s`
-                      : "Resend code"}
+                      ? `Resend code in ${resendCooldown}s`
+                      : "Resend Code"}
                 </button>
               </div>
             </form>
@@ -385,26 +385,26 @@ const AuthContent = () => {
           {registrationStep === "form" && tab === "register" && (
             <>
               {/* Role selector */}
-              <div className="mb-6">
-                <Label className="text-sm font-medium text-foreground mb-3 block">I want to</Label>
+              <div className="mb-5">
+                <Label className="text-xs font-semibold text-foreground mb-2 block">Account Type</Label>
                 <div className="grid grid-cols-2 gap-3">
                   {(
                     [
-                      { value: "buyer", label: "Shop & buy", icon: ShoppingBag, desc: "Browse and purchase from local sellers" },
-                      { value: "seller", label: "Sell products", icon: Store, desc: "Create my store and reach customers" },
+                      { value: "buyer", label: "Buyer", icon: ShoppingBag, desc: "Purchase products securely" },
+                      { value: "seller", label: "Seller", icon: Store, desc: "Create storefront & list items" },
                     ] as { value: Role; label: string; icon: typeof Store; desc: string }[]
                   ).map(({ value, label, icon: Icon, desc }) => (
                     <button
                       key={value}
                       onClick={() => setRole(value)}
-                      className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${role === value
-                        ? "border-primary bg-secondary"
-                        : "border-border bg-card hover:border-border/80"
+                      className={`p-3.5 rounded-lg border text-left transition-all ${role === value
+                        ? "border-primary bg-secondary/80 shadow-2xs"
+                        : "border-border/80 bg-card hover:border-border"
                         }`}
                     >
-                      <Icon size={20} className={role === value ? "text-primary mb-2" : "text-muted-foreground mb-2"} />
-                      <div className="font-semibold text-sm text-foreground">{label}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{desc}</div>
+                      <Icon size={18} className={role === value ? "text-primary mb-1.5" : "text-muted-foreground mb-1.5"} />
+                      <div className="font-semibold text-xs text-foreground">{label}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5">{desc}</div>
                     </button>
                   ))}
                 </div>

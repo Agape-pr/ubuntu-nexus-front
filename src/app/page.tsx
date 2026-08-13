@@ -47,152 +47,93 @@ const HomeContent = () => {
             {/* Left: copy */}
             <div className="max-w-2xl">
               <div
-                className="animate-fade-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary border border-border text-xs font-medium text-muted-foreground mb-5"
+                className="animate-fade-up inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary border border-border/80 text-xs font-medium text-muted-foreground mb-5"
                 style={{ opacity: 0 }}
               >
-                <Sparkles size={13} className="text-accent" />
-                <span>The new era of local commerce</span>
+                <Sparkles size={13} className="text-primary" />
+                <span>Rwanda's Trusted Local Marketplace</span>
               </div>
 
               <h1
-                className="animate-fade-up text-4xl sm:text-5xl lg:text-[4rem] font-bold tracking-tight text-foreground leading-[1.08] mb-5 text-balance"
+                className="animate-fade-up text-4xl sm:text-5xl lg:text-[3.75rem] font-bold tracking-tight text-foreground leading-[1.1] mb-5 text-balance"
                 style={{ animationDelay: "100ms", opacity: 0 }}
               >
                 Buy and sell with{" "}
                 <span className="relative inline-block text-primary">
-                  people you trust
-                  <svg
-                    className="absolute -bottom-2 left-0 w-full text-accent/40"
-                    viewBox="0 0 200 9"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden
-                  >
-                    <path
-                      d="M2.00049 6.84039C50.0005 1.84039 120.501 -2.15961 198.001 6.84039"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  local confidence
                 </span>
               </h1>
 
               <p
-                className="animate-fade-up text-base sm:text-lg text-muted-foreground leading-relaxed mb-7 max-w-xl"
+                className="animate-fade-up text-base sm:text-lg text-muted-foreground leading-relaxed mb-8 max-w-xl"
                 style={{ animationDelay: "200ms", opacity: 0 }}
               >
-                Start selling online in minutes. Discover unique products from
-                your neighbors, and shop securely with our 2-hour escrow
-                guarantee.
+                Connect directly with Rwandan artisans, farmers, and local merchants.
+                Shop unique local products backed by our escrow protection and same-day Kigali delivery.
               </p>
 
               <div
                 className="animate-fade-up flex flex-col sm:flex-row gap-3 mb-8"
                 style={{ animationDelay: "300ms", opacity: 0 }}
               >
-                <Button asChild size="lg" className="w-full sm:w-auto gradient-amber text-near-black font-semibold px-7 h-12 rounded-2xl shadow-amber hover:-translate-y-1 hover:shadow-lg transition-all duration-300 border-0">
+                <Button asChild size="lg" className="w-full sm:w-auto font-semibold px-6 h-11 rounded-lg shadow-2xs">
                   <Link href="/auth?tab=register&role=seller">
-                    Start your store <ArrowRight size={17} className="ml-2" />
+                    Start Your Store <ArrowRight size={16} className="ml-2" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="w-full sm:w-auto h-12 px-7 rounded-2xl border-border bg-card hover:bg-secondary hover:-translate-y-1 transition-all duration-300">
-                  <a href="#how-it-works">See how it works</a>
+                <Button asChild size="lg" variant="outline" className="w-full sm:w-auto h-11 px-6 rounded-lg border-border bg-card hover:bg-secondary">
+                  <a href="#how-it-works">How It Works</a>
                 </Button>
               </div>
 
               {/* Trust bar */}
               <div
-                className="animate-fade-up flex flex-wrap items-center gap-4 text-sm text-muted-foreground"
+                className="animate-fade-up flex flex-wrap items-center gap-4 text-xs font-medium text-muted-foreground"
                 style={{ animationDelay: "400ms", opacity: 0 }}
               >
-                <div className="flex items-center gap-2">
-                  <ShieldCheck size={16} className="text-emerald-500" />
-                  <span className="font-medium text-foreground">100% Secure</span>
+                <div className="flex items-center gap-1.5 text-foreground">
+                  <ShieldCheck size={15} className="text-emerald-600" />
+                  <span>Escrow payment protection</span>
                 </div>
                 <div className="hidden sm:block w-1 h-1 rounded-full bg-border" />
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <div className="flex -space-x-1.5">
-                    {["🧑🏿", "👩🏾", "👨🏿"].map((emoji, i) => (
-                      <div
-                        key={i}
-                        className="h-6 w-6 rounded-full bg-secondary border border-background flex items-center justify-center text-[10px] z-10 shadow-sm"
-                      >
-                        {emoji}
-                      </div>
-                    ))}
-                  </div>
-                  <span className="ml-1 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                    🌱 Early Access — Be a founding seller
-                  </span>
+                <div className="flex items-center gap-1.5">
+                  <Zap size={14} className="text-amber-500" />
+                  <span>Same-day Kigali delivery</span>
                 </div>
               </div>
             </div>
 
-            {/* Right: image collage — hidden on mobile, visible ≥ lg */}
+            {/* Right: image presentation */}
             <div
-              className="animate-fade-up relative h-[420px] lg:h-[540px] w-full hidden lg:block"
+              className="animate-fade-up relative h-[400px] lg:h-[480px] w-full hidden lg:block"
               style={{ animationDelay: "150ms", opacity: 0 }}
             >
-              {/* Background tilt card */}
-              <div className="absolute inset-0 rounded-3xl bg-secondary transform rotate-3" />
-
-              {/* Main image */}
-              <div className="absolute top-4 left-4 right-12 bottom-12 rounded-3xl overflow-hidden shadow-xl border-4 border-card bg-secondary">
+              {/* Main image container */}
+              <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-lg border border-border bg-card">
                 <Image
                   src={heroImage}
-                  alt="Buyers shopping at a local market in Kigali"
+                  alt="Local marketplace in Kigali"
                   fill
                   priority
                   sizes="(min-width: 1024px) 40vw, 0px"
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
-                <div className="absolute bottom-6 left-6 text-white">
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-white/80">Live</span>
-                  </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+                <div className="absolute bottom-6 left-6 text-foreground bg-card/90 backdrop-blur-md px-4 py-2.5 rounded-xl border border-border/80 shadow-2xs flex items-center gap-3">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xs font-medium">Connecting local businesses across Kigali</span>
                 </div>
               </div>
 
-              {/* Floating: seller portrait */}
-              <div className="absolute -bottom-6 -left-6 h-44 w-36 rounded-2xl overflow-hidden shadow-xl border-4 border-card z-20 bg-secondary">
+              {/* Inset seller photo */}
+              <div className="absolute -bottom-4 -left-4 h-36 w-32 rounded-xl overflow-hidden shadow-md border-2 border-card z-20 bg-card">
                 <Image
                   src={kigaliSellerImage}
-                  alt="A local seller in Kigali"
+                  alt="A local vendor in Kigali"
                   fill
-                  sizes="150px"
+                  sizes="130px"
                   className="object-cover"
                 />
-              </div>
-
-              {/* Floating: fast delivery badge */}
-              <div className="animate-float absolute top-10 -right-6 bg-card/90 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-border/50 z-30 flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                  <Zap size={18} />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-foreground">Fast Delivery</p>
-                  <p className="text-xs text-muted-foreground">Same-day in Kigali</p>
-                </div>
-              </div>
-
-              {/* Floating: rating card */}
-              <div
-                className="animate-float absolute bottom-20 -right-2 bg-card p-3 rounded-2xl shadow-xl border border-border z-30"
-                style={{ animationDelay: "1.5s" }}
-              >
-                <div className="flex items-center gap-1 mb-1">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} size={11} className="fill-accent text-accent" />
-                  ))}
-                </div>
-                <p className="text-xs font-medium text-foreground">
-                  <span className="font-bold">Kigali local vendors</span>
-                  <br />
-                  Best platform ever!
-                </p>
               </div>
             </div>
           </div>

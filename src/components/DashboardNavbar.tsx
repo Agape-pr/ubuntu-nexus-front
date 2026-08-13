@@ -15,7 +15,7 @@ export function DashboardNavbar() {
   const logoutMutation = useLogout();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-card/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/90 backdrop-blur-md">
       <div className="container flex h-14 items-center justify-between gap-4">
         <Logo href="/dashboard" />
 

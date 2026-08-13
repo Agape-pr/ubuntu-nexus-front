@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { PaymentOptions } from "@/components/ui/PaymentOptions";
 import { useProduct, useProducts } from "@/lib/api/hooks/useProducts";
 import { useCartStore } from "@/lib/store/cartStore";
-import { useFavoritesStore } from "@/lib/store/favoritesStore";
+import { useWishlistStore } from "@/lib/store/wishlistStore";
 import { useAuthState } from "@/hooks/useAuthState";
 import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 import { CloudImage } from "@/components/ui/CloudImage";
@@ -121,8 +121,8 @@ function ProductPageContent() {
   }, [allProducts, product, isSeed]);
 
   const favoriteId = product ? (isSeed ? idStr : String(product.id)) : "";
-  const wishlisted = useFavoritesStore((s) => s.isFavorite(favoriteId));
-  const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite);
+  const wishlisted = useWishlistStore((s) => s.isWishlisted(favoriteId));
+  const toggleWishlist = useWishlistStore((s) => s.toggleWishlist);
 
   if (!mounted) return null;
 
@@ -185,12 +185,50 @@ function ProductPageContent() {
   // way to resolve it client-side — in that case we show a plain label instead
   // of a link, rather than sending buyers to a /shop/[slug] that can't exist.
   const listMatch = !isSeed
-    ? allProducts.find((p) => String(p.id) === String(product.id) || p.slug === idStr)
+    ? allProducts.find((p: any) => String(p.id) === String(product.id) || p.slug === idStr)
     : undefined;
+
+  // Extract store ID regardless of whether store is an integer or an object
+  const targetStoreId: number | null =
+    typeof product.store === "number"
+      ? product.store
+      : typeof product.store === "object" && product.store !== null
+      ? (product.store as any).id
+      : (product as any).store_id || null;
+
+  // Find any product in allProducts matching the store ID that has a store_name
+  const sameStoreProduct = !isSeed && targetStoreId !== null
+    ? allProducts.find((p: any) => {
+        const pStoreId = typeof p.store === "number" ? p.store : typeof p.store === "object" && p.store !== null ? p.store.id : p.store_id;
+        const pStoreName = p.store_name || (typeof p.store === "object" ? p.store?.store_name : null);
+        return pStoreId && Number(pStoreId) === Number(targetStoreId) && Boolean(pStoreName);
+      })
+    : undefined;
+
   const resolvedStoreName: string | null =
-    product.store?.store_name || product.store_name || listMatch?.store_name || null;
-  const storeName = resolvedStoreName || "Store info unavailable";
-  const storeSlug = product.store?.slug || product.storeSlug || (resolvedStoreName ? makeStoreSlug(resolvedStoreName) : null);
+    (typeof product.store === "object" && product.store !== null && product.store?.store_name) ||
+    product.store_name ||
+    (product as any).store_info?.store_name ||
+    (product as any).store_details?.name ||
+    listMatch?.store_name ||
+    (listMatch as any)?.store?.store_name ||
+    sameStoreProduct?.store_name ||
+    (sameStoreProduct as any)?.store?.store_name ||
+    null;
+
+  const storeName = resolvedStoreName || (targetStoreId ? `Store #${targetStoreId}` : "Ubuntu Seller");
+
+  const rawSlug =
+    (typeof product.store === "object" && product.store !== null && product.store?.slug) ||
+    product.storeSlug ||
+    (product as any).store_slug ||
+    (listMatch as any)?.store_slug ||
+    (listMatch as any)?.store?.slug ||
+    (sameStoreProduct as any)?.store_slug ||
+    (sameStoreProduct as any)?.store?.slug ||
+    (resolvedStoreName ? makeStoreSlug(resolvedStoreName) : null);
+
+  const storeSlug = rawSlug || makeStoreSlug(storeName) || (targetStoreId ? `store-${targetStoreId}` : "ubuntu-store");
 
   const images: string[] = (product.images ?? [])
     .map((img: any) => img?.image)
@@ -198,7 +236,7 @@ function ProductPageContent() {
   const coverImage = images[activeImage] ?? images[0];
 
   const handleToggleFavorite = () => {
-    toggleFavorite({
+    toggleWishlist({
       id: favoriteId,
       name,
       price,
@@ -503,21 +541,21 @@ function ProductPageContent() {
               )}
 
               {/* Purchase panel */}
-              <div className="bg-secondary/30 rounded-2xl p-5 border border-border/50 mb-8">
+              <div className="bg-card rounded-xl p-4 sm:p-5 border border-border/80 mb-8 shadow-2xs">
                 {isLoggedIn && (
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-semibold text-foreground">Quantity</span>
-                    <div className="flex items-center h-11 bg-card rounded-xl border border-border p-1">
+                  <div className="flex items-center justify-between mb-4 pb-4 border-b border-border/60">
+                    <span className="text-xs font-semibold text-foreground">Quantity</span>
+                    <div className="flex items-center h-9 bg-secondary rounded-lg border border-border overflow-hidden">
                       <button
                         type="button"
                         aria-label="Decrease quantity"
                         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                         disabled={!inStock}
-                        className="w-10 h-full flex items-center justify-center text-foreground hover:bg-secondary rounded-lg transition-colors disabled:opacity-30"
+                        className="w-9 h-full flex items-center justify-center text-foreground hover:bg-muted transition-colors disabled:opacity-30"
                       >
-                        <Minus size={15} />
+                        <Minus size={14} />
                       </button>
-                      <div className="w-10 h-full flex items-center justify-center font-bold text-base tabular-nums">
+                      <div className="w-9 h-full flex items-center justify-center font-bold text-xs tabular-nums">
                         {inStock ? quantity : 0}
                       </div>
                       <button
@@ -525,28 +563,26 @@ function ProductPageContent() {
                         aria-label="Increase quantity"
                         onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
                         disabled={!inStock}
-                        className="w-10 h-full flex items-center justify-center text-foreground hover:bg-secondary rounded-lg transition-colors disabled:opacity-30"
+                        className="w-9 h-full flex items-center justify-center text-foreground hover:bg-muted transition-colors disabled:opacity-30"
                       >
-                        <Plus size={15} />
+                        <Plus size={14} />
                       </button>
                     </div>
                   </div>
                 )}
 
-                {/* Action row — left to right: Store, Favorites, Add to Cart, Buy Now (priority order, Buy Now rightmost) */}
-                <div className="grid grid-cols-4 gap-2">
+                {/* Action buttons */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {storeSlug ? (
                     <Link
                       href={`/shop/${storeSlug}`}
-                      className="flex flex-col items-center justify-center gap-1 h-16 rounded-xl border border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors"
+                      className="flex items-center justify-center gap-1.5 h-11 rounded-lg border border-border bg-secondary text-xs font-semibold text-foreground hover:bg-muted transition-colors"
                     >
-                      <Store size={18} />
-                      <span className="text-[10px] font-semibold">Store</span>
+                      <Store size={15} /> Store
                     </Link>
                   ) : (
-                    <div className="flex flex-col items-center justify-center gap-1 h-16 rounded-xl border border-border/50 bg-card text-muted-foreground/50 cursor-not-allowed">
-                      <Store size={18} />
-                      <span className="text-[10px] font-semibold">Store</span>
+                    <div className="flex items-center justify-center gap-1.5 h-11 rounded-lg border border-border/60 bg-secondary/50 text-xs font-semibold text-muted-foreground opacity-50 cursor-not-allowed">
+                      <Store size={15} /> Store
                     </div>
                   )}
 
@@ -554,64 +590,59 @@ function ProductPageContent() {
                     type="button"
                     aria-pressed={wishlisted}
                     onClick={handleToggleFavorite}
-                    className={`flex flex-col items-center justify-center gap-1 h-16 rounded-xl border transition-colors ${
+                    className={`flex items-center justify-center gap-1.5 h-11 rounded-lg border text-xs font-semibold transition-colors ${
                       wishlisted
-                        ? "border-rose-400/40 bg-rose-500/10 text-rose-400"
-                        : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                        ? "border-rose-500/30 bg-rose-500/10 text-rose-600"
+                        : "border-border bg-secondary text-foreground hover:bg-muted"
                     }`}
                   >
-                    <Heart size={18} fill={wishlisted ? "currentColor" : "none"} />
-                    <span className="text-[10px] font-semibold">Favorite</span>
+                    <Heart size={15} fill={wishlisted ? "currentColor" : "none"} />
+                    Wishlist
                   </button>
 
                   {isLoggedIn ? (
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
                       onClick={handleAddToCart}
                       disabled={!inStock}
-                      className="flex flex-col items-center justify-center gap-1 h-16 rounded-xl border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="h-11 rounded-lg text-xs font-semibold gap-1.5 border-primary/40 text-primary hover:bg-primary/10"
                     >
-                      <ShoppingCart size={18} />
-                      <span className="text-[10px] font-bold">Add to Cart</span>
-                    </button>
+                      <ShoppingCart size={15} /> Add to Cart
+                    </Button>
                   ) : (
-                    <Link
-                      href="/auth?tab=register"
-                      className="flex flex-col items-center justify-center gap-1 h-16 rounded-xl border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 transition-colors"
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="h-11 rounded-lg text-xs font-semibold gap-1.5 border-primary/40 text-primary hover:bg-primary/10"
                     >
-                      <Lock size={18} />
-                      <span className="text-[10px] font-bold">Add to Cart</span>
-                    </Link>
+                      <Link href="/auth?tab=register">
+                        <Lock size={15} /> Add to Cart
+                      </Link>
+                    </Button>
                   )}
 
                   {isLoggedIn ? (
-                    <button
+                    <Button
                       type="button"
                       onClick={handleBuyNow}
                       disabled={!inStock}
-                      className="flex flex-col items-center justify-center gap-1 h-16 rounded-xl gradient-amber text-near-black shadow-amber border-0 hover:opacity-95 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="h-11 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
                     >
-                      <span className="text-[11px] font-black">{inStock ? "Buy Now" : "Sold out"}</span>
-                      <div className="flex items-center gap-1">
-                        <Banknote size={11} />
-                        <span className="h-3.5 w-3.5 rounded-full bg-[#FFCC00] flex items-center justify-center text-black text-[6px] font-black leading-none">M</span>
-                        <span className="h-3.5 w-3.5 rounded-full bg-[#FF0000] flex items-center justify-center text-white text-[6px] font-black leading-none">A</span>
-                        <Landmark size={11} />
-                      </div>
-                    </button>
+                      {inStock ? "Buy Now" : "Sold Out"}
+                    </Button>
                   ) : (
-                    <Link
-                      href="/auth?tab=register"
-                      className="flex flex-col items-center justify-center gap-1 h-16 rounded-xl gradient-amber text-near-black shadow-amber border-0 hover:opacity-95 transition-opacity"
+                    <Button
+                      asChild
+                      className="h-11 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
                     >
-                      <Lock size={16} />
-                      <span className="text-[11px] font-black">Buy Now</span>
-                    </Link>
+                      <Link href="/auth?tab=register">Buy Now</Link>
+                    </Button>
                   )}
                 </div>
 
-                <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                  <Truck size={14} /> Confirmed orders ship same day from Kigali
+                <div className="mt-3.5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                  <Truck size={13} /> Verified orders delivered same day in Kigali
                 </div>
               </div>
 

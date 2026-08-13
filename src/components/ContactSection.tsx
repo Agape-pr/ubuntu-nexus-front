@@ -13,7 +13,7 @@ const SUPPORT_EMAIL = "support@ubuntunow.rw";
 
 const CONTACT_INFO = [
   { icon: Mail, label: "Email", value: SUPPORT_EMAIL, href: `mailto:${SUPPORT_EMAIL}` },
-  { icon: MapPin, label: "Location", value: "Kigali, Rwanda", href: "https://www.google.com/maps/search/?api=1&query=Kigali%2C+Rwanda" },
+  { icon: MapPin, label: "Office", value: "Kigali, Rwanda", href: "https://www.google.com/maps/search/?api=1&query=Kigali%2C+Rwanda" },
 ];
 
 export function ContactSection() {
@@ -22,45 +22,44 @@ export function ContactSection() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
-      toast.error("Please fill in all fields.");
+      toast.error("Please fill in all fields to send a message.");
       return;
     }
     const subject = `Message from ${form.name} via UbuntuNow`;
     const body = `${form.message}\n\n— ${form.name} (${form.email})`;
     window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    toast.success("Opening your email app to send this to our team…");
+    toast.success("Opening your email client to send message...");
   };
 
   return (
-    <section id="contact" className="scroll-mt-16 py-20 bg-background border-t border-border">
-      <div className="container max-w-5xl mx-auto">
-        <Reveal className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold mb-4">
-            <MessageCircle size={13} /> We&apos;re here to help
+    <section id="contact" className="scroll-mt-16 py-20 bg-background border-t border-border/60">
+      <div className="container max-w-5xl mx-auto px-4">
+        <Reveal className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary border border-border/80 text-muted-foreground text-xs font-medium mb-3">
+            <MessageCircle size={13} /> Contact Support
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">Contact us</h2>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Have a question, bug report, or partnership idea? Drop us a message
-            and we&apos;ll get back to you within one business day.
+          <h2 className="text-3xl font-bold text-foreground mb-2">Get in Touch</h2>
+          <p className="text-muted-foreground text-base max-w-xl mx-auto">
+            Have questions about buying, selling, or escrow protection? Reach out and our Kigali support team will respond promptly.
           </p>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-12">
-          <Reveal className="md:col-span-2 space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+          <Reveal className="md:col-span-2 space-y-6">
             <div>
-              <h3 className="text-xl font-bold text-foreground mb-6">Get in touch</h3>
+              <h3 className="text-lg font-bold text-foreground mb-4">Contact Information</h3>
               {CONTACT_INFO.map((item) => (
-                <div key={item.label} className="flex items-start gap-4 mb-6">
-                  <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <item.icon size={18} className="text-primary" />
+                <div key={item.label} className="flex items-start gap-3.5 mb-5">
+                  <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0 text-foreground">
+                    <item.icon size={16} />
                   </div>
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{item.label}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">{item.label}</p>
                     <a
                       href={item.href}
                       target={item.href.startsWith("http") ? "_blank" : undefined}
                       rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                      className="text-foreground font-medium hover:text-primary transition-colors"
+                      className="text-foreground text-sm font-medium hover:text-primary transition-colors"
                     >
                       {item.value}
                     </a>
@@ -69,52 +68,52 @@ export function ContactSection() {
               ))}
             </div>
 
-            <div className="bg-card rounded-3xl p-6 border border-border">
-              <p className="text-sm font-semibold text-foreground mb-1">Response time</p>
-              <p className="text-sm text-muted-foreground">
-                We typically respond within <strong className="text-foreground">24 hours</strong> on business days.
+            <div className="bg-card rounded-xl p-5 border border-border/80 shadow-2xs">
+              <p className="text-xs font-semibold text-foreground mb-1">Support Hours</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Monday – Saturday, 8:00 AM – 6:00 PM CAT. Inquiries are handled within 24 hours.
               </p>
             </div>
           </Reveal>
 
-          <Reveal delay={150} className="md:col-span-3 bg-card border border-border rounded-3xl p-8 shadow-sm">
-            <h3 className="font-bold text-xl text-foreground mb-6">Send us a message</h3>
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Your name</Label>
+          <Reveal delay={100} className="md:col-span-3 bg-card border border-border/80 rounded-xl p-6 sm:p-8 shadow-2xs">
+            <h3 className="font-bold text-lg text-foreground mb-5">Send Message</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground">Your Name</Label>
                 <Input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Jean Pierre"
-                  className="rounded-2xl h-11 border-border bg-secondary/30"
+                  placeholder="Jean Paul"
+                  className="rounded-lg h-10 border-border bg-background text-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email address</Label>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground">Email Address</Label>
                 <Input
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="you@example.com"
-                  className="rounded-2xl h-11 border-border bg-secondary/30"
+                  placeholder="jeanpaul@example.com"
+                  className="rounded-lg h-10 border-border bg-background text-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Message</Label>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground">Message</Label>
                 <Textarea
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  placeholder="Tell us how we can help..."
-                  rows={5}
-                  className="rounded-2xl border-border bg-secondary/30 resize-none"
+                  placeholder="How can we help you?"
+                  rows={4}
+                  className="rounded-lg border-border bg-background text-sm resize-none"
                 />
               </div>
               <Button
                 type="submit"
-                className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold gap-2 hover:-translate-y-0.5 transition-all"
+                className="w-full h-11 rounded-lg font-semibold gap-2"
               >
-                <Send size={16} />
-                Send message
+                <Send size={15} />
+                Send Message
               </Button>
             </form>
           </Reveal>
@@ -123,3 +122,4 @@ export function ContactSection() {
     </section>
   );
 }
+

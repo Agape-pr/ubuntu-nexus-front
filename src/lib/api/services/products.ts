@@ -87,7 +87,10 @@ export const getProducts = async (params?: ProductsListParams): Promise<Product[
     ? `${API_ENDPOINTS.PRODUCTS.LIST}?${queryParams.toString()}`
     : API_ENDPOINTS.PRODUCTS.LIST;
 
-  return apiClient.get<Product[]>(endpoint);
+  const res = await apiClient.get<any>(endpoint);
+  if (Array.isArray(res)) return res;
+  if (res && Array.isArray(res.results)) return res.results;
+  return [];
 };
 
 /**
@@ -101,7 +104,10 @@ export const getProduct = async (slug: string): Promise<Product> => {
  * Get seller's products
  */
 export const getSellerProducts = async (): Promise<SellerProduct[]> => {
-  return apiClient.get<SellerProduct[]>(API_ENDPOINTS.SELLER_PRODUCTS.LIST);
+  const res = await apiClient.get<any>(API_ENDPOINTS.SELLER_PRODUCTS.LIST);
+  if (Array.isArray(res)) return res;
+  if (res && Array.isArray(res.results)) return res.results;
+  return [];
 };
 
 /**

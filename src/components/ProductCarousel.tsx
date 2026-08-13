@@ -6,8 +6,7 @@ import ProductCard from "@/components/ProductCard";
 import { useProducts } from "@/lib/api/hooks/useProducts";
 import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 
-const makeStoreSlug = (name?: string) =>
-  name ? name.toLowerCase().trim().replace(/\s+/g, "-") : undefined;
+import { makeStoreSlug } from "@/lib/utils";
 
 /**
  * Real-product showcase for the landing page. Reuses ProductCard, which

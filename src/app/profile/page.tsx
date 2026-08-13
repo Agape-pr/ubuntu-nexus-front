@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import { BuyerDashboardShell } from "@/components/BuyerDashboardShell";
 import { useCurrentUser, useUpdateProfile } from "@/lib/api/hooks/useUsers";
 import { useLogout } from "@/lib/api/hooks/useAuth";
-import { useFavoritesStore } from "@/lib/store/favoritesStore";
+import { useWishlistStore } from "@/lib/store/wishlistStore";
 import { User, MapPin, Phone, Mail, Edit3, Save, X, LogOut, ShoppingBag, CheckCircle, Heart } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 function ProfileContent() {
   const { data: userProfile, isLoading } = useCurrentUser();
   const logoutMutation = useLogout();
-  const favorites = useFavoritesStore((s) => s.items);
+  const wishlist = useWishlistStore((s) => s.items);
 
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({
@@ -136,15 +136,15 @@ function ProfileContent() {
           <CheckCircle size={15} className="text-white/20" />
         </Link>
 
-        {/* Favorites */}
-        <Link href="/favorites" className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
+        {/* Wishlist */}
+        <Link href="/wishlist" className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
           <div className="h-9 w-9 rounded-xl bg-white/5 flex items-center justify-center">
             <Heart size={17} className="text-gold-accent" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold text-white">Favorites</p>
+            <p className="text-sm font-bold text-white">Wishlist</p>
             <p className="text-xs text-white/40">
-              {favorites.length > 0 ? `${favorites.length} saved product${favorites.length !== 1 ? "s" : ""}` : "Products you've saved"}
+              {wishlist.length > 0 ? `${wishlist.length} saved product${wishlist.length !== 1 ? "s" : ""}` : "Products in your wishlist"}
             </p>
           </div>
           <CheckCircle size={15} className="text-white/20" />

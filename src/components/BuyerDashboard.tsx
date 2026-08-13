@@ -17,6 +17,7 @@ import { AutoSlideCarousel } from "@/components/AutoSlideCarousel";
 import { PromoBanner, type PromoSlide } from "@/components/PromoBanner";
 import { useProducts } from "@/lib/api/hooks/useProducts";
 import { useBuyerOrders } from "@/lib/api/hooks/useOrders";
+import type { Order, OrderItem } from "@/lib/api/services/orders";
 import { useCurrentUser } from "@/lib/api/hooks/useUsers";
 import { useCartStore } from "@/lib/store/cartStore";
 import { resolveCategoryName } from "@/lib/categories";
@@ -26,7 +27,7 @@ import {
   AlertTriangle, RotateCcw, PackageSearch, ArrowRight, Clock, CheckCircle, Truck, Package,
 } from "lucide-react";
 
-type IconType = React.ComponentType<{ size?: number; className?: string }>;
+type IconType = React.ComponentType<{ size?: number | string; className?: string }>;
 
 // Rotating accent palette so the category strip reads as vibrant, not uniform grey
 const CATEGORY_COLORS = [
@@ -45,11 +46,17 @@ const SORT_OPTIONS = [
   { value: "name", label: "Name: A to Z" },
 ];
 
-const PRICE_BUCKETS = [
+interface PriceBucket {
+  label: string;
+  min?: number;
+  max?: number;
+}
+
+const PRICE_BUCKETS: PriceBucket[] = [
   { label: "Under 10,000", max: 10_000 },
   { label: "10,000 – 30,000", min: 10_000, max: 30_000 },
   { label: "Over 30,000", min: 30_000 },
-] as const;
+];
 
 const PROMO_SLIDES: PromoSlide[] = [
   {
@@ -96,15 +103,15 @@ const makeStoreSlug = (name?: string) =>
   name ? name.toLowerCase().trim().replace(/\s+/g, "-") : undefined;
 
 const ORDER_STATUS_MAP: Record<string, { label: string; color: string; step: number }> = {
-  pending:          { label: "New Order",     color: "bg-white/10 text-white/70 border border-white/15",              step: 1 },
-  confirmed:        { label: "New Order",     color: "bg-white/10 text-white/70 border border-white/15",              step: 1 },
-  shipped:          { label: "Ready to Ship", color: "bg-gold-bright/20 text-gold-accent border border-gold-bright/30", step: 2 },
-  ready_to_ship:    { label: "Ready to Ship", color: "bg-gold-bright/20 text-gold-accent border border-gold-bright/30", step: 2 },
-  picked:           { label: "On its Way",    color: "bg-blue-500/20 text-blue-300 border border-blue-500/30",        step: 3 },
-  out_for_delivery: { label: "On its Way",    color: "bg-blue-500/20 text-blue-300 border border-blue-500/30",        step: 3 },
-  ready_for_pickup: { label: "On its Way",    color: "bg-blue-500/20 text-blue-300 border border-blue-500/30",        step: 3 },
-  in_transit:       { label: "On its Way",    color: "bg-blue-500/20 text-blue-300 border border-blue-500/30",        step: 3 },
-  completed:        { label: "Delivered",     color: "bg-success/20 text-success border border-success/30",           step: 4 },
+  pending:          { label: "Order placed",  color: "bg-secondary text-muted-foreground border border-border", step: 1 },
+  confirmed:        { label: "Confirmed",     color: "bg-secondary text-muted-foreground border border-border", step: 1 },
+  shipped:          { label: "Ready to ship", color: "bg-amber-500/10 text-amber-700 border border-amber-500/20", step: 2 },
+  ready_to_ship:    { label: "Ready to ship", color: "bg-amber-500/10 text-amber-700 border border-amber-500/20", step: 2 },
+  picked:           { label: "On its way",    color: "bg-sky-500/10 text-sky-700 border border-sky-500/20", step: 3 },
+  out_for_delivery: { label: "On its way",    color: "bg-sky-500/10 text-sky-700 border border-sky-500/20", step: 3 },
+  ready_for_pickup: { label: "On its way",    color: "bg-sky-500/10 text-sky-700 border border-sky-500/20", step: 3 },
+  in_transit:       { label: "On its way",    color: "bg-sky-500/10 text-sky-700 border border-sky-500/20", step: 3 },
+  completed:        { label: "Delivered",     color: "bg-emerald-500/10 text-emerald-700 border border-emerald-500/20", step: 4 },
 };
 
 function getOrderStatus(status: string) {
@@ -113,12 +120,12 @@ function getOrderStatus(status: string) {
 
 function ProductCardSkeleton() {
   return (
-    <div className="flex flex-col h-full bg-card border border-border/60 rounded-xl overflow-hidden">
+    <div className="flex flex-col h-full bg-card border border-border/80 rounded-xl overflow-hidden">
       <div className="aspect-[4/3] bg-secondary animate-pulse" />
-      <div className="p-2.5 space-y-2">
-        <div className="h-3 bg-secondary rounded animate-pulse" />
-        <div className="h-3 w-2/3 bg-secondary rounded animate-pulse" />
-        <div className="h-4 w-1/2 bg-secondary rounded animate-pulse mt-2" />
+      <div className="p-3 space-y-2">
+        <div className="h-3.5 bg-secondary rounded animate-pulse" />
+        <div className="h-3.5 w-2/3 bg-secondary rounded animate-pulse" />
+        <div className="h-4 w-1/2 bg-secondary rounded animate-pulse mt-3" />
       </div>
     </div>
   );
@@ -136,12 +143,12 @@ function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-      <div className="h-16 w-16 rounded-2xl bg-secondary flex items-center justify-center mb-5">
-        <Icon size={28} className="text-muted-foreground" />
+    <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+      <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center mb-4 text-muted-foreground">
+        <Icon size={22} />
       </div>
-      <h3 className="font-bold text-foreground text-lg mb-1.5">{title}</h3>
-      <p className="text-muted-foreground text-sm max-w-xs mb-6">{description}</p>
+      <h3 className="font-semibold text-foreground text-base mb-1">{title}</h3>
+      <p className="text-muted-foreground text-xs max-w-xs mb-5">{description}</p>
       {action}
     </div>
   );
@@ -179,18 +186,23 @@ export function BuyerDashboard() {
 
   const stores = useMemo(() => {
     const map = new Map<string, { name: string; slug: string; count: number }>();
-    allProducts.forEach((p) => {
-      const slug = makeStoreSlug(p.store_name);
+    allProducts.forEach((p: any) => {
+      const sName = p.store_name || (typeof p.store === "object" ? p.store?.store_name : null);
+      const sId = typeof p.store === "number" ? p.store : typeof p.store === "object" ? p.store?.id : p.store_id;
+      const name = sName || (sId ? `Store #${sId}` : null);
+      if (!name) return;
+      const slug = makeStoreSlug(name) || (sId ? `store-${sId}` : null);
       if (!slug) return;
       const existing = map.get(slug);
       if (existing) existing.count += 1;
-      else map.set(slug, { name: p.store_name!, slug, count: 1 });
+      else map.set(slug, { name, slug, count: 1 });
     });
     return Array.from(map.values()).sort((a, b) => b.count - a.count).slice(0, 10);
   }, [allProducts]);
 
   const newArrivals = useMemo(() => {
     return [...allProducts]
+      .filter((p) => Number(p.stock_quantity) > 0)
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 10);
   }, [allProducts]);
@@ -237,100 +249,101 @@ export function BuyerDashboard() {
   };
 
   const firstName = userProfile?.first_name || "there";
-  const pendingOrders = orders.filter((o: any) => getOrderStatus(o.status).step < 4).length;
-  const deliveredOrders = orders.filter((o: any) => getOrderStatus(o.status).step === 4).length;
-  const totalSpent = orders.reduce((sum: number, o: any) => sum + (parseFloat(o?.total_amount) || 0), 0);
+  const pendingOrders = orders.filter((o: Order) => getOrderStatus(o.status).step < 4).length;
+  const deliveredOrders = orders.filter((o: Order) => getOrderStatus(o.status).step === 4).length;
+  const totalSpent = orders.reduce((sum: number, o: Order) => sum + (parseFloat(o?.total_amount) || 0), 0);
 
   const STATS = [
-    { label: "Total Orders", value: isOrdersLoading ? "…" : String(orders.length), sub: pendingOrders > 0 ? `${pendingOrders} in progress` : "All caught up", icon: ShoppingBag, iconBg: "bg-gold-bright/20", iconColor: "text-gold-accent" },
-    { label: "Delivered", value: isOrdersLoading ? "…" : String(deliveredOrders), sub: "Orders completed", icon: CheckCircle, iconBg: "bg-emerald-500/20", iconColor: "text-emerald-400" },
-    { label: "In Cart", value: String(cartCount), sub: cartCount > 0 ? "Ready to check out" : "Cart is empty", icon: ShoppingCart, iconBg: "bg-blue-500/20", iconColor: "text-blue-400" },
-    { label: "Total Spent", value: totalSpent > 0 ? totalSpent.toLocaleString() : "0", sub: "RWF · All time", icon: Truck, iconBg: "bg-violet-500/20", iconColor: "text-violet-400" },
+    { label: "Total Orders", value: isOrdersLoading ? "…" : String(orders.length), sub: pendingOrders > 0 ? `${pendingOrders} in progress` : "All delivered", icon: ShoppingBag },
+    { label: "Delivered", value: isOrdersLoading ? "…" : String(deliveredOrders), sub: "Completed orders", icon: CheckCircle },
+    { label: "In Cart", value: String(cartCount), sub: cartCount > 0 ? "Ready for checkout" : "Cart is empty", icon: ShoppingCart },
+    { label: "Total Spent", value: totalSpent > 0 ? totalSpent.toLocaleString() : "0", sub: "RWF", icon: Truck },
   ];
 
   return (
     <BuyerDashboardShell>
-      <div className="p-4 md:p-6 lg:p-10">
+      <div className="p-4 md:p-6 lg:p-8">
         {view === "overview" && (
-          <div className="max-w-5xl mx-auto space-y-6 animate-fade-up">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="max-w-5xl mx-auto space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-5">
               <div>
-                <p className="text-xs font-semibold text-white/40 mb-0.5">{getGreeting()}, {firstName}</p>
-                <h1 className="font-display text-2xl md:text-3xl text-white tracking-tight leading-tight">
-                  What are you shopping for today?
+                <p className="text-xs font-medium text-muted-foreground mb-0.5">{getGreeting()}, {firstName}</p>
+                <h1 className="text-2xl font-bold text-foreground tracking-tight">
+                  Account Overview
                 </h1>
               </div>
               <Button
                 onClick={goToShop}
-                className="bg-gold-bright text-near-black hover:bg-gold-accent rounded-2xl px-6 h-11 gap-2 font-bold shadow-md transition-all hover:-translate-y-0.5 shrink-0"
+                className="gap-2 rounded-lg text-sm font-semibold shrink-0"
               >
-                <Store size={16} /> Browse products
+                <Store size={15} /> Browse Marketplace
               </Button>
             </div>
 
+            {/* Stat Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
               {STATS.map((stat) => (
-                <div key={stat.label} className="bg-white/5 rounded-2xl p-4 md:p-5 border border-white/10 hover:-translate-y-0.5 transition-all group cursor-default">
-                  <div className={`h-9 w-9 rounded-xl ${stat.iconBg} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200`}>
-                    <stat.icon size={17} className={stat.iconColor} />
+                <div key={stat.label} className="bg-card rounded-xl p-4 border border-border/80 shadow-2xs">
+                  <div className="flex items-center justify-between text-muted-foreground mb-2">
+                    <span className="text-xs font-medium text-muted-foreground">{stat.label}</span>
+                    <stat.icon size={16} className="opacity-70" />
                   </div>
-                  <div className="text-xl md:text-2xl font-black text-white leading-none mb-1">{stat.value}</div>
-                  <div className="text-[11px] font-bold text-white/60">{stat.label}</div>
-                  <div className="text-[10px] text-white/40 mt-1 leading-snug">{stat.sub}</div>
+                  <div className="text-2xl font-bold text-foreground tracking-tight mb-0.5">{stat.value}</div>
+                  <div className="text-[11px] text-muted-foreground">{stat.sub}</div>
                 </div>
               ))}
             </div>
 
-            {/* -- Recent Orders -- */}
-            <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            {/* Recent Orders */}
+            <div className="bg-card rounded-xl border border-border/80 shadow-2xs overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
                 <div className="flex items-center gap-2">
-                  <ShoppingBag size={15} className="text-white/40" />
-                  <h2 className="font-bold text-white text-sm">Recent Orders</h2>
-                  {orders.length > 0 && <span className="text-xs font-bold bg-white/10 text-white/60 px-2 py-0.5 rounded-full">{orders.length}</span>}
+                  <ShoppingBag size={16} className="text-muted-foreground" />
+                  <h2 className="font-semibold text-foreground text-sm">Recent Orders</h2>
+                  {orders.length > 0 && <span className="text-xs font-medium bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">{orders.length}</span>}
                 </div>
-                <Link href="/my-orders" className="text-xs font-semibold text-white/40 hover:text-white flex items-center gap-1 transition-colors">
+                <Link href="/my-orders" className="text-xs font-medium text-primary hover:underline flex items-center gap-1 transition-colors">
                   View all <ChevronRight size={12} />
                 </Link>
               </div>
 
               {orders.length === 0 ? (
                 <div className="px-6 py-12 flex flex-col items-center text-center">
-                  <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-                    <ShoppingBag size={22} className="text-white/30" />
+                  <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center mb-3 text-muted-foreground">
+                    <ShoppingBag size={20} />
                   </div>
-                  <p className="font-bold text-white/80 mb-1">No orders yet</p>
-                  <p className="text-sm text-white/40 max-w-xs leading-relaxed">Browse the marketplace and your orders will show up here.</p>
-                  <Button onClick={goToShop} variant="outline" className="mt-4 rounded-xl text-xs font-bold gap-2">
-                    <Store size={13} /> Start shopping
+                  <p className="font-semibold text-foreground text-sm mb-1">No orders placed yet</p>
+                  <p className="text-xs text-muted-foreground max-w-xs">When you place orders on the marketplace, they will appear here for tracking.</p>
+                  <Button onClick={goToShop} variant="outline" className="mt-4 rounded-lg text-xs font-semibold gap-2">
+                    <Store size={13} /> Start Shopping
                   </Button>
                 </div>
               ) : (
-                <div className="divide-y divide-border">
-                  {orders.slice(0, 5).map((order: any) => {
+                <div className="divide-y divide-border/60">
+                  {orders.slice(0, 5).map((order: Order) => {
                     const s = getOrderStatus(order.status);
                     return (
-                      <Link key={order.id} href="/my-orders" className="px-5 py-4 flex items-center gap-4 hover:bg-white/5 transition-colors">
-                        <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 bg-white/8">
+                      <Link key={order.id} href="/my-orders" className="px-5 py-3.5 flex items-center gap-4 hover:bg-secondary/40 transition-colors">
+                        <div className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0 bg-secondary border border-border/60 text-muted-foreground">
                           {s.step === 4 ? (
-                            <CheckCircle size={18} className="text-emerald-400" />
+                            <CheckCircle size={16} className="text-emerald-600" />
                           ) : s.step === 3 ? (
-                            <Truck size={18} className="text-sky-400" />
+                            <Truck size={16} className="text-sky-600" />
                           ) : (
-                            <Package size={18} className="text-white/50" />
+                            <Package size={16} />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <span className="font-bold text-sm text-white">Order #{order.id}</span>
-                          <div className="text-xs text-white/40 truncate mt-0.5">
-                            {order.items?.map((i: any) => i.product_name).join(", ")}
+                          <span className="font-semibold text-sm text-foreground">Order #{order.id}</span>
+                          <div className="text-xs text-muted-foreground truncate mt-0.5">
+                            {order.items?.map((i: OrderItem) => i.product_name).join(", ")}
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <div className="font-black text-sm text-white">
-                            {parseFloat(order.total_amount).toLocaleString()} <span className="text-[10px] font-bold text-white/40">RWF</span>
+                          <div className="font-bold text-sm text-foreground">
+                            {parseFloat(order.total_amount).toLocaleString()} <span className="text-[10px] font-normal text-muted-foreground">RWF</span>
                           </div>
-                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s.color}`}>{s.label}</span>
+                          <span className={`text-[10px] font-medium px-2 py-0.5 rounded ${s.color}`}>{s.label}</span>
                         </div>
                       </Link>
                     );
@@ -339,37 +352,37 @@ export function BuyerDashboard() {
               )}
             </div>
 
-            {/* -- Quick actions -- */}
+            {/* Quick actions */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Link href="/my-orders" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 hover:-translate-y-0.5 transition-all">
-                <div className="h-9 w-9 rounded-xl bg-gold-bright/20 flex items-center justify-center shrink-0">
-                  <Clock size={16} className="text-gold-accent" />
+              <Link href="/my-orders" className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/80 hover:border-primary/40 transition-all">
+                <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center shrink-0 text-muted-foreground">
+                  <Clock size={16} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-white">Track orders</p>
-                  <p className="text-[11px] text-white/40">See delivery status</p>
+                  <p className="text-sm font-semibold text-foreground">Track Orders</p>
+                  <p className="text-xs text-muted-foreground">Real-time status</p>
                 </div>
-                <ArrowRight size={14} className="text-white/30 ml-auto shrink-0" />
+                <ArrowRight size={14} className="text-muted-foreground ml-auto shrink-0" />
               </Link>
-              <Link href="/cart" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 hover:-translate-y-0.5 transition-all">
-                <div className="h-9 w-9 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0">
-                  <ShoppingCart size={16} className="text-blue-400" />
+              <Link href="/cart" className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/80 hover:border-primary/40 transition-all">
+                <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center shrink-0 text-muted-foreground">
+                  <ShoppingCart size={16} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-white">View cart</p>
-                  <p className="text-[11px] text-white/40">{cartCount} item{cartCount !== 1 ? "s" : ""} waiting</p>
+                  <p className="text-sm font-semibold text-foreground">View Cart</p>
+                  <p className="text-xs text-muted-foreground">{cartCount} item{cartCount !== 1 ? "s" : ""}</p>
                 </div>
-                <ArrowRight size={14} className="text-white/30 ml-auto shrink-0" />
+                <ArrowRight size={14} className="text-muted-foreground ml-auto shrink-0" />
               </Link>
-              <Link href="/profile" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 hover:-translate-y-0.5 transition-all">
-                <div className="h-9 w-9 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0">
-                  <User size={16} className="text-violet-400" />
+              <Link href="/profile" className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/80 hover:border-primary/40 transition-all">
+                <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center shrink-0 text-muted-foreground">
+                  <User size={16} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-white">Edit profile</p>
-                  <p className="text-[11px] text-white/40">Address & contact info</p>
+                  <p className="text-sm font-semibold text-foreground">Account Settings</p>
+                  <p className="text-xs text-muted-foreground">Address & profile</p>
                 </div>
-                <ArrowRight size={14} className="text-white/30 ml-auto shrink-0" />
+                <ArrowRight size={14} className="text-muted-foreground ml-auto shrink-0" />
               </Link>
             </div>
           </div>
@@ -463,37 +476,7 @@ export function BuyerDashboard() {
               </section>
             )}
 
-            {/* Trusted sellers rail */}
-            {!isLoading && !isError && stores.length >= 2 && (
-              <section id="trusted-sellers" className="scroll-mt-20">
-                <div className="flex items-baseline justify-between mb-3">
-                  <h2 className="flex items-center gap-2 text-base md:text-lg font-bold text-foreground">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" /> Trusted sellers
-                  </h2>
-                  <span className="text-xs text-muted-foreground">Real stores, real people</span>
-                </div>
-                <div className="flex overflow-x-auto no-scrollbar gap-3 pb-1 -mx-1 px-1 snap-x">
-                  {stores.map((store, i) => {
-                    const color = CATEGORY_COLORS[i % CATEGORY_COLORS.length];
-                    return (
-                      <Link
-                        key={store.slug}
-                        href={`/shop/${store.slug}`}
-                        className="shrink-0 snap-start w-[150px] flex flex-col items-center text-center gap-2 p-4 rounded-2xl bg-card border border-border/60 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm transition-all"
-                      >
-                        <div className={`h-12 w-12 rounded-full ${color.bg} flex items-center justify-center ${color.text} font-black text-lg`}>
-                          {store.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="min-w-0 w-full">
-                          <p className="text-xs font-bold text-foreground truncate">{store.name}</p>
-                          <p className="text-[11px] text-muted-foreground">{store.count} product{store.count !== 1 ? "s" : ""}</p>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
+
 
             {/* Browse */}
             <section id="browse">

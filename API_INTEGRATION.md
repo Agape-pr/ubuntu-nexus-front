@@ -4,7 +4,7 @@ This guide explains how to connect your backend API to the Ubuntu Nexus Front ap
 
 **Updated to match Swagger API documentation** (`/api/v1/` endpoints)
 
-## 📋 Table of Contents
+## Table of Contents
 
 1. [Setup](#setup)
 2. [Configuration](#configuration)
@@ -14,7 +14,7 @@ This guide explains how to connect your backend API to the Ubuntu Nexus Front ap
 6. [CORS Configuration](#cors-configuration)
 7. [Environment Variables](#environment-variables)
 
-## 🚀 Setup
+## Setup
 
 ### Step 1: Create Environment File
 
