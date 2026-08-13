@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Heart, Store, Truck, MapPin, Clock, Share2, Plus, Minus,
   CheckCircle, XCircle, Mail, PackageSearch, ChevronLeft, ChevronRight, Lock,
-  ShoppingCart, Banknote, Landmark,
+  ShoppingCart, Banknote, Landmark, ImageOff, Zap, Package,
 } from "lucide-react";
 
 // SEED DATA FALLBACK
@@ -217,7 +217,7 @@ function ProductPageContent() {
         publicId={src}
         alt={alt}
         crop="fill"
-        fallback={<div className="w-full h-full flex items-center justify-center text-5xl bg-secondary/60">🛍️</div>}
+        fallback={<div className="w-full h-full flex items-center justify-center bg-secondary/60"><ImageOff size={32} className="opacity-25" strokeWidth={1.5} /></div>}
         className={className}
       />
     );
@@ -303,7 +303,7 @@ function ProductPageContent() {
                     "w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   )
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-6xl">🛍️</div>
+                  <div className="w-full h-full flex items-center justify-center"><ImageOff size={40} className="opacity-25" strokeWidth={1.5} /></div>
                 )}
 
                 {images.length > 1 && (
@@ -405,16 +405,16 @@ function ProductPageContent() {
                   <div className="flex items-end justify-between gap-3 flex-wrap">
                     <div className="flex items-baseline gap-1.5">
                       <span className="text-xs text-muted-foreground font-semibold">RWF</span>
-                      <span className="text-3xl font-black text-accent tracking-tight" style={{ fontFamily: "Nunito, sans-serif" }}>
+                      <span className="font-display text-3xl font-black text-accent tracking-tight">
                         {formattedPrice}
                       </span>
                     </div>
                     <div className="text-right shrink-0">
                       {sellerHasStock === true && (
-                        <span className="text-primary text-xs font-bold">⚡ Quick delivery</span>
+                        <span className="inline-flex items-center gap-1 text-primary text-xs font-bold"><Zap size={12} className="fill-current" /> Quick delivery</span>
                       )}
                       {sellerHasStock === false && (
-                        <span className="text-accent text-xs font-bold">📦 Same-day delivery</span>
+                        <span className="inline-flex items-center gap-1 text-accent text-xs font-bold"><Package size={12} /> Same-day delivery</span>
                       )}
                       {inStock && stock <= 5 ? (
                         <p className="text-rose-500 font-semibold text-xs mt-0.5">Only {stock} left</p>
@@ -441,7 +441,7 @@ function ProductPageContent() {
                   </span>
                 )}
 
-                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground leading-[1.15] mb-3">
+                <h1 className="font-display text-2xl md:text-3xl lg:text-4xl text-foreground leading-[1.15] mb-3">
                   {name}
                 </h1>
 

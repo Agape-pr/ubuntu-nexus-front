@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, Star, Heart, Lock } from "lucide-react";
+import { Plus, Star, Heart, Lock, ImageOff, Zap, Package } from "lucide-react";
 import { CloudImage } from "@/components/ui/CloudImage";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useFavoritesStore } from "@/lib/store/favoritesStore";
@@ -115,13 +115,13 @@ const ProductCard = ({
               }
               fallback={
                 <div className="w-full aspect-[4/3] flex items-center justify-center bg-secondary/50">
-                  <span className="text-3xl opacity-30">🛍️</span>
+                  <ImageOff size={22} className="opacity-25" strokeWidth={1.5} />
                 </div>
               }
             />
           ) : (
             <div className="w-full aspect-[4/3] flex items-center justify-center bg-secondary/50">
-              <span className="text-3xl opacity-30">🛍️</span>
+              <ImageOff size={22} className="opacity-25" strokeWidth={1.5} />
             </div>
           )}
 
@@ -144,12 +144,12 @@ const ProductCard = ({
           {/* Delivery badge — bottom-left, pill style */}
           {inStock && sellerHasStock === true && (
             <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 text-[10px] font-bold bg-primary/95 backdrop-blur-sm text-primary-foreground px-2 py-0.5 rounded-full leading-none">
-              ⚡ Quick
+              <Zap size={9} className="fill-current" /> Quick
             </span>
           )}
           {inStock && sellerHasStock === false && (
             <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 text-[10px] font-bold bg-card/90 backdrop-blur-sm text-accent border border-accent/30 px-2 py-0.5 rounded-full leading-none">
-              📦 Same day
+              <Package size={9} /> Same day
             </span>
           )}
 
@@ -202,10 +202,7 @@ const ProductCard = ({
             <div className="flex flex-col min-w-0">
               <div className="flex items-baseline gap-0.5 min-w-0">
                 <span className="text-[9px] text-muted-foreground shrink-0">{currency}</span>
-                <span
-                  className="text-[13px] font-black text-accent leading-none tracking-tight"
-                  style={{ fontFamily: "Nunito, sans-serif" }}
-                >
+                <span className="font-display text-[13px] font-black text-accent leading-none tracking-tight">
                   {formattedPrice}
                 </span>
               </div>

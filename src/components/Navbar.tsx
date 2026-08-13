@@ -224,7 +224,7 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                   className="px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
                 >
-                  💡 Learn how it works
+                  Learn how it works
                 </Link>
 
                 <Link

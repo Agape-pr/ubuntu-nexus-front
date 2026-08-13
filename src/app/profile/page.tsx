@@ -102,7 +102,7 @@ function ProfileContent() {
         {/* Header */}
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 mb-1">Your account</p>
-          <h1 className="text-2xl font-bold text-white">Profile</h1>
+          <h1 className="font-display text-2xl text-white">Profile</h1>
         </div>
 
         {/* Avatar + Name */}

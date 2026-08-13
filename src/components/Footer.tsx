@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Twitter, Instagram, Linkedin, Mail, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Twitter, Instagram, Linkedin, Mail, CheckCircle2, CreditCard, MapPin } from "lucide-react";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -67,11 +67,11 @@ function SocialButton({ Icon, href, label }: { Icon: React.ElementType; href: st
         group relative h-9 w-9 rounded-xl
         bg-white/5 border border-white/10
         flex items-center justify-center
-        text-white/40 hover:text-amber-400
-        hover:border-amber-400/40
-        hover:bg-amber-400/10
+        text-white/40 hover:text-gold-accent
+        hover:border-gold-accent/40
+        hover:bg-gold-accent/10
         transition-all duration-300
-        hover:shadow-[0_0_16px_rgba(251,191,36,0.25)]
+        hover:shadow-[0_0_16px_rgba(240,184,0,0.25)]
       "
     >
       <Icon size={15} />
@@ -87,7 +87,7 @@ function FooterLink({ label, href }: { label: string; href: string }) {
         className="
           group inline-flex items-center gap-1.5
           text-sm text-white/40
-          hover:text-amber-400
+          hover:text-gold-accent
           transition-colors duration-200
         "
       >
@@ -95,70 +95,13 @@ function FooterLink({ label, href }: { label: string; href: string }) {
           {label}
           <span className="
             absolute -bottom-0.5 left-0 h-px w-0
-            bg-amber-400/70
+            bg-gold-accent/70
             group-hover:w-full
             transition-all duration-300
           " />
         </span>
       </Link>
     </li>
-  );
-}
-
-// ─── Pre-CTA Section ─────────────────────────────────────────────────────────
-
-export function FooterCTA() {
-  return (
-    <section className="relative overflow-hidden bg-[#0a0a0a] py-20 md:py-28">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-        <div className="absolute left-1/4 top-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-amber-400/6 blur-[96px]" />
-        <div className="absolute right-1/4 top-1/2 -translate-x-1/2 -translate-y-1/2 h-72 w-72 rounded-full bg-amber-600/5 blur-[72px]" />
-      </div>
-
-      <div className="container relative text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-amber-400/20 bg-amber-400/8 mb-6">
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-xs font-medium text-amber-400 tracking-wide">Join sellers building their stores across Rwanda</span>
-        </div>
-
-        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-          Ready to start selling?
-        </h2>
-        <p className="text-lg text-white/40 max-w-lg mx-auto mb-10 leading-relaxed">
-          Turn your skills and products into income. Community-powered commerce, built for Africa.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Link
-            href="/auth?tab=register&role=seller"
-            className="
-              group inline-flex items-center gap-2 px-7 py-3.5
-              bg-amber-400 text-[#0a0a0a]
-              font-semibold text-sm rounded-2xl
-              hover:bg-amber-300
-              hover:shadow-[0_0_32px_rgba(251,191,36,0.35)]
-              transition-all duration-300
-            "
-          >
-            Start for free
-            <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform duration-200" />
-          </Link>
-          <Link
-            href="/"
-            className="
-              inline-flex items-center gap-2 px-7 py-3.5
-              border border-white/12 text-white/70
-              font-medium text-sm rounded-2xl
-              hover:border-white/25 hover:text-white
-              hover:bg-white/5
-              transition-all duration-300
-            "
-          >
-            Browse marketplace
-          </Link>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -169,13 +112,13 @@ const Footer = () => {
     <footer className="relative overflow-hidden bg-[#080808]">
 
       {/* Top border glow */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" aria-hidden />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-accent/40 to-transparent" aria-hidden />
 
       {/* Background ambient glows */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-        <div className="absolute -left-32 top-16 h-72 w-72 rounded-full bg-amber-400/4 blur-[80px]" />
-        <div className="absolute right-0 top-40 h-56 w-56 rounded-full bg-amber-600/4 blur-[64px]" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-40 w-96 rounded-full bg-amber-400/3 blur-[60px]" />
+        <div className="absolute -left-32 top-16 h-72 w-72 rounded-full bg-gold-accent/4 blur-[80px]" />
+        <div className="absolute right-0 top-40 h-56 w-56 rounded-full bg-gold-primary/4 blur-[64px]" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-40 w-96 rounded-full bg-gold-accent/3 blur-[60px]" />
       </div>
 
       <div className="container relative py-14 md:py-20">
@@ -236,11 +179,11 @@ const Footer = () => {
           {/* Brand column */}
           <div className="md:col-span-4">
             <div className="flex items-center gap-2 mb-5">
-              <div className="h-8 w-8 rounded-xl bg-amber-400/15 border border-amber-400/30 flex items-center justify-center">
-                <span className="text-amber-400 font-black text-sm">U</span>
+              <div className="h-8 w-8 rounded-xl bg-gold-accent/15 border border-gold-accent/30 flex items-center justify-center">
+                <span className="text-gold-accent font-black text-sm">U</span>
               </div>
               <span className="font-black text-xl tracking-tight text-white">
-                Ubuntu<span className="text-amber-400">Now</span>
+                Ubuntu<span className="text-gold-accent">Now</span>
               </span>
             </div>
 
@@ -265,7 +208,7 @@ const Footer = () => {
                     flex-1 min-w-0 h-9 px-3 text-sm
                     bg-white/5 border border-white/10 rounded-xl
                     text-white placeholder:text-white/25
-                    focus:outline-none focus:border-amber-400/50 focus:bg-white/8
+                    focus:outline-none focus:border-gold-accent/50 focus:bg-white/8
                     transition-all duration-200
                   "
                 />
@@ -274,9 +217,9 @@ const Footer = () => {
                   aria-label="Subscribe to newsletter"
                   className="
                     h-9 px-4 rounded-xl text-sm font-semibold
-                    bg-amber-400/15 text-amber-400
-                    border border-amber-400/25
-                    hover:bg-amber-400/25
+                    bg-gold-accent/15 text-gold-accent
+                    border border-gold-accent/25
+                    hover:bg-gold-accent/25
                     transition-all duration-200
                   "
                 >
@@ -318,17 +261,19 @@ const Footer = () => {
               bg-white/5 border border-white/10
               text-[11px] text-white/40 font-medium
             ">
-              🇷🇼 Built with pride in Kigali
+              <MapPin size={11} className="text-white/40" />
+              Built with pride in Kigali
             </span>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
             <span className="
               inline-flex items-center gap-2 px-3 py-1.5 rounded-xl
-              bg-amber-400/8 border border-amber-400/18
-              text-xs font-bold text-amber-400/80 tracking-wide
+              bg-gold-accent/8 border border-gold-accent/18
+              text-xs font-bold text-gold-accent/80 tracking-wide
             ">
-              💳 Powered by Pesapal
+              <CreditCard size={12} className="text-gold-accent/80" />
+              Powered by Pesapal
             </span>
 
             <span className="inline-flex items-center gap-1.5 text-xs text-white/30">

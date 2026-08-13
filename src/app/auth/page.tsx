@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, Timer } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, Timer, ShieldCheck, Truck, MapPin } from "lucide-react";
 import { useLogin, useRegister, useVerifyOTP, useResendOTP } from "@/lib/api/hooks/useAuth";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
@@ -238,7 +238,7 @@ const AuthContent = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/75 to-background/95" />
         <div className="absolute top-0 right-0 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-emerald/10 blur-3xl" />
+        <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-emerald/15 blur-3xl" />
 
         <Logo href="/" size="lg" className="z-10 relative" />
 
@@ -250,15 +250,20 @@ const AuthContent = () => {
             Join a community of entrepreneurs and shoppers building the future of African commerce together.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
-            {["🔒 Escrow-protected payments", "🚚 Same-day Kigali delivery", "🇷🇼 Made in Kigali"].map((item) => (
-              <div key={item} className="px-3 py-1.5 rounded-full bg-foreground/10 text-foreground text-xs font-medium border border-foreground/20">
-                {item}
+            {[
+              { icon: ShieldCheck, label: "Escrow-protected payments" },
+              { icon: Truck, label: "Same-day Kigali delivery" },
+              { icon: MapPin, label: "Made in Kigali" },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/10 text-foreground text-xs font-medium border border-foreground/20">
+                <Icon size={13} className="text-emerald shrink-0" />
+                {label}
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-foreground/30 text-xs relative z-10">© 2025 UbuntuNow Ltd, Kigali</p>
+        <p className="text-foreground/30 text-xs relative z-10">© {new Date().getFullYear()} UbuntuNow Ltd, Kigali</p>
       </div>
 
       {/* Right panel — form */}
@@ -292,7 +297,7 @@ const AuthContent = () => {
           )}
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+            <h1 className="font-display text-3xl text-foreground mb-2">
               {registrationStep === "otp"
                 ? "Verify your email"
                 : tab === "login"

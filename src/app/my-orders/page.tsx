@@ -148,7 +148,7 @@ function MyOrdersContent() {
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 mb-1">Your account</p>
-          <h1 className="text-2xl font-bold text-white">My Orders</h1>
+          <h1 className="font-display text-2xl text-white">My Orders</h1>
         </div>
 
         {isLoading ? (

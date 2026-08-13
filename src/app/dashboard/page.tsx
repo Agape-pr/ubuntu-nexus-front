@@ -13,7 +13,7 @@ import {
   CheckCircle, Edit3, Trash2, ShoppingBag, AlertCircle, Loader2,
   Eye, LayoutDashboard, Wallet, LogOut, ChevronRight, ChevronDown, Search,
   Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star, Truck, Bell, Zap, Link2,
-  ArrowLeft, User, MapPin, Mail, Phone,
+  ArrowLeft, User, MapPin, Mail, Phone, Lock, ImageOff,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateProduct, useUpdateProduct, useSellerProducts, useDeleteProduct } from "@/lib/api/hooks/useProducts";
@@ -218,7 +218,7 @@ function OrderCard({ order, s, step, itemCount, updateStatus, isUpdatingOrder }:
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Payment</p>
             <div className="flex items-center gap-2">
-              <span className="text-lg">🔒</span>
+              <Lock size={16} className="text-white/50" />
               <span className={`text-sm font-bold ${order.status === "completed" ? "text-success" : "text-gold-bright"}`}>
                 {order.status === "completed" ? "Payment Released" : "Held in Escrow"}
               </span>
@@ -478,7 +478,7 @@ function SellerDashboardView() {
     { label: "Active Listings", value: isProductsLoading ? "…" : String(activeProductsCount), sub: "Products live in your store", icon: Package, iconBg: "bg-blue-500/20", iconColor: "text-blue-400" },
     { label: "Total Orders", value: String(REAL_ORDERS.length), sub: pendingOrders > 0 ? `${pendingOrders} awaiting action` : "All fulfilled", icon: ShoppingBag, iconBg: "bg-gold-bright/20", iconColor: "text-gold-accent" },
     { label: "Revenue Earned", value: totalRevenue > 0 ? `${totalRevenue.toLocaleString()}` : "0", sub: totalRevenue > 0 ? "RWF · All time" : "Start selling today", icon: Wallet, iconBg: "bg-violet-500/20", iconColor: "text-violet-400" },
-    { label: "Store Status", value: storeSlug ? "Live ✦" : "Setup", sub: storeSlug ? "Accepting orders" : "Complete your store", icon: Zap, iconBg: "bg-emerald-500/20", iconColor: "text-emerald-400" },
+    { label: "Store Status", value: storeSlug ? "Live" : "Setup", sub: storeSlug ? "Accepting orders" : "Complete your store", icon: Zap, iconBg: "bg-emerald-500/20", iconColor: "text-emerald-400" },
   ];
 
   return (
@@ -585,8 +585,8 @@ function SellerDashboardView() {
               {/* -- Greeting -- */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold text-white/40 mb-0.5">{getGreeting()}, {storeName} 👋</p>
-                  <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight leading-tight">
+                  <p className="text-xs font-semibold text-white/40 mb-0.5">{getGreeting()}, {storeName}</p>
+                  <h1 className="font-display text-2xl md:text-3xl text-white tracking-tight leading-tight">
                     Here's your store at a glance
                   </h1>
                   {pendingOrders > 0 && (
@@ -637,7 +637,7 @@ function SellerDashboardView() {
                     </div>
                     <div className="flex gap-2 shrink-0">
                       <Button
-                        onClick={() => { if (!storeSlug) return; navigator.clipboard.writeText(`${window.location.origin}/shop/${storeSlug}`); setCopied(true); setTimeout(() => setCopied(false), 2000); toast.success("Link copied! 🔗"); }}
+                        onClick={() => { if (!storeSlug) return; navigator.clipboard.writeText(`${window.location.origin}/shop/${storeSlug}`); setCopied(true); setTimeout(() => setCopied(false), 2000); toast.success("Link copied to clipboard"); }}
                         disabled={!storeSlug}
                         className="bg-gold-accent text-near-black hover:opacity-90 rounded-xl font-bold gap-2 h-10 px-4 text-sm disabled:opacity-50 transition-all">
                         {copied ? <CheckCircle size={14} /> : <Copy size={14} />}
@@ -680,7 +680,7 @@ function SellerDashboardView() {
                     <p className="font-bold text-white/80 mb-1">No orders yet — but they're coming!</p>
                     <p className="text-sm text-white/40 max-w-xs leading-relaxed">Share your store link on WhatsApp and Instagram to get your first order today.</p>
                     {storeUrl && (
-                      <button onClick={() => { if (storeSlug) navigator.clipboard.writeText(`${window.location.origin}/shop/${storeSlug}`); toast.success("Link copied! Share it now 🚀"); }}
+                      <button onClick={() => { if (storeSlug) navigator.clipboard.writeText(`${window.location.origin}/shop/${storeSlug}`); toast.success("Link copied — share it now"); }}
                         className="mt-4 flex items-center gap-2 text-xs font-bold text-gold-accent hover:text-accent transition-colors">
                         <Copy size={12} /> Copy store link
                       </button>
@@ -697,7 +697,13 @@ function SellerDashboardView() {
                             order.status === "completed" ? "bg-emerald-500/15" :
                             order.status === "shipped" ? "bg-blue-500/15" : "bg-gold-bright/15"
                           }`}>
-                            {order.status === "completed" ? "✅" : order.status === "shipped" ? "🚚" : "📦"}
+                            {order.status === "completed" ? (
+                              <CheckCircle size={16} className="text-emerald-400" />
+                            ) : order.status === "shipped" ? (
+                              <Truck size={16} className="text-blue-400" />
+                            ) : (
+                              <Package size={16} className="text-gold-accent" />
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
@@ -832,7 +838,7 @@ function SellerDashboardView() {
                                   : "border-white/10 bg-white/5 text-white/50 hover:border-emerald-500/40 hover:bg-emerald-500/5"
                               }`}
                             >
-                              ✅ Yes — Ready for quick delivery
+                              <CheckCircle size={15} /> Yes — Ready for quick delivery
                             </button>
                             <button
                               type="button"
@@ -843,7 +849,7 @@ function SellerDashboardView() {
                                   : "border-white/10 bg-white/5 text-white/50 hover:border-blue-500/40 hover:bg-blue-500/5"
                               }`}
                             >
-                              📦 No — Confirm & deliver same day
+                              <Package size={15} /> No — Confirm & deliver same day
                             </button>
                           </div>
                         </div>
@@ -1002,10 +1008,10 @@ function SellerDashboardView() {
                                 height={64}
                                 crop="fill"
                                 className="w-full h-full object-cover"
-                                fallback={<div className="w-full h-full flex items-center justify-center text-2xl">🛍️</div>}
+                                fallback={<div className="w-full h-full flex items-center justify-center"><ImageOff size={20} className="opacity-25" strokeWidth={1.5} /></div>}
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center text-2xl">🛍️</div>
+                              <div className="w-full h-full flex items-center justify-center"><ImageOff size={20} className="opacity-25" strokeWidth={1.5} /></div>
                             )}
                           </div>
 
@@ -1022,8 +1028,8 @@ function SellerDashboardView() {
                                 inStock ? statusConfig.active.color : statusConfig["out-of-stock"].color
                               }`}>{inStock ? "In stock" : "Out of stock"}</span>
                               {lowStock && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold-bright/15 text-gold-accent border border-gold-bright/30 flex items-center gap-1"><AlertCircle size={9}/> Low</span>}
-                              {product.in_stock === true && <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">⚡ Quick delivery</span>}
-                              {product.in_stock === false && <span className="text-[10px] font-semibold text-blue-300 bg-blue-500/15 border border-blue-500/30 px-2 py-0.5 rounded-full">📦 Same day</span>}
+                              {product.in_stock === true && <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full"><Zap size={9} className="fill-current" /> Quick delivery</span>}
+                              {product.in_stock === false && <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-300 bg-blue-500/15 border border-blue-500/30 px-2 py-0.5 rounded-full"><Package size={9} /> Same day</span>}
                             </div>
                           </div>
 

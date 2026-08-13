@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import Link from "next/link";
-import { ArrowLeft, Heart, X } from "lucide-react";
+import { ArrowLeft, Heart, X, ImageOff } from "lucide-react";
 import { BuyerDashboardShell } from "@/components/BuyerDashboardShell";
 import { useFavoritesStore } from "@/lib/store/favoritesStore";
 import { CloudImage } from "@/components/ui/CloudImage";
@@ -23,7 +23,7 @@ function FavoritesContent() {
 
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 mb-1">Your account</p>
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="font-display text-2xl text-white">
             Favorites {favorites.length > 0 && <span className="text-white/40 font-medium">({favorites.length})</span>}
           </h1>
         </div>
@@ -60,10 +60,10 @@ function FavoritesContent() {
                           height={56}
                           crop="fill"
                           className="w-full h-full object-cover"
-                          fallback={<div className="w-full h-full flex items-center justify-center text-xl">🛍️</div>}
+                          fallback={<div className="w-full h-full flex items-center justify-center text-xl"><ImageOff size={18} className="opacity-25" strokeWidth={1.5} /></div>}
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xl">🛍️</div>
+                        <div className="w-full h-full flex items-center justify-center text-xl"><ImageOff size={18} className="opacity-25" strokeWidth={1.5} /></div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">

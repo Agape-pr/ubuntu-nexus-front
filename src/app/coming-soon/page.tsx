@@ -11,6 +11,9 @@ import {
   Store,
   Lock,
   Mail,
+  Globe,
+  ShoppingBag,
+  Star,
 } from "lucide-react";
 
 // ─── Constants ──────────────────────────────────────────────────────────────────
@@ -352,15 +355,14 @@ export default function ComingSoonPage() {
                 ref={addRevealRef}
                 className="reveal inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/8 text-xs font-medium text-[#888780] mb-6"
               >
-                <span className="text-sm">🌍</span>
+                <Globe size={14} />
                 <span>Made for Rwanda. Built for Africa.</span>
               </div>
 
               {/* Headline */}
               <h1
                 ref={addRevealRef}
-                className="reveal reveal-delay-1 text-[2.5rem] sm:text-5xl lg:text-[3.5rem] font-black leading-[1.08] tracking-tight mb-6"
-                style={{ fontFamily: "'Nunito', sans-serif" }}
+                className="font-display reveal reveal-delay-1 text-[2.5rem] sm:text-5xl lg:text-[3.5rem] font-black leading-[1.08] tracking-tight mb-6"
               >
                 The{" "}
                 <span className="text-gradient-gold">trust layer</span>{" "}
@@ -443,8 +445,8 @@ export default function ComingSoonPage() {
                 delay="0s"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#B87800]/30 to-[#F0B800]/10 flex items-center justify-center text-lg">
-                    👜
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-bright/30 to-gold-accent/10 flex items-center justify-center">
+                    <ShoppingBag size={18} className="text-gold-accent" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-[#FBF8F2]">
@@ -492,9 +494,7 @@ export default function ComingSoonPage() {
                     </p>
                     <div className="flex gap-0.5 mt-0.5">
                       {[1, 2, 3, 4, 5].map((s) => (
-                        <span key={s} className="text-[8px] text-[#F0B800]">
-                          ★
-                        </span>
+                        <Star key={s} size={8} className="fill-gold-accent text-gold-accent" />
                       ))}
                     </div>
                   </div>
@@ -521,8 +521,7 @@ export default function ComingSoonPage() {
               What we&apos;re building
             </p>
             <h2
-              className="text-2xl sm:text-3xl font-black tracking-tight"
-              style={{ fontFamily: "'Nunito', sans-serif" }}
+              className="font-display text-2xl sm:text-3xl font-black tracking-tight"
             >
               Commerce infrastructure,{" "}
               <span className="text-[#888780]">reimagined.</span>
@@ -596,8 +595,7 @@ export default function ComingSoonPage() {
               </div>
 
               <h2
-                className="text-2xl sm:text-3xl font-black tracking-tight mb-3"
-                style={{ fontFamily: "'Nunito', sans-serif" }}
+                className="font-display text-2xl sm:text-3xl font-black tracking-tight mb-3"
               >
                 Are you a seller in Rwanda?
               </h2>

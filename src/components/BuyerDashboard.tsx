@@ -23,7 +23,7 @@ import { resolveCategoryName } from "@/lib/categories";
 import {
   Store, ShoppingBag, ShoppingCart, User, ChevronRight,
   Search, SlidersHorizontal, X, Sparkles, ShieldCheck,
-  AlertTriangle, RotateCcw, PackageSearch, ArrowRight, Clock, CheckCircle, Truck,
+  AlertTriangle, RotateCcw, PackageSearch, ArrowRight, Clock, CheckCircle, Truck, Package,
 } from "lucide-react";
 
 type IconType = React.ComponentType<{ size?: number; className?: string }>;
@@ -255,8 +255,8 @@ export function BuyerDashboard() {
           <div className="max-w-5xl mx-auto space-y-6 animate-fade-up">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold text-white/40 mb-0.5">{getGreeting()}, {firstName} 👋</p>
-                <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight leading-tight">
+                <p className="text-xs font-semibold text-white/40 mb-0.5">{getGreeting()}, {firstName}</p>
+                <h1 className="font-display text-2xl md:text-3xl text-white tracking-tight leading-tight">
                   What are you shopping for today?
                 </h1>
               </div>
@@ -311,8 +311,14 @@ export function BuyerDashboard() {
                     const s = getOrderStatus(order.status);
                     return (
                       <Link key={order.id} href="/my-orders" className="px-5 py-4 flex items-center gap-4 hover:bg-white/5 transition-colors">
-                        <div className="h-10 w-10 rounded-xl flex items-center justify-center text-lg shrink-0 bg-white/8">
-                          {s.step === 4 ? "✅" : s.step === 3 ? "🚚" : "📦"}
+                        <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 bg-white/8">
+                          {s.step === 4 ? (
+                            <CheckCircle size={18} className="text-emerald-400" />
+                          ) : s.step === 3 ? (
+                            <Truck size={18} className="text-sky-400" />
+                          ) : (
+                            <Package size={18} className="text-white/50" />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <span className="font-bold text-sm text-white">Order #{order.id}</span>
