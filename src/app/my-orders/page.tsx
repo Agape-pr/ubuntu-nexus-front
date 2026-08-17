@@ -147,7 +147,6 @@ function MyOrdersContent() {
     <BuyerDashboardShell>
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Account History</p>
           <h1 className="text-2xl font-bold text-foreground">My Orders</h1>
         </div>
 

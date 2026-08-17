@@ -1,80 +1,69 @@
 "use client";
 
 import { Reveal } from "@/components/Reveal";
-import { Heart, ShieldCheck, Zap, Clock, Shield, TrendingUp } from "lucide-react";
-
-const values = [
-  {
-    icon: Heart,
-    title: "Community Focused",
-    desc: "Built to empower local Rwandan merchants and artisans to build sustainable digital storefronts.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Secure Escrow",
-    desc: "Payments are held safely until delivery is confirmed by the buyer, protecting both parties.",
-  },
-  {
-    icon: Zap,
-    title: "Fast Local Setup",
-    desc: "Sellers can list products and share store links in minutes without technical complexity.",
-  },
-];
-
-const trustPoints = [
-  { icon: Clock,      title: "Escrow Protection",      sub: "Safe & verified payout" },
-  { icon: Shield,     title: "Secure Payments",        sub: "Encrypted transactions" },
-  { icon: Zap,        title: "Same-Day Delivery",      sub: "Across Kigali city" },
-  { icon: TrendingUp, title: "Local Economic Growth", sub: "Empowering businesses" },
-];
+import { Lock, Package, Store, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 
 export function AboutSection() {
   return (
     <section id="about" className="scroll-mt-16 py-20 bg-background border-t border-border/60">
-      <div className="container max-w-4xl mx-auto px-4">
-        <Reveal className="text-center mb-12">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Our Mission</p>
-          <h2 className="text-3xl font-bold text-foreground mb-3">About UbuntuNow</h2>
-          <p className="text-muted-foreground text-base max-w-2xl mx-auto leading-relaxed">
-            Founded in Kigali to make local commerce simpler, safer, and accessible to everyone.
-            We provide local businesses with modern tools to reach nearby customers with confidence.
-          </p>
-        </Reveal>
+      <div className="container max-w-5xl mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          {/* Main Story */}
+          <Reveal className="lg:col-span-7 space-y-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
+              Built for Kigali&apos;s independent shops and buyers.
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+              UbuntuNow connects local Kigali sellers directly with buyers in their city. We take out the friction of online local commerce with verified escrow payments, instant seller setups, and reliable Kigali delivery.
+            </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          {values.map((item, i) => (
-            <Reveal key={item.title} delay={i * 100} className="bg-card border border-border/80 rounded-xl p-6 shadow-2xs hover:border-primary/40 transition-all">
-              <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center mb-4 text-foreground">
-                <item.icon size={20} />
-              </div>
-              <h3 className="font-semibold text-base text-foreground mb-1.5">{item.title}</h3>
-              <p className="text-muted-foreground text-xs leading-relaxed">{item.desc}</p>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal>
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-6 text-center">
-            Built for Rwandan Buyers and Sellers
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {trustPoints.map((point, i) => (
-              <Reveal
-                key={point.title}
-                delay={i * 80}
-                className="flex flex-col items-center text-center gap-2 p-5 rounded-xl bg-card border border-border/80 hover:border-primary/40 transition-all"
+            <div className="pt-2 flex flex-wrap gap-4">
+              <Link
+                href="/auth?tab=register&role=seller"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
               >
-                <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center text-foreground mb-1">
-                  <point.icon size={18} />
-                </div>
-                <p className="font-semibold text-sm text-foreground">{point.title}</p>
-                <p className="text-xs text-muted-foreground">{point.sub}</p>
-              </Reveal>
-            ))}
-          </div>
-        </Reveal>
+                Become a seller <ArrowUpRight size={14} />
+              </Link>
+            </div>
+          </Reveal>
+
+          {/* Clean Highlights List */}
+          <Reveal delay={100} className="lg:col-span-5 space-y-3">
+            <div className="flex items-start gap-3.5 p-4 rounded-xl bg-card border border-border/70">
+              <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <Lock size={18} />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-foreground">Escrow Payment Protection</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Funds held safely until buyer confirms receipt</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3.5 p-4 rounded-xl bg-card border border-border/70">
+              <div className="h-9 w-9 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                <Package size={18} />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-foreground">Same-Day Local Delivery</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Fast dispatches right across Kigali city</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3.5 p-4 rounded-xl bg-card border border-border/70">
+              <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <Store size={18} />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-foreground">Verified Local Storefronts</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Direct connection to real local business owners</p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
 }
+
 

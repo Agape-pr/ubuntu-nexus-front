@@ -7,7 +7,7 @@ import { useCartStore } from "@/lib/store/cartStore";
 import { PaymentOptions } from "@/components/ui/PaymentOptions";
 import {
   Trash2, ShoppingBag, ArrowRight, Plus, Minus,
-  ShieldCheck, Zap, Package, ChevronLeft, ImageOff, X,
+  Lock, Package, ChevronLeft, ImageOff, X,
 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api/config";
 import { toast } from "sonner";
@@ -367,9 +367,8 @@ function CartContent() {
 
                 {/* Trust signals */}
                 <div className="mt-6 space-y-2 pt-5 border-t border-border/80">
-                  <TrustRow icon={ShieldCheck} color="text-foreground" label="Escrow Protection — payment held safely" />
-                  <TrustRow icon={Zap}         color="text-foreground" label="Verified seller payouts on delivery" />
-                  <TrustRow icon={Package}     color="text-foreground" label="Same-day delivery across Kigali" />
+                  <TrustRow icon={Lock} color="text-foreground" label="Escrow Protection — payment held safely" />
+                  <TrustRow icon={Package} color="text-foreground" label="Verified seller payouts on delivery" />
                 </div>
 
                 {/* Payment options */}

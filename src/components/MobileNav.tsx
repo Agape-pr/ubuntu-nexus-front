@@ -58,7 +58,7 @@ const MobileNav = () => {
   // serves signed-in sellers browsing outside their dashboard — /dashboard already
   // has its own complete mobile tab bar, so a second one here would duplicate it.
   if (!mounted || !isLoggedIn || !isSeller) return null;
-  if (pathname.startsWith("/dashboard")) return null;
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/product")) return null;
 
   const navItems = [
     { label: "Home",      icon: Home,           href: "/" },

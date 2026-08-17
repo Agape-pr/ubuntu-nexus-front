@@ -263,11 +263,11 @@ const Navbar = () => {
               </Link>
             )}
 
-            <div className="mt-2 pt-3 border-t border-border flex flex-col gap-2">
+            <div className="mt-2 pt-3 border-t border-border grid grid-cols-2 gap-2.5">
               {isLoggedIn ? (
                 <>
                   {userRole === "admin" && (
-                    <Button asChild variant="outline" className="w-full gap-1.5 border-violet-200 text-violet-500">
+                    <Button asChild variant="outline" className="col-span-2 gap-1.5 border-violet-200 text-violet-500">
                       <Link href="/admin" onClick={() => setIsOpen(false)}>
                         <Shield size={16} /> Admin Panel
                       </Link>
@@ -290,10 +290,10 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <Button asChild variant="outline" className="w-full">
+                  <Button asChild variant="outline" className="w-full h-11 text-xs sm:text-sm font-semibold rounded-xl">
                     <Link href="/auth" onClick={() => setIsOpen(false)}>Sign in</Link>
                   </Button>
-                  <Button asChild className="w-full font-semibold">
+                  <Button asChild className="w-full h-11 text-xs sm:text-sm font-semibold rounded-xl">
                     <Link href="/auth?tab=register" onClick={() => setIsOpen(false)}>Get started free</Link>
                   </Button>
                 </>

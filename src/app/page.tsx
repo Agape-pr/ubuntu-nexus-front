@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useAuthState } from "@/hooks/useAuthState";
 import heroImage from "@/assets/hero-kigali.jpg";
 import kigaliSellerImage from "@/assets/kigali-seller.jpg";
-import { ShieldCheck, Sparkles, Zap, Star, ArrowRight } from "lucide-react";
+import { Star, ArrowRight } from "lucide-react";
 
 // ─── HomeContent ──────────────────────────────────────────────────────────────
 
@@ -46,21 +46,13 @@ const HomeContent = () => {
 
             {/* Left: copy */}
             <div className="max-w-2xl">
-              <div
-                className="animate-fade-up inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary border border-border/80 text-xs font-medium text-muted-foreground mb-5"
-                style={{ opacity: 0 }}
-              >
-                <Sparkles size={13} className="text-primary" />
-                <span>Rwanda's Trusted Local Marketplace</span>
-              </div>
-
               <h1
                 className="animate-fade-up text-4xl sm:text-5xl lg:text-[3.75rem] font-bold tracking-tight text-foreground leading-[1.1] mb-5 text-balance"
                 style={{ animationDelay: "100ms", opacity: 0 }}
               >
                 Buy and sell with{" "}
                 <span className="relative inline-block text-primary">
-                  local confidence
+                  people you trust
                 </span>
               </h1>
 
@@ -68,20 +60,19 @@ const HomeContent = () => {
                 className="animate-fade-up text-base sm:text-lg text-muted-foreground leading-relaxed mb-8 max-w-xl"
                 style={{ animationDelay: "200ms", opacity: 0 }}
               >
-                Connect directly with Rwandan artisans, farmers, and local merchants.
-                Shop unique local products backed by our escrow protection and same-day Kigali delivery.
+                Start selling online in minutes. Discover unique products from your neighbors, and shop securely with our 2-hour escrow guarantee.
               </p>
 
               <div
-                className="animate-fade-up flex flex-col sm:flex-row gap-3 mb-8"
+                className="animate-fade-up grid grid-cols-2 sm:flex sm:flex-row gap-2.5 sm:gap-3 mb-8"
                 style={{ animationDelay: "300ms", opacity: 0 }}
               >
-                <Button asChild size="lg" className="w-full sm:w-auto font-semibold px-6 h-11 rounded-lg shadow-2xs">
+                <Button asChild size="lg" className="w-full sm:w-auto font-semibold px-3 sm:px-6 h-11 text-xs sm:text-sm rounded-lg shadow-2xs">
                   <Link href="/auth?tab=register&role=seller">
-                    Start Your Store <ArrowRight size={16} className="ml-2" />
+                    Start Your Store <ArrowRight size={14} className="ml-1 sm:ml-2 shrink-0 hidden xs:inline-block" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="w-full sm:w-auto h-11 px-6 rounded-lg border-border bg-card hover:bg-secondary">
+                <Button asChild size="lg" variant="outline" className="w-full sm:w-auto h-11 px-3 sm:px-6 text-xs sm:text-sm rounded-lg border-border bg-card hover:bg-secondary">
                   <a href="#how-it-works">How It Works</a>
                 </Button>
               </div>
@@ -92,48 +83,50 @@ const HomeContent = () => {
                 style={{ animationDelay: "400ms", opacity: 0 }}
               >
                 <div className="flex items-center gap-1.5 text-foreground">
-                  <ShieldCheck size={15} className="text-emerald-600" />
                   <span>Escrow payment protection</span>
                 </div>
                 <div className="hidden sm:block w-1 h-1 rounded-full bg-border" />
                 <div className="flex items-center gap-1.5">
-                  <Zap size={14} className="text-amber-500" />
                   <span>Same-day Kigali delivery</span>
                 </div>
               </div>
             </div>
 
-            {/* Right: image presentation */}
+            {/* Right: clean storefront hero preview */}
             <div
-              className="animate-fade-up relative h-[400px] lg:h-[480px] w-full hidden lg:block"
+              className="animate-fade-up relative w-full hidden lg:block"
               style={{ animationDelay: "150ms", opacity: 0 }}
             >
-              {/* Main image container */}
-              <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-lg border border-border bg-card">
-                <Image
-                  src={heroImage}
-                  alt="Local marketplace in Kigali"
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 40vw, 0px"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-                <div className="absolute bottom-6 left-6 text-foreground bg-card/90 backdrop-blur-md px-4 py-2.5 rounded-xl border border-border/80 shadow-2xs flex items-center gap-3">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-xs font-medium">Connecting local businesses across Kigali</span>
+              <div className="relative rounded-2xl border border-border/80 bg-card p-6 shadow-md overflow-hidden">
+                <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-primary text-sm">
+                      UN
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-sm text-foreground">Kigali Stores</h3>
+                      <p className="text-xs text-muted-foreground">Local verified sellers</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    Verified
+                  </span>
                 </div>
-              </div>
 
-              {/* Inset seller photo */}
-              <div className="absolute -bottom-4 -left-4 h-36 w-32 rounded-xl overflow-hidden shadow-md border-2 border-card z-20 bg-card">
-                <Image
-                  src={kigaliSellerImage}
-                  alt="A local vendor in Kigali"
-                  fill
-                  sizes="130px"
-                  className="object-cover"
-                />
+                <div className="space-y-3">
+                  <div className="p-3.5 rounded-xl bg-secondary/50 border border-border/60 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-foreground">Fast Local Delivery</p>
+                      <p className="text-[11px] text-muted-foreground">Orders dispatched directly across Kigali</p>
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-secondary/50 border border-border/60 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-foreground">Escrow Guarantee</p>
+                      <p className="text-[11px] text-muted-foreground">2-hour escrow security on all purchases</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

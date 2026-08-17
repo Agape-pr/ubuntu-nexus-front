@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Heart, Store, Truck, MapPin, Clock, Share2, Plus, Minus,
   CheckCircle, XCircle, Mail, PackageSearch, ChevronLeft, ChevronRight, Lock,
-  ShoppingCart, Banknote, Landmark, ImageOff, Zap, Package,
+  ShoppingCart, Banknote, Landmark, ImageOff, Package, CreditCard,
 } from "lucide-react";
 
 // SEED DATA FALLBACK
@@ -123,6 +123,7 @@ function ProductPageContent() {
   const favoriteId = product ? (isSeed ? idStr : String(product.id)) : "";
   const wishlisted = useWishlistStore((s) => s.isWishlisted(favoriteId));
   const toggleWishlist = useWishlistStore((s) => s.toggleWishlist);
+  const cartItems = useCartStore((s) => s.items);
 
   if (!mounted) return null;
 
@@ -174,7 +175,13 @@ function ProductPageContent() {
   const price = Number(product.price);
   const formattedPrice = new Intl.NumberFormat("en-RW").format(price);
   const stock = Number(product.stock_quantity);
-  const inStock = stock > 0;
+
+  const inCartQuantity = cartItems
+    .filter((item) => item.productId === actualId || item.id === actualId || item.id.startsWith(`${actualId}-`))
+    .reduce((sum, item) => sum + item.quantity, 0);
+
+  const availableStock = Math.max(0, stock - inCartQuantity);
+  const inStock = availableStock > 0;
   const description = product.description || "No description provided.";
   const catName = resolveCategoryName(product.category);
   const sellerHasStock: boolean | undefined = product.in_stock;
@@ -320,7 +327,7 @@ function ProductPageContent() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-6 md:pb-10 lg:pt-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-36 md:pb-32 lg:pt-10">
           <Button
             variant="ghost"
             onClick={() => router.back()}
@@ -394,16 +401,11 @@ function ProductPageContent() {
 
                 <button
                   type="button"
-                  aria-label={wishlisted ? `Remove ${name} from wishlist` : `Add ${name} to wishlist`}
-                  aria-pressed={wishlisted}
-                  onClick={handleToggleFavorite}
-                  className={`absolute top-3 right-16 lg:right-3 h-11 w-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all shadow-sm border ${
-                    wishlisted
-                      ? "bg-rose-500/15 border-rose-400/40 text-rose-500"
-                      : "bg-card/80 border-border/50 text-muted-foreground hover:text-rose-500"
-                  }`}
+                  aria-label="Share product"
+                  onClick={handleShare}
+                  className="absolute top-3 right-16 lg:right-3 h-11 w-11 rounded-full bg-card/80 backdrop-blur-md flex items-center justify-center transition-all shadow-sm border border-border/50 text-muted-foreground hover:text-foreground"
                 >
-                  <Heart size={20} fill={wishlisted ? "currentColor" : "none"} />
+                  <Share2 size={20} />
                 </button>
 
                 {!inStock && (
@@ -442,22 +444,22 @@ function ProductPageContent() {
                 {isLoggedIn ? (
                   <div className="flex items-end justify-between gap-3 flex-wrap">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-xs text-muted-foreground font-semibold">RWF</span>
                       <span className="font-display text-3xl font-black text-accent tracking-tight">
                         {formattedPrice}
                       </span>
+                      <span className="text-xs text-muted-foreground font-semibold">RWF</span>
                     </div>
                     <div className="text-right shrink-0">
                       {sellerHasStock === true && (
-                        <span className="inline-flex items-center gap-1 text-primary text-xs font-bold"><Zap size={12} className="fill-current" /> Quick delivery</span>
+                        <span className="inline-flex items-center gap-1 text-primary text-xs font-bold">Quick delivery</span>
                       )}
                       {sellerHasStock === false && (
                         <span className="inline-flex items-center gap-1 text-accent text-xs font-bold"><Package size={12} /> Same-day delivery</span>
                       )}
-                      {inStock && stock <= 5 ? (
-                        <p className="text-rose-500 font-semibold text-xs mt-0.5">Only {stock} left</p>
+                      {inStock && availableStock <= 5 ? (
+                        <p className="text-rose-500 font-semibold text-xs mt-0.5">Only {availableStock} left</p>
                       ) : (
-                        <p className="text-muted-foreground text-xs mt-0.5">{stock} in stock</p>
+                        <p className="text-muted-foreground text-xs mt-0.5">{availableStock} in stock</p>
                       )}
                     </div>
                   </div>
@@ -540,125 +542,128 @@ function ProductPageContent() {
                 </div>
               )}
 
-              {/* Purchase panel */}
-              <div className="bg-card rounded-xl p-4 sm:p-5 border border-border/80 mb-8 shadow-2xs">
-                {isLoggedIn && (
-                  <div className="flex items-center justify-between mb-4 pb-4 border-b border-border/60">
-                    <span className="text-xs font-semibold text-foreground">Quantity</span>
-                    <div className="flex items-center h-9 bg-secondary rounded-lg border border-border overflow-hidden">
-                      <button
-                        type="button"
-                        aria-label="Decrease quantity"
-                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                        disabled={!inStock}
-                        className="w-9 h-full flex items-center justify-center text-foreground hover:bg-muted transition-colors disabled:opacity-30"
-                      >
-                        <Minus size={14} />
-                      </button>
-                      <div className="w-9 h-full flex items-center justify-center font-bold text-xs tabular-nums">
-                        {inStock ? quantity : 0}
-                      </div>
-                      <button
-                        type="button"
-                        aria-label="Increase quantity"
-                        onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
-                        disabled={!inStock}
-                        className="w-9 h-full flex items-center justify-center text-foreground hover:bg-muted transition-colors disabled:opacity-30"
-                      >
-                        <Plus size={14} />
-                      </button>
+              {/* Quantity selector (when logged in & in stock) */}
+              {isLoggedIn && inStock && (
+                <div className="flex items-center justify-between p-3.5 mb-5 rounded-xl bg-card border border-border/80 shadow-2xs">
+                  <span className="text-xs font-semibold text-foreground">Quantity</span>
+                  <div className="flex items-center h-8 bg-secondary rounded-lg border border-border overflow-hidden">
+                    <button
+                      type="button"
+                      aria-label="Decrease quantity"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      className="w-8 h-full flex items-center justify-center text-foreground hover:bg-muted transition-colors disabled:opacity-30"
+                    >
+                      <Minus size={13} />
+                    </button>
+                    <div className="w-8 h-full flex items-center justify-center font-bold text-xs tabular-nums">
+                      {quantity}
                     </div>
+                    <button
+                      type="button"
+                      aria-label="Increase quantity"
+                      onClick={() => setQuantity((q) => Math.min(availableStock, q + 1))}
+                      className="w-8 h-full flex items-center justify-center text-foreground hover:bg-muted transition-colors disabled:opacity-30"
+                    >
+                      <Plus size={13} />
+                    </button>
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Action buttons */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <PaymentOptions />
+
+              {/* Bottom Fixed Action Bar */}
+              <div className="fixed bottom-0 inset-x-0 z-50 bg-background/95 backdrop-blur-md border-t border-border p-2 sm:p-3 shadow-xl">
+                <div className="max-w-4xl mx-auto grid grid-cols-4 gap-1.5 sm:gap-2">
+                  {/* 1. Store */}
                   {storeSlug ? (
                     <Link
                       href={`/shop/${storeSlug}`}
-                      className="flex items-center justify-center gap-1.5 h-11 rounded-lg border border-border bg-secondary text-xs font-semibold text-foreground hover:bg-muted transition-colors"
+                      className="flex items-center justify-center gap-1.5 h-12 px-2 rounded-xl border border-border bg-secondary text-foreground hover:bg-muted text-xs font-semibold transition-colors text-center shrink-0"
                     >
-                      <Store size={15} /> Store
+                      <Store size={16} className="shrink-0" />
+                      <span className="truncate hidden sm:inline">Store</span>
                     </Link>
                   ) : (
-                    <div className="flex items-center justify-center gap-1.5 h-11 rounded-lg border border-border/60 bg-secondary/50 text-xs font-semibold text-muted-foreground opacity-50 cursor-not-allowed">
-                      <Store size={15} /> Store
+                    <div className="flex items-center justify-center gap-1.5 h-12 px-2 rounded-xl border border-border/60 bg-secondary/50 text-xs font-semibold text-muted-foreground opacity-50 cursor-not-allowed text-center shrink-0">
+                      <Store size={16} className="shrink-0" />
+                      <span className="truncate hidden sm:inline">Store</span>
                     </div>
                   )}
 
+                  {/* 2. Wishlist */}
                   <button
                     type="button"
                     aria-pressed={wishlisted}
                     onClick={handleToggleFavorite}
-                    className={`flex items-center justify-center gap-1.5 h-11 rounded-lg border text-xs font-semibold transition-colors ${
+                    className={`flex items-center justify-center gap-1.5 h-12 px-2 rounded-xl border text-xs font-semibold transition-colors text-center shrink-0 ${
                       wishlisted
                         ? "border-rose-500/30 bg-rose-500/10 text-rose-600"
                         : "border-border bg-secondary text-foreground hover:bg-muted"
                     }`}
                   >
-                    <Heart size={15} fill={wishlisted ? "currentColor" : "none"} />
-                    Wishlist
+                    <Heart size={16} fill={wishlisted ? "currentColor" : "none"} className="shrink-0" />
+                    <span className="truncate hidden sm:inline">Wishlist</span>
                   </button>
 
+                  {/* 3. Add to Cart */}
                   {isLoggedIn ? (
                     <Button
                       type="button"
                       variant="outline"
                       onClick={handleAddToCart}
                       disabled={!inStock}
-                      className="h-11 rounded-lg text-xs font-semibold gap-1.5 border-primary/40 text-primary hover:bg-primary/10"
+                      className="h-12 py-1 px-1 sm:px-2 rounded-xl text-[10px] sm:text-xs font-bold flex flex-col items-center justify-center gap-0.5 border-primary/40 text-primary hover:bg-primary/10 text-center shrink-0"
                     >
-                      <ShoppingCart size={15} /> Add to Cart
+                      <ShoppingCart size={14} className="shrink-0" />
+                      <span className="truncate leading-none">Add to Cart</span>
                     </Button>
                   ) : (
                     <Button
                       asChild
                       variant="outline"
-                      className="h-11 rounded-lg text-xs font-semibold gap-1.5 border-primary/40 text-primary hover:bg-primary/10"
+                      className="h-12 py-1 px-1 sm:px-2 rounded-xl text-[10px] sm:text-xs font-bold flex flex-col items-center justify-center gap-0.5 border-primary/40 text-primary hover:bg-primary/10 text-center shrink-0"
                     >
                       <Link href="/auth?tab=register">
-                        <Lock size={15} /> Add to Cart
+                        <Lock size={14} className="shrink-0" />
+                        <span className="truncate leading-none">Add to Cart</span>
                       </Link>
                     </Button>
                   )}
 
+                  {/* 4. Buy Now with MTN, Airtel, Cards icons below text */}
                   {isLoggedIn ? (
                     <Button
                       type="button"
                       onClick={handleBuyNow}
                       disabled={!inStock}
-                      className="h-11 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
+                      className="h-12 py-1 px-1 sm:px-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 flex flex-col items-center justify-center text-center shrink-0"
                     >
-                      {inStock ? "Buy Now" : "Sold Out"}
+                      <span className="text-[11px] sm:text-xs font-bold leading-none">{inStock ? "Buy Now" : "Sold Out"}</span>
+                      {inStock && (
+                        <div className="flex items-center gap-0.5 shrink-0 mt-0.5">
+                          <span className="w-3.5 h-3.5 rounded-full bg-amber-400 text-black text-[6px] font-black flex items-center justify-center leading-none" title="MTN Mobile Money">M</span>
+                          <span className="w-3.5 h-3.5 rounded-full bg-rose-600 text-white text-[6px] font-black flex items-center justify-center leading-none" title="Airtel Money">A</span>
+                          <CreditCard size={11} className="text-primary-foreground opacity-90" />
+                        </div>
+                      )}
                     </Button>
                   ) : (
                     <Button
                       asChild
-                      className="h-11 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
+                      className="h-12 py-1 px-1 sm:px-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 flex flex-col items-center justify-center text-center shrink-0"
                     >
-                      <Link href="/auth?tab=register">Buy Now</Link>
+                      <Link href="/auth?tab=register" className="flex flex-col items-center justify-center gap-0.5 py-0.5">
+                        <span className="text-[11px] sm:text-xs font-bold leading-none">Buy Now</span>
+                        <div className="flex items-center gap-0.5 shrink-0 mt-0.5">
+                          <span className="w-3.5 h-3.5 rounded-full bg-amber-400 text-black text-[6px] font-black flex items-center justify-center leading-none" title="MTN Mobile Money">M</span>
+                          <span className="w-3.5 h-3.5 rounded-full bg-rose-600 text-white text-[6px] font-black flex items-center justify-center leading-none" title="Airtel Money">A</span>
+                          <CreditCard size={11} className="text-primary-foreground opacity-90" />
+                        </div>
+                      </Link>
                     </Button>
                   )}
                 </div>
-
-                <div className="mt-3.5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-                  <Truck size={13} /> Verified orders delivered same day in Kigali
-                </div>
-              </div>
-
-              <PaymentOptions />
-
-              {/* Share & Report */}
-              <div className="mt-8 pt-5 border-t border-border flex items-center justify-between text-sm">
-                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" onClick={handleShare}>
-                  <Share2 size={16} /> Share item
-                </Button>
-                <a
-                  href={`mailto:hello@ubuntunow.com?subject=${encodeURIComponent(`Reported item: ${name}`)}`}
-                  className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground px-3 py-2 rounded-md transition-colors"
-                >
-                  <Mail size={16} /> Report issue
-                </a>
               </div>
             </div>
           </div>
@@ -689,10 +694,10 @@ function ProductPageContent() {
               </div>
               <div
                 ref={relatedTrackRef}
-                className="flex overflow-x-auto no-scrollbar gap-3 sm:gap-4 pb-1 scroll-smooth"
+                className="flex overflow-x-auto touch-pan-x snap-x scroll-smooth no-scrollbar gap-3 sm:gap-4 pb-3 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0"
               >
                 {relatedProducts.map((p) => (
-                  <div key={p.id} data-scroll-card className="w-[160px] sm:w-[190px] shrink-0">
+                  <div key={p.id} data-scroll-card className="w-[160px] sm:w-[190px] shrink-0 snap-start">
                     <ProductCard
                       id={String(p.id)}
                       slug={p.slug || String(p.id)}

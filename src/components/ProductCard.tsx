@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, Star, Heart, Lock, ImageOff, Zap, Package } from "lucide-react";
+import { Plus, Star, Heart, Lock, ImageOff, Package } from "lucide-react";
 import { CloudImage } from "@/components/ui/CloudImage";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useWishlistStore } from "@/lib/store/wishlistStore";
@@ -38,6 +38,8 @@ interface ProductCardProps {
   layout?: "grid" | "rail";
   /** Hide the add-to-cart "+" button — e.g. New Arrivals is a taste, not the full buy flow. */
   showAddToCart?: boolean;
+  hideName?: boolean;
+  hideWishlist?: boolean;
 }
 
 const ProductCard = ({
@@ -58,6 +60,8 @@ const ProductCard = ({
   sellerHasStock,
   layout = "rail",
   showAddToCart = true,
+  hideName = false,
+  hideWishlist = false,
 }: ProductCardProps) => {
   const wishlisted = useWishlistStore((s) => s.isWishlisted(id));
   const toggleWishlist = useWishlistStore((s) => s.toggleWishlist);
@@ -142,69 +146,75 @@ const ProductCard = ({
             </div>
           )}
 
-          {/* Delivery badge — bottom-left */}
-          {inStock && sellerHasStock === true && (
-            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 text-[10px] font-medium bg-background/90 backdrop-blur-sm text-foreground px-2 py-0.5 rounded border border-border/80 shadow-2xs">
-              <Zap size={9} className="text-primary fill-primary" /> Express
-            </span>
-          )}
-          {inStock && sellerHasStock === false && (
-            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 text-[10px] font-medium bg-background/90 backdrop-blur-sm text-muted-foreground px-2 py-0.5 rounded border border-border/80 shadow-2xs">
-              <Package size={9} /> Same day
-            </span>
-          )}
-
           {/* Wishlist button */}
-          <button
-            type="button"
-            aria-label={wishlisted ? `Remove ${name} from wishlist` : `Add ${name} to wishlist`}
-            aria-pressed={wishlisted}
-            onClick={handleToggleFavorite}
-            className={`absolute top-2 right-2 h-7 w-7 rounded-full flex items-center justify-center backdrop-blur-sm border transition-all duration-200 ${
-              wishlisted
-                ? "bg-card/90 border-rose-200 text-rose-500 shadow-2xs"
-                : "bg-card/70 border-border/60 text-muted-foreground hover:text-foreground hover:bg-card/90"
-            }`}
-          >
-            <Heart
-              size={13}
-              className={wishlisted ? "text-rose-500 fill-rose-500" : ""}
-            />
-          </button>
+          {!hideWishlist && (
+            <button
+              type="button"
+              aria-label={wishlisted ? `Remove ${name} from wishlist` : `Add ${name} to wishlist`}
+              aria-pressed={wishlisted}
+              onClick={handleToggleFavorite}
+              className={`absolute top-2 right-2 h-7 w-7 rounded-full flex items-center justify-center backdrop-blur-sm border transition-all duration-200 ${
+                wishlisted
+                  ? "bg-card/90 border-rose-200 text-rose-500 shadow-2xs"
+                  : "bg-card/70 border-border/60 text-muted-foreground hover:text-foreground hover:bg-card/90"
+              }`}
+            >
+              <Heart
+                size={13}
+                className={wishlisted ? "text-rose-500 fill-rose-500" : ""}
+              />
+            </button>
+          )}
         </div>
       </Link>
 
       {/* ── Product Info ── */}
       <div className={`flex flex-col p-2.5 pt-1.5 gap-1.5 ${layout === "rail" ? "flex-1 justify-between" : ""}`}>
         <div>
-          <Link
-            href={productHref}
-            className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xs"
-          >
-            <h3 className="text-xs font-semibold text-foreground leading-snug line-clamp-2 hover:text-primary transition-colors">
-              {name}
-            </h3>
-          </Link>
-
-          {storeName && (
+          {!hideName && (
             <Link
-              href={`/shop/${storeSlug || makeStoreSlug(storeName)}`}
-              className="inline-block text-[11px] text-muted-foreground hover:text-foreground transition-colors truncate mt-0.5"
+              href={productHref}
+              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xs"
             >
-              {storeName}
+              <h3 className="text-xs font-semibold text-foreground leading-snug line-clamp-2 hover:text-primary transition-colors">
+                {name}
+              </h3>
             </Link>
           )}
+
+          <div className="flex items-center justify-between gap-1 flex-wrap mt-0.5">
+            {storeName && (
+              <Link
+                href={`/shop/${storeSlug || makeStoreSlug(storeName)}`}
+                className="text-[11px] text-muted-foreground hover:text-foreground transition-colors truncate"
+              >
+                {storeName}
+              </Link>
+            )}
+
+            {/* Delivery badge — below product image */}
+            {inStock && sellerHasStock === true && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-400">
+                Express
+              </span>
+            )}
+            {inStock && sellerHasStock === false && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+                <Package size={9} /> Same day
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Price & Cart CTA */}
-        <div className="flex items-center justify-between gap-1 pt-1 border-t border-border/40">
+        {/* Price & Cart CTA — separate divider line removed */}
+        <div className="flex items-center justify-between gap-1 pt-1">
           {isLoggedIn ? (
             <div className="flex flex-col min-w-0">
               <div className="flex items-baseline gap-1">
-                <span className="font-semibold text-xs text-foreground tracking-tight">
+                <span className="font-bold text-xs text-amber-400 tracking-tight">
                   {formattedPrice}
                 </span>
-                <span className="text-[10px] text-muted-foreground font-medium">{currency}</span>
+                <span className="text-[10px] text-amber-400/80 font-semibold">{currency}</span>
               </div>
               {hasDiscount && (
                 <span className="text-[10px] text-muted-foreground/60 line-through">

@@ -12,8 +12,8 @@ import {
   Store, Package, TrendingUp, Settings, Plus, Copy, ExternalLink,
   CheckCircle, Edit3, Trash2, ShoppingBag, AlertCircle, Loader2,
   Eye, LayoutDashboard, Wallet, LogOut, ChevronRight, ChevronDown, Search,
-  Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star, Truck, Bell, Zap, Link2,
-  ArrowLeft, User, MapPin, Mail, Phone, Lock, ImageOff, SlidersHorizontal, Filter, ShieldCheck,
+  Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star, Truck, Bell, Link2,
+  ArrowLeft, User, MapPin, Mail, Phone, Lock, ImageOff, SlidersHorizontal, Filter,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateProduct, useUpdateProduct, useSellerProducts, useDeleteProduct } from "@/lib/api/hooks/useProducts";
@@ -205,7 +205,7 @@ function OrderCard({ order, s, step, itemCount, updateStatus, isUpdatingOrder }:
           {/* Payment & Action Controls */}
           <div className="flex items-center justify-between pt-2 border-t border-border/40 gap-4 flex-wrap">
             <div className="flex items-center gap-2">
-              <ShieldCheck size={16} className="text-emerald-400" />
+              <Lock size={16} className="text-emerald-400" />
               <span className={`text-xs font-bold ${order.status === "completed" ? "text-emerald-400" : "text-gold-accent"}`}>
                 {order.status === "completed" ? "Payment Released to Seller" : "Escrow Protected Payment"}
               </span>
@@ -776,7 +776,7 @@ function SellerDashboardView() {
                     <h2 className="text-lg font-bold text-white flex items-center gap-2">
                       {editingProductId
                         ? <><Edit3 size={18} className="text-gold-accent"/> Edit Listing</>
-                        : <><Sparkles size={18} className="text-gold-accent"/> New Product Listing</>}
+                        : <><Plus size={18} className="text-gold-accent"/> New Product Listing</>}
                     </h2>
                     <button onClick={() => { setShowAddProduct(false); setEditingProductId(null); }} className="h-8 w-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
                       <X size={15} className="text-muted-foreground" />

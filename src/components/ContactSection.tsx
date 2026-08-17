@@ -35,31 +35,28 @@ export function ContactSection() {
     <section id="contact" className="scroll-mt-16 py-20 bg-background border-t border-border/60">
       <div className="container max-w-5xl mx-auto px-4">
         <Reveal className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary border border-border/80 text-muted-foreground text-xs font-medium mb-3">
-            <MessageCircle size={13} /> Contact Support
-          </div>
-          <h2 className="text-3xl font-bold text-foreground mb-2">Get in Touch</h2>
-          <p className="text-muted-foreground text-base max-w-xl mx-auto">
-            Have questions about buying, selling, or escrow protection? Reach out and our Kigali support team will respond promptly.
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Get in Touch</h2>
+          <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto">
+            Have questions about buying, selling, or escrow protection? Reach out and our support team will respond promptly.
           </p>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-          <Reveal className="md:col-span-2 space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-foreground mb-4">Contact Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
+          <Reveal className="md:col-span-2 space-y-4">
+            <div className="bg-card border border-border/80 rounded-2xl p-5 md:p-6 shadow-2xs space-y-5">
+              <h3 className="text-base font-bold text-foreground border-b border-border/60 pb-3">Contact Information</h3>
               {CONTACT_INFO.map((item) => (
-                <div key={item.label} className="flex items-start gap-3.5 mb-5">
-                  <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0 text-foreground">
-                    <item.icon size={16} />
+                <div key={item.label} className="flex items-center gap-3.5">
+                  <div className="h-10 w-10 rounded-xl bg-secondary border border-border/60 flex items-center justify-center shrink-0 text-primary">
+                    <item.icon size={18} />
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">{item.label}</p>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{item.label}</p>
                     <a
                       href={item.href}
                       target={item.href.startsWith("http") ? "_blank" : undefined}
                       rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                      className="text-foreground text-sm font-medium hover:text-primary transition-colors"
+                      className="text-foreground text-sm font-semibold hover:text-primary transition-colors truncate block"
                     >
                       {item.value}
                     </a>
@@ -68,16 +65,16 @@ export function ContactSection() {
               ))}
             </div>
 
-            <div className="bg-card rounded-xl p-5 border border-border/80 shadow-2xs">
-              <p className="text-xs font-semibold text-foreground mb-1">Support Hours</p>
+            <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-2xs space-y-1">
+              <p className="text-xs font-bold text-foreground">Support Hours</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Monday – Saturday, 8:00 AM – 6:00 PM CAT. Inquiries are handled within 24 hours.
               </p>
             </div>
           </Reveal>
 
-          <Reveal delay={100} className="md:col-span-3 bg-card border border-border/80 rounded-xl p-6 sm:p-8 shadow-2xs">
-            <h3 className="font-bold text-lg text-foreground mb-5">Send Message</h3>
+          <Reveal delay={100} className="md:col-span-3 bg-card border border-border/80 rounded-2xl p-5 md:p-8 shadow-2xs">
+            <h3 className="font-bold text-base md:text-lg text-foreground mb-4">Send Message</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold text-foreground">Your Name</Label>
@@ -85,7 +82,7 @@ export function ContactSection() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="Jean Paul"
-                  className="rounded-lg h-10 border-border bg-background text-sm"
+                  className="rounded-xl h-10 border-border/80 bg-secondary/30 text-sm"
                 />
               </div>
               <div className="space-y-1.5">
@@ -95,7 +92,7 @@ export function ContactSection() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="jeanpaul@example.com"
-                  className="rounded-lg h-10 border-border bg-background text-sm"
+                  className="rounded-xl h-10 border-border/80 bg-secondary/30 text-sm"
                 />
               </div>
               <div className="space-y-1.5">
@@ -105,12 +102,12 @@ export function ContactSection() {
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   placeholder="How can we help you?"
                   rows={4}
-                  className="rounded-lg border-border bg-background text-sm resize-none"
+                  className="rounded-xl border-border/80 bg-secondary/30 text-sm resize-none"
                 />
               </div>
               <Button
                 type="submit"
-                className="w-full h-11 rounded-lg font-semibold gap-2"
+                className="w-full h-11 rounded-xl font-semibold gap-2 shadow-2xs"
               >
                 <Send size={15} />
                 Send Message

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import ProductCard from "@/components/ProductCard";
 import { useProducts } from "@/lib/api/hooks/useProducts";
@@ -28,9 +28,6 @@ export function ProductCarousel() {
       <div className="container">
         <Reveal className="flex items-end justify-between gap-4 mb-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold mb-3">
-              <Sparkles size={13} /> Fresh on UbuntuNow
-            </div>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">Products from local sellers</h2>
           </div>
           <div className="hidden sm:flex items-center gap-2 shrink-0">

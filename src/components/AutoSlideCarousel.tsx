@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface AutoSlideCarouselProps<T> {
   items: T[];
@@ -13,8 +13,8 @@ interface AutoSlideCarouselProps<T> {
 }
 
 /**
- * Small auto-advancing, swipeable card strip with dot indicators. Pauses while
- * the user is actively touching/dragging, resumes shortly after they let go.
+ * Small auto-advancing, swipeable card strip with panel dot indicators.
+ * Pauses while the user is actively touching/dragging, resumes shortly after.
  */
 export function AutoSlideCarousel<T>({
   items,
@@ -24,9 +24,33 @@ export function AutoSlideCarousel<T>({
   itemWidthClass = "w-[108px] sm:w-[128px]",
 }: AutoSlideCarouselProps<T>) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [index, setIndex] = useState(0);
+  const [panelIndex, setPanelIndex] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(1);
   const pausedRef = useRef(false);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const updateItemsPerPage = useCallback(() => {
+    const node = trackRef.current;
+    if (!node) return;
+    const firstCard = node.children[0] as HTMLElement | undefined;
+    if (!firstCard) return;
+    const cardWidth = firstCard.offsetWidth;
+    const gap = 12; // gap-3 = 12px
+    const containerWidth = node.clientWidth;
+    const count = Math.max(1, Math.floor((containerWidth + gap) / (cardWidth + gap)));
+    setItemsPerPage(count);
+  }, []);
+
+  useEffect(() => {
+    updateItemsPerPage();
+    const node = trackRef.current;
+    if (!node) return;
+    const ro = new ResizeObserver(() => updateItemsPerPage());
+    ro.observe(node);
+    return () => ro.disconnect();
+  }, [updateItemsPerPage, items.length]);
+
+  const numPanels = Math.max(1, Math.ceil(items.length / itemsPerPage));
 
   const scrollToIndex = (i: number) => {
     const node = trackRef.current;
@@ -36,26 +60,29 @@ export function AutoSlideCarousel<T>({
   };
 
   useEffect(() => {
-    if (items.length <= 1) return;
+    if (numPanels <= 1) return;
     const timer = setInterval(() => {
       if (pausedRef.current) return;
-      setIndex((i) => {
-        const next = (i + 1) % items.length;
-        scrollToIndex(next);
-        return next;
+      setPanelIndex((p) => {
+        const nextPanel = (p + 1) % numPanels;
+        const targetIndex = Math.min(nextPanel * itemsPerPage, items.length - 1);
+        scrollToIndex(targetIndex);
+        return nextPanel;
       });
     }, intervalMs);
     return () => clearInterval(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items.length, intervalMs]);
+  }, [numPanels, itemsPerPage, items.length, intervalMs]);
 
   const pause = () => {
     pausedRef.current = true;
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
   };
+
   const scheduleResume = () => {
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-    resumeTimerRef.current = setTimeout(() => { pausedRef.current = false; }, 3000);
+    resumeTimerRef.current = setTimeout(() => {
+      pausedRef.current = false;
+    }, 3000);
   };
 
   const handleScroll = () => {
@@ -63,8 +90,12 @@ export function AutoSlideCarousel<T>({
     const card = node?.children[0] as HTMLElement | undefined;
     if (!node || !card) return;
     const step = card.offsetWidth + 12;
-    const i = Math.round(node.scrollLeft / step);
-    setIndex(Math.min(Math.max(i, 0), items.length - 1));
+    const currentCardIndex = Math.round(node.scrollLeft / step);
+    const currentPanel = Math.min(
+      Math.max(Math.floor(currentCardIndex / itemsPerPage), 0),
+      numPanels - 1
+    );
+    setPanelIndex(currentPanel);
   };
 
   return (
@@ -85,17 +116,23 @@ export function AutoSlideCarousel<T>({
         ))}
       </div>
 
-      {items.length > 1 && (
+      {numPanels > 1 && (
         <div className="flex items-center justify-center gap-1.5 mt-3">
-          {items.map((item, i) => (
+          {Array.from({ length: numPanels }).map((_, p) => (
             <button
-              key={itemKey(item)}
+              key={p}
               type="button"
-              aria-label={`Go to slide ${i + 1}`}
-              aria-current={i === index}
-              onClick={() => { pause(); setIndex(i); scrollToIndex(i); scheduleResume(); }}
+              aria-label={`Go to panel ${p + 1}`}
+              aria-current={p === panelIndex}
+              onClick={() => {
+                pause();
+                setPanelIndex(p);
+                const targetIndex = Math.min(p * itemsPerPage, items.length - 1);
+                scrollToIndex(targetIndex);
+                scheduleResume();
+              }}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === index ? "w-5 bg-primary" : "w-1.5 bg-border"
+                p === panelIndex ? "w-5 bg-primary" : "w-1.5 bg-border"
               }`}
             />
           ))}

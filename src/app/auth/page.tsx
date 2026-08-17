@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, Timer, ShieldCheck, Truck, MapPin } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, Timer, Lock, Truck, MapPin } from "lucide-react";
 import { useLogin, useRegister, useVerifyOTP, useResendOTP } from "@/lib/api/hooks/useAuth";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
@@ -251,7 +251,7 @@ const AuthContent = () => {
           </p>
           <div className="mt-8 flex flex-wrap gap-2.5">
             {[
-              { icon: ShieldCheck, label: "Escrow-Protected" },
+              { icon: Lock, label: "Escrow-Protected" },
               { icon: Truck, label: "Kigali Delivery" },
               { icon: MapPin, label: "Verified Merchants" },
             ].map(({ icon: Icon, label }) => (

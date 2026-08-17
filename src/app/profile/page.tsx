@@ -98,10 +98,9 @@ function ProfileContent() {
 
   return (
     <BuyerDashboardShell>
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
         {/* Header */}
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 mb-1">Your account</p>
           <h1 className="font-display text-2xl text-white">Profile</h1>
         </div>
 
@@ -121,98 +120,56 @@ function ProfileContent() {
           </div>
         </div>
 
-        {/* Quick actions */}
+        {/* Quick action: Personal Info & Delivery Address */}
+        <Link href="/profile/personal-info" className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:bg-white/5 transition-colors group">
+          <div className="h-9 w-9 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+            <User size={17} className="text-gold-accent" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-white group-hover:text-gold-bright transition-colors">Personal Info</p>
+            <p className="text-xs text-white/40 truncate">Name, phone number & delivery address</p>
+          </div>
+          <CheckCircle size={15} className="text-white/20 group-hover:text-gold-accent transition-colors" />
+        </Link>
+
+        {/* Quick action: My Orders / My Store */}
         <Link href={userProfile?.role === "seller" ? "/dashboard" : "/my-orders"}
-          className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
-          <div className="h-9 w-9 rounded-xl bg-white/5 flex items-center justify-center">
+          className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:bg-white/5 transition-colors group">
+          <div className="h-9 w-9 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
             <ShoppingBag size={17} className="text-gold-accent" />
           </div>
-          <div className="flex-1">
-            <p className="text-sm font-bold text-white">{userProfile?.role === "seller" ? "My Store" : "My Orders"}</p>
-            <p className="text-xs text-white/40">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-white group-hover:text-gold-bright transition-colors">{userProfile?.role === "seller" ? "My Store" : "My Orders"}</p>
+            <p className="text-xs text-white/40 truncate">
               {userProfile?.role === "seller" ? "Manage your products and orders" : "Track and manage your purchases"}
             </p>
           </div>
-          <CheckCircle size={15} className="text-white/20" />
+          <CheckCircle size={15} className="text-white/20 group-hover:text-gold-accent transition-colors" />
         </Link>
 
         {/* Wishlist */}
-        <Link href="/wishlist" className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
-          <div className="h-9 w-9 rounded-xl bg-white/5 flex items-center justify-center">
+        <Link href="/wishlist" className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:bg-white/5 transition-colors group">
+          <div className="h-9 w-9 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
             <Heart size={17} className="text-gold-accent" />
           </div>
-          <div className="flex-1">
-            <p className="text-sm font-bold text-white">Wishlist</p>
-            <p className="text-xs text-white/40">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-white group-hover:text-gold-bright transition-colors">Wishlist</p>
+            <p className="text-xs text-white/40 truncate">
               {wishlist.length > 0 ? `${wishlist.length} saved product${wishlist.length !== 1 ? "s" : ""}` : "Products in your wishlist"}
             </p>
           </div>
-          <CheckCircle size={15} className="text-white/20" />
+          <CheckCircle size={15} className="text-white/20 group-hover:text-gold-accent transition-colors" />
         </Link>
 
-        {/* Personal Info card */}
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <User size={15} className="text-gold-accent" />
-              <span className="text-sm font-bold text-white">Personal Info</span>
-            </div>
-            {editMode ? (
-              <div className="flex gap-2">
-                <button onClick={() => setEditMode(false)} className="text-xs text-white/40 hover:text-white flex items-center gap-1">
-                  <X size={12} /> Cancel
-                </button>
-                <button onClick={handleSave} disabled={updateProfileMutation.isPending} className="text-xs text-gold-bright hover:text-gold-accent flex items-center gap-1 font-bold">
-                  <Save size={12} /> {updateProfileMutation.isPending ? "Saving..." : "Save"}
-                </button>
-              </div>
-            ) : (
-              <button onClick={() => setEditMode(true)} className="text-xs text-gold-bright hover:text-gold-accent flex items-center gap-1">
-                <Edit3 size={12} /> Edit
-              </button>
-            )}
-          </div>
-
-          {field("First Name", form.first_name, "first_name", "e.g. Amina")}
-          {field("Last Name", form.last_name, "last_name", "e.g. Uwase")}
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-white/30">Email</label>
-            <div className="flex items-center gap-2">
-              <Mail size={13} className="text-white/30" />
-              <p className="text-sm text-white/70">{email}</p>
-            </div>
-          </div>
-
-          {field("Phone Number", form.phone, "phone", "+250 7XX XXX XXX")}
-        </div>
-
-        {/* Delivery Address card */}
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-5">
-          <div className="flex items-center gap-2">
-            <MapPin size={15} className="text-gold-accent" />
-            <span className="text-sm font-bold text-white">Delivery Address</span>
-          </div>
-
-          {field("Street / Address line 1", form.address_line1, "address_line1", "e.g. KG 123 St")}
-          {field("Apartment / Suite (optional)", form.address_line2, "address_line2", "e.g. Floor 2, Apt 3")}
-          {field("City", form.city, "city", "e.g. Kigali")}
-          {field("Country", form.country, "country", "Rwanda")}
-
-          {!editMode && !form.address_line1 && (
-            <button onClick={() => setEditMode(true)} className="text-sm text-gold-bright hover:text-gold-accent flex items-center gap-1.5">
-              <MapPin size={13} /> Add your delivery address
-            </button>
-          )}
-        </div>
-
         {/* Logout */}
-        <button
-          onClick={() => logoutMutation.mutate()}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-rose-500/30 text-rose-400 text-sm font-bold hover:bg-rose-500/10 transition-colors"
-        >
-          <LogOut size={15} /> Sign out
-        </button>
+        <div className="pt-2">
+          <button
+            onClick={() => logoutMutation.mutate()}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-rose-500/30 text-rose-400 text-sm font-bold hover:bg-rose-500/10 transition-colors"
+          >
+            <LogOut size={15} /> Sign out
+          </button>
+        </div>
       </div>
     </BuyerDashboardShell>
   );

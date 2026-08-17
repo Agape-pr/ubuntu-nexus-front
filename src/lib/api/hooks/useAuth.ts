@@ -167,7 +167,7 @@ export const useLogout = () => {
     onSuccess: () => {
       queryClient.clear();
       toast.success('Logged out successfully');
-      router.push('/');
+      router.push('/auth');
     },
     onError: () => {
       // Even if API call fails, clear local state

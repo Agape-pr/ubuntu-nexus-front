@@ -5,11 +5,10 @@ import {
   ArrowRight,
   ExternalLink,
   CheckCircle2,
-  Sparkles,
-  ShieldCheck,
-  Zap,
-  Store,
+  CheckCircle,
   Lock,
+  Package,
+  Store,
   Mail,
   Globe,
   ShoppingBag,
@@ -29,13 +28,13 @@ const FEATURES = [
     accent: "#B87800",
   },
   {
-    icon: ShieldCheck,
+    icon: Lock,
     title: "Escrow Protection",
     desc: "Every payment held safe until you confirm delivery. Zero risk.",
     accent: "#16A34A",
   },
   {
-    icon: Zap,
+    icon: Package,
     title: "2-Hour Delivery",
     desc: "Local sellers, lightning-fast fulfillment across Kigali.",
     accent: "#F0B800",
@@ -466,7 +465,7 @@ export default function ComingSoonPage() {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-                    <ShieldCheck size={18} />
+                    <Lock size={18} />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-[#FBF8F2]">
@@ -486,7 +485,7 @@ export default function ComingSoonPage() {
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-full bg-[#B87800]/10 flex items-center justify-center">
-                    <Sparkles size={14} className="text-[#F0B800]" />
+                    <Lock size={14} className="text-[#F0B800]" />
                   </div>
                   <div>
                     <p className="text-[11px] font-bold text-[#FBF8F2]">
@@ -590,7 +589,7 @@ export default function ComingSoonPage() {
 
             <div className="relative z-10 max-w-lg">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#B87800]/10 border border-[#B87800]/20 text-xs font-bold text-[#B87800] mb-5">
-                <Sparkles size={12} />
+                <CheckCircle size={12} />
                 Help shape the platform
               </div>
 
@@ -612,7 +611,7 @@ export default function ComingSoonPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-white/5 border border-white/10 text-[#FBF8F2] hover:bg-white/10 transition-all duration-200 font-bold text-sm group"
               >
-                <Sparkles
+                <CheckCircle
                   size={15}
                   className="text-[#B87800] group-hover:rotate-12 transition-transform"
                 />

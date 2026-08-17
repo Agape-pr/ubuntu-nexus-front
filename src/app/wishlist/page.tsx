@@ -22,7 +22,6 @@ function WishlistContent() {
         </Link>
 
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 mb-1">Your account</p>
           <h1 className="font-display text-2xl text-white">
             Wishlist {items.length > 0 && <span className="text-white/40 font-medium">({items.length})</span>}
           </h1>

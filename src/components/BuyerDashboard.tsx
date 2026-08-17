@@ -23,7 +23,7 @@ import { useCartStore } from "@/lib/store/cartStore";
 import { resolveCategoryName } from "@/lib/categories";
 import {
   Store, ShoppingBag, ShoppingCart, User, ChevronRight,
-  Search, SlidersHorizontal, X, Sparkles, ShieldCheck,
+  Search, SlidersHorizontal, X, Sparkles, Lock,
   AlertTriangle, RotateCcw, PackageSearch, ArrowRight, Clock, CheckCircle, Truck, Package,
 } from "lucide-react";
 
@@ -62,8 +62,8 @@ const PROMO_SLIDES: PromoSlide[] = [
   {
     key: "new-arrivals",
     href: "#new-arrivals",
-    icon: Sparkles,
-    title: "Fresh drops every week",
+    icon: Package,
+    title: "New drops every week",
     subtitle: "New arrivals from local sellers",
     cta: "Browse",
     className: "bg-gradient-to-r from-primary/15 to-accent/5 border-primary/20",
@@ -81,7 +81,7 @@ const PROMO_SLIDES: PromoSlide[] = [
   },
   {
     key: "escrow",
-    icon: ShieldCheck,
+    icon: Lock,
     title: "Escrow-protected payments",
     subtitle: "Your money is held safe until delivery",
     className: "bg-gradient-to-r from-sky-500/15 to-sky-500/5 border-sky-500/20",
@@ -204,7 +204,7 @@ export function BuyerDashboard() {
     return [...allProducts]
       .filter((p) => Number(p.stock_quantity) > 0)
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 10);
+      .slice(0, 8);
   }, [allProducts]);
 
   const priceRange = PRICE_BUCKETS.find((b) => b.label === priceBucket);
@@ -267,7 +267,6 @@ export function BuyerDashboard() {
           <div className="max-w-5xl mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-5">
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-0.5">{getGreeting()}, {firstName}</p>
                 <h1 className="text-2xl font-bold text-foreground tracking-tight">
                   Account Overview
                 </h1>
@@ -470,6 +469,8 @@ export function BuyerDashboard() {
                       stockQuantity={product.stock_quantity}
                       sellerHasStock={(product as { in_stock?: boolean }).in_stock}
                       showAddToCart={false}
+                      hideName={true}
+                      hideWishlist={true}
                     />
                   )}
                 />

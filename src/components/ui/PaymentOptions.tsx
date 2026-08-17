@@ -1,11 +1,11 @@
-import { ShieldCheck, CreditCard, RotateCcw } from "lucide-react";
+import { Lock, CreditCard, RotateCcw } from "lucide-react";
 
 export function PaymentOptions() {
   return (
     <div className="space-y-4">
       <div className="bg-secondary/40 border border-border/80 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3 text-xs font-semibold text-foreground">
-          <ShieldCheck size={15} className="text-emerald-600" />
+          <Lock size={15} className="text-primary" />
           <span>Accepted Payment Methods</span>
         </div>
         
@@ -36,7 +36,7 @@ export function PaymentOptions() {
 
       <div className="grid grid-cols-2 gap-2.5">
         <div className="flex items-start gap-2 p-3 rounded-lg bg-card border border-border/80 shadow-2xs">
-          <ShieldCheck size={16} className="text-foreground shrink-0 mt-0.5" />
+          <Lock size={16} className="text-foreground shrink-0 mt-0.5" />
           <div>
             <h4 className="text-xs font-semibold text-foreground">Escrow Protected</h4>
             <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">Funds held safely until order confirmation</p>
