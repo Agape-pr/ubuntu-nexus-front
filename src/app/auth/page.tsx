@@ -12,7 +12,7 @@ import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, Timer, Lock, Truck, M
 import { useLogin, useRegister, useVerifyOTP, useResendOTP } from "@/lib/api/hooks/useAuth";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
-import marketImage from "@/assets/kigali-market.jpg";
+import conventionImage from "@/assets/kigali-convention.jpeg";
 
 // ── OTP_EXPIRY and RESEND_COOLDOWN match auth-service/apps/authentication/services/otp_service.py
 const OTP_EXPIRY_SECONDS = 5 * 60; // 5 minutes
@@ -229,12 +229,12 @@ const AuthContent = () => {
       {/* Left panel — brand */}
       <div className="hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden">
         <Image
-          src={marketImage}
-          alt="A local market in Kigali"
+          src={conventionImage}
+          alt="Kigali landmark"
           fill
           priority
           sizes="(min-width: 1024px) 50vw, 0px"
-          className="object-cover"
+          className="object-cover opacity-40 mix-blend-luminosity"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/75 to-background/95" />
         <div className="absolute top-0 right-0 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
