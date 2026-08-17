@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export function AboutSection() {
   return (
-    <section id="about" className="scroll-mt-16 py-20 bg-background border-t border-border/60">
+    <section id="about" className="scroll-mt-16 min-h-screen flex flex-col justify-center py-20 bg-background border-t border-border/60">
       <div className="container max-w-5xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           {/* Main Story */}

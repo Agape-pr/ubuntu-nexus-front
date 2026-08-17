@@ -28,7 +28,7 @@ const steps = [
 
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="scroll-mt-16 py-16 md:py-20 bg-secondary/30 border-t border-border/60">
+    <section id="how-it-works" className="scroll-mt-16 min-h-screen flex flex-col justify-center py-16 md:py-20 bg-secondary/30 border-t border-border/60">
       <div className="container max-w-5xl mx-auto px-4">
         <Reveal className="text-center max-w-xl mx-auto mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground">How buying on UbuntuNow works</h2>

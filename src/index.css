@@ -211,4 +211,32 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
+
+  /* Smooth floating motion for hero cards */
+  @keyframes hero-float-slow {
+    0%, 100% { transform: translateY(0px) rotate(-3deg); }
+    50% { transform: translateY(-7px) rotate(-3deg); }
+  }
+
+  @keyframes hero-float-up {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes hero-float-down {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(7px); }
+  }
+
+  .animate-float-up {
+    animation: hero-float-up 4s ease-in-out infinite;
+  }
+
+  .animate-float-down {
+    animation: hero-float-down 5s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: hero-float-slow 6s ease-in-out infinite;
+  }
 }

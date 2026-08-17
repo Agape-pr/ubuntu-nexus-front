@@ -24,7 +24,7 @@ export function ProductCarousel() {
   if (isLoading || isError || products.length < 4) return null;
 
   return (
-    <section className="py-16 bg-secondary/40 border-t border-border/60">
+    <section className="min-h-screen flex flex-col justify-center py-16 bg-secondary/40 border-t border-border/60">
       <div className="container">
         <Reveal className="flex items-end justify-between gap-4 mb-6">
           <div>
