@@ -13,7 +13,7 @@ import {
   CheckCircle, Edit3, Trash2, ShoppingBag, AlertCircle, Loader2,
   Eye, LayoutDashboard, Wallet, LogOut, ChevronRight, ChevronDown, Search,
   Tag, X, ImagePlus, ArrowRight, Sparkles, BarChart2, Star, Truck, Bell, Link2,
-  ArrowLeft, User, MapPin, Mail, Phone, Lock, ImageOff, SlidersHorizontal, Filter,
+  ArrowLeft, User, MapPin, Mail, Phone, Lock, ImageOff, SlidersHorizontal, Filter, Zap,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateProduct, useUpdateProduct, useSellerProducts, useDeleteProduct } from "@/lib/api/hooks/useProducts";
