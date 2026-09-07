@@ -7,13 +7,13 @@ import { useCartStore } from "@/lib/store/cartStore";
 import { PaymentOptions } from "@/components/ui/PaymentOptions";
 import {
   Trash2, ShoppingBag, ArrowRight, Plus, Minus,
-  Lock, Package, ChevronLeft, ImageOff, X,
+  Lock, Package, ChevronLeft, ImageOff, X, MapPin, Edit3,
 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api/config";
 import { toast } from "sonner";
 import { Suspense, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useCurrentUser } from "@/lib/api/hooks/useUsers";
+import { useCurrentUser, useUpdateProfile } from "@/lib/api/hooks/useUsers";
 
 function CartContent() {
   const { items, removeItem, getTotalPrice, updateQuantity, clearCart } = useCartStore();
@@ -22,9 +22,46 @@ function CartContent() {
   const [paymentIframeUrl, setPaymentIframeUrl] = useState<string | null>(null);
   const router = useRouter();
   const { data: userProfile } = useCurrentUser();
+  const updateProfileMutation = useUpdateProfile();
+
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [addressForm, setAddressForm] = useState({
+    address_line1: "",
+    landmark: "",
+    city: "Kigali",
+    country: "Rwanda",
+  });
+
+  // Pre-fill from the saved profile; open the form automatically if no address is on file yet.
+  useEffect(() => {
+    if (userProfile) {
+      setAddressForm({
+        address_line1: userProfile.address_line1 || "",
+        landmark: userProfile.landmark || "",
+        city: userProfile.city || "Kigali",
+        country: userProfile.country || "Rwanda",
+      });
+      if (!userProfile.address_line1) setIsEditingAddress(true);
+    }
+  }, [userProfile]);
+
+  const handleSaveAddress = () => {
+    if (!addressForm.address_line1.trim()) {
+      toast.error("Please enter your street address.");
+      return;
+    }
+    updateProfileMutation.mutate(addressForm, {
+      onSuccess: () => setIsEditingAddress(false),
+    });
+  };
 
   const handleCheckout = async () => {
     if (items.length === 0) return;
+    if (!userProfile?.address_line1) {
+      toast.error("Please add your delivery address to continue.");
+      setIsEditingAddress(true);
+      return;
+    }
     setIsProcessing(true);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("access_token")?.replace(/[\s\n\r\t\u200B"']/g, '') : null;
@@ -33,17 +70,11 @@ function CartContent() {
         router.push("/auth");
         return;
       }
-      if (!userProfile?.address_line1) {
-        toast.error("Please add a delivery address to checkout.", {
-          action: { label: "Add Address", onClick: () => router.push("/profile") },
-        });
-        router.push("/profile");
-        return;
-      }
       const orderPayload = {
         delivery_address: {
           address_line1: userProfile.address_line1,
           address_line2: userProfile.address_line2,
+          landmark: userProfile.landmark,
           city: userProfile.city,
           country: userProfile.country,
         },
@@ -332,6 +363,81 @@ function CartContent() {
 
                 {/* Spacer on desktop so CTA stays at bottom */}
                 <div className="flex-1 hidden lg:block" />
+
+                {/* Delivery Address */}
+                <div className="mb-6 pb-6 border-b border-border/80">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-1.5">
+                      <MapPin size={14} className="text-muted-foreground" />
+                      <span className="text-sm font-bold text-foreground">Delivery Address</span>
+                    </div>
+                    {!isEditingAddress && userProfile?.address_line1 && (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingAddress(true)}
+                        className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                      >
+                        <Edit3 size={12} /> Edit
+                      </button>
+                    )}
+                  </div>
+
+                  {isEditingAddress ? (
+                    <div className="space-y-2.5">
+                      <input
+                        className="w-full h-10 px-3 rounded-lg border border-border bg-secondary text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        placeholder="Street address / house no. *"
+                        value={addressForm.address_line1}
+                        onChange={(e) => setAddressForm({ ...addressForm, address_line1: e.target.value })}
+                      />
+                      <input
+                        className="w-full h-10 px-3 rounded-lg border border-border bg-secondary text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        placeholder="Popular name / landmark (e.g. near Kigali Heights)"
+                        value={addressForm.landmark}
+                        onChange={(e) => setAddressForm({ ...addressForm, landmark: e.target.value })}
+                      />
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <input
+                          className="h-10 px-3 rounded-lg border border-border bg-secondary text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          placeholder="City"
+                          value={addressForm.city}
+                          onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                        />
+                        <input
+                          className="h-10 px-3 rounded-lg border border-border bg-secondary text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          placeholder="Country"
+                          value={addressForm.country}
+                          onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleSaveAddress}
+                          disabled={updateProfileMutation.isPending}
+                          className="flex-1 h-9 rounded-lg bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 disabled:opacity-50"
+                        >
+                          {updateProfileMutation.isPending ? "Saving..." : "Save Address"}
+                        </button>
+                        {userProfile?.address_line1 && (
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingAddress(false)}
+                            className="h-9 px-4 rounded-lg border border-border text-xs font-semibold text-muted-foreground hover:text-foreground"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-muted-foreground leading-relaxed">
+                      <p className="text-foreground font-medium">{userProfile?.address_line1}</p>
+                      {userProfile?.landmark && <p>Near {userProfile.landmark}</p>}
+                      <p>{userProfile?.city}, {userProfile?.country}</p>
+                    </div>
+                  )}
+                </div>
 
                 {/* CTA */}
                 <div className="space-y-2.5">

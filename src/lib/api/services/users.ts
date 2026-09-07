@@ -19,6 +19,7 @@ export interface UserProfile {
     last_name?: string | null;
     address_line1?: string | null;
     address_line2?: string | null;
+    landmark?: string | null;
     city?: string | null;
     country?: string | null;
 }

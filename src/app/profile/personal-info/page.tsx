@@ -17,6 +17,7 @@ function PersonalInfoContent() {
     phone: "",
     address_line1: "",
     address_line2: "",
+    landmark: "",
     city: "",
     country: "Rwanda",
   });
@@ -29,6 +30,7 @@ function PersonalInfoContent() {
         phone:         (userProfile as any).phone_number || "",
         address_line1: (userProfile as any).address_line1 || "",
         address_line2: (userProfile as any).address_line2 || "",
+        landmark:      (userProfile as any).landmark || "",
         city:          (userProfile as any).city  || "Kigali",
         country:       (userProfile as any).country || "Rwanda",
       });
@@ -44,6 +46,7 @@ function PersonalInfoContent() {
       phone_number: form.phone,
       address_line1: form.address_line1,
       address_line2: form.address_line2,
+      landmark: form.landmark,
       city: form.city,
       country: form.country,
     }, {
@@ -158,6 +161,7 @@ function PersonalInfoContent() {
 
           {field("Street / Address line 1", form.address_line1, "address_line1", "e.g. KG 123 St")}
           {field("Apartment / Suite (optional)", form.address_line2, "address_line2", "e.g. Floor 2, Apt 3")}
+          {field("Popular name / Landmark (optional)", form.landmark, "landmark", "e.g. Near Kigali Heights")}
           {field("City", form.city, "city", "e.g. Kigali")}
           {field("Country", form.country, "country", "Rwanda")}
 
