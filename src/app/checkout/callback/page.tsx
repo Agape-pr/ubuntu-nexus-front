@@ -75,7 +75,7 @@ function CallbackContent() {
       <CheckCircle className="w-16 h-16 text-green-500 mb-4 animate-bounce" />
       <h2 className="text-2xl font-bold text-green-800">Payment Successful!</h2>
       <p className="text-green-600 mt-2">Thank you for your purchase.</p>
-      <p className="text-sm text-green-500 mt-4 opacity-75">Redirecting you to the dashboard...</p>
+      <p className="text-sm text-green-500 mt-4 opacity-75">Redirecting you back...</p>
     </div>
   );
 }

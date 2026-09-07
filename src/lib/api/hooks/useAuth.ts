@@ -76,7 +76,7 @@ export const useVerifyOTP = () => {
       if (redirectTo) {
         router.push(redirectTo);
       } else {
-        router.push(role === 'seller' ? '/dashboard' : '/marketplace');
+        router.push(role === 'seller' ? '/dashboard' : '/');
       }
     },
     onError: (error: { message?: string }) => {
@@ -104,7 +104,7 @@ export const useLogin = () => {
       if (redirectTo) {
         router.push(redirectTo);
       } else {
-        router.push(role === 'seller' ? '/dashboard' : '/marketplace');
+        router.push(role === 'seller' ? '/dashboard' : '/');
       }
     },
     onError: (error: { message?: string }) => {
@@ -167,7 +167,7 @@ export const useLogout = () => {
     onSuccess: () => {
       queryClient.clear();
       toast.success('Logged out successfully');
-      router.push('/');
+      router.push('/auth');
     },
     onError: () => {
       // Even if API call fails, clear local state

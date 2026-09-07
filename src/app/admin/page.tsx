@@ -120,6 +120,7 @@ function UserDrawer({ userId, onClose }: { userId: number; onClose: () => void }
                         <Link
                           href={`https://www.ubuntunow.rw/shop/${user.store.slug}`}
                           target="_blank"
+                          rel="noopener noreferrer"
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-200 transition-colors"
                         >
                           /shop/{user.store.slug} <ExternalLink size={12} />
@@ -316,130 +317,130 @@ export default function AdminPage() {
   const buyerCount  = users.filter(u => u.role === "buyer").length;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <div className="container max-w-6xl mx-auto px-4 py-10 flex-1">
+      <div className="container max-w-6xl mx-auto px-4 py-8 flex-1">
 
         {/* Header */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-9 w-9 rounded-xl bg-violet-100 flex items-center justify-center">
-                <Shield size={18} className="text-violet-600" />
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-lg bg-secondary border border-border/80 flex items-center justify-center text-foreground">
+                <Shield size={16} />
               </div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Platform Management</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Platform Administration</p>
             </div>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Admin Dashboard</h1>
-            <p className="text-slate-500 mt-1">Manage all users, sellers, and buyer accounts.</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Admin Dashboard</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-1">Manage platform accounts, sellers, and system roles.</p>
           </div>
 
-          <Button onClick={() => setIsAddUserOpen(true)} className="h-10 bg-slate-900 text-white rounded-xl font-bold text-sm px-4 gap-2">
-            <Plus size={16} /> Add User
+          <Button onClick={() => setIsAddUserOpen(true)} className="h-10 rounded-lg font-semibold text-xs px-4 gap-2">
+            <Plus size={15} /> Add User
           </Button>
         </div>
 
         {/* Stat cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-2xl p-5 border border-violet-100 shadow-sm flex items-center gap-4">
-            <div className="h-11 w-11 rounded-xl bg-violet-50 flex items-center justify-center flex-shrink-0">
-              <Users size={20} className="text-violet-600" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="bg-card rounded-xl p-5 border border-border/80 shadow-2xs flex items-center gap-4">
+            <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center shrink-0 text-foreground">
+              <Users size={18} />
             </div>
             <div>
-              <div className="text-2xl font-bold text-slate-900">{meLoading || isLoading ? "…" : totalCount}</div>
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Users</div>
+              <div className="text-2xl font-bold text-foreground">{meLoading || isLoading ? "…" : totalCount}</div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Accounts</div>
             </div>
           </div>
 
           {hasPermission(me, 'manage_sellers') && (
-            <div className="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm flex items-center gap-4">
-              <div className="h-11 w-11 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                <Store size={20} className="text-emerald-600" />
+            <div className="bg-card rounded-xl p-5 border border-border/80 shadow-2xs flex items-center gap-4">
+              <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center shrink-0 text-foreground">
+                <Store size={18} />
               </div>
               <div>
-                <div className="text-2xl font-bold text-slate-900">{meLoading || isLoading ? "…" : sellerCount}</div>
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Sellers</div>
+                <div className="text-2xl font-bold text-foreground">{meLoading || isLoading ? "…" : sellerCount}</div>
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sellers</div>
               </div>
             </div>
           )}
 
           {hasPermission(me, 'manage_buyers') && (
-            <div className="bg-white rounded-2xl p-5 border border-blue-100 shadow-sm flex items-center gap-4">
-              <div className="h-11 w-11 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-                <ShoppingBag size={20} className="text-blue-600" />
+            <div className="bg-card rounded-xl p-5 border border-border/80 shadow-2xs flex items-center gap-4">
+              <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center shrink-0 text-foreground">
+                <ShoppingBag size={18} />
               </div>
               <div>
-                <div className="text-2xl font-bold text-slate-900">{meLoading || isLoading ? "…" : buyerCount}</div>
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Buyers</div>
+                <div className="text-2xl font-bold text-foreground">{meLoading || isLoading ? "…" : buyerCount}</div>
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Buyers</div>
               </div>
             </div>
           )}
         </div>
 
         {/* Filters + search */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div className="bg-card rounded-xl border border-border/80 shadow-2xs p-3.5 mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
           {/* Role filter tabs */}
-          <div className="flex gap-1 flex-shrink-0">
-            <button onClick={() => setFilters(f => ({ ...f, role: "" }))} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filters.role === "" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100"}`}>All</button>
+          <div className="flex gap-1 shrink-0">
+            <button onClick={() => setFilters(f => ({ ...f, role: "" }))} className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${filters.role === "" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>All</button>
             
             {hasPermission(me, 'manage_sellers') && (
-              <button onClick={() => setFilters(f => ({ ...f, role: "seller" }))} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filters.role === "seller" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100"}`}>Seller</button>
+              <button onClick={() => setFilters(f => ({ ...f, role: "seller" }))} className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${filters.role === "seller" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>Sellers</button>
             )}
             
             {hasPermission(me, 'manage_buyers') && (
-              <button onClick={() => setFilters(f => ({ ...f, role: "buyer" }))} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filters.role === "buyer" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100"}`}>Buyer</button>
+              <button onClick={() => setFilters(f => ({ ...f, role: "buyer" }))} className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${filters.role === "buyer" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>Buyers</button>
             )}
 
-            <button onClick={() => setFilters(f => ({ ...f, role: "admin" }))} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filters.role === "admin" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100"}`}>Admin</button>
+            <button onClick={() => setFilters(f => ({ ...f, role: "admin" }))} className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${filters.role === "admin" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>Admins</button>
           </div>
 
           {/* Search */}
-          <form onSubmit={handleSearch} className="flex gap-2 flex-1">
+          <form onSubmit={handleSearch} className="flex gap-2 flex-1 w-full sm:w-auto">
             <div className="relative flex-1">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search by email…"
-                className="h-9 rounded-xl pl-8 text-sm border-slate-200 bg-slate-50 focus:bg-white"
+                placeholder="Search by email address..."
+                className="h-9 rounded-md pl-8 text-xs border-border bg-background"
               />
             </div>
             {search && (
               <button type="button" onClick={() => { setSearch(""); setFilters(f => ({ ...f, search: "" })); }}
-                className="h-9 w-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
-                <X size={14} className="text-slate-500" />
+                className="h-9 w-9 rounded-md bg-secondary hover:bg-muted flex items-center justify-center transition-colors">
+                <X size={14} className="text-muted-foreground" />
               </button>
             )}
-            <Button type="submit" size="sm" className="h-9 rounded-xl bg-slate-900 text-white px-4 text-xs font-semibold">
+            <Button type="submit" size="sm" className="h-9 rounded-md text-xs font-semibold px-4">
               Search
             </Button>
           </form>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-3 border-b border-slate-100 flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              {isLoading ? "Loading…" : `${totalCount} user${totalCount !== 1 ? "s" : ""}`}
+        <div className="bg-card rounded-xl border border-border/80 shadow-2xs overflow-hidden">
+          <div className="px-5 py-3 border-b border-border/80 flex items-center gap-2 bg-secondary/30">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {isLoading ? "Loading Accounts..." : `${totalCount} Account${totalCount !== 1 ? "s" : ""}`}
             </span>
           </div>
 
           {isLoading ? (
-            <div className="py-20 flex flex-col items-center gap-3 text-slate-400">
-              <Loader2 size={28} className="animate-spin" />
-              <span className="text-sm">Loading users…</span>
+            <div className="py-16 flex flex-col items-center gap-3 text-muted-foreground">
+              <Loader2 size={24} className="animate-spin" />
+              <span className="text-xs">Loading user list...</span>
             </div>
           ) : users.length === 0 ? (
-            <div className="py-20 flex flex-col items-center text-center gap-3 text-slate-400">
-              <Users size={32} className="text-slate-200" />
-              <p className="font-semibold text-slate-600">No users found</p>
-              <p className="text-sm">Try adjusting your filters.</p>
+            <div className="py-16 flex flex-col items-center text-center gap-2 text-muted-foreground">
+              <Users size={28} className="opacity-40" />
+              <p className="font-semibold text-foreground text-sm">No accounts found</p>
+              <p className="text-xs">Try clearing search keywords or active filters.</p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-50">
+            <div className="divide-y divide-border/60">
               {/* Table head */}
-              <div className="grid grid-cols-[1fr_4rem_6rem_5rem_3rem] gap-4 px-6 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                <span>User</span>
+              <div className="grid grid-cols-[1fr_5rem_6rem_5rem_2rem] gap-4 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground bg-secondary/20">
+                <span>Account</span>
                 <span className="hidden sm:block">Phone</span>
                 <span>Joined</span>
                 <span>Status</span>
@@ -455,29 +456,29 @@ export default function AdminPage() {
                 <button
                   key={user.id}
                   onClick={() => setSelectedUserId(user.id)}
-                  className="w-full grid grid-cols-[1fr_4rem_6rem_5rem_3rem] gap-4 px-6 py-4 hover:bg-slate-50/80 transition-colors text-left items-center"
+                  className="w-full grid grid-cols-[1fr_5rem_6rem_5rem_2rem] gap-4 px-5 py-3.5 hover:bg-secondary/40 transition-colors text-left items-center"
                 >
                   {/* Identity */}
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-sm font-bold text-primary flex-shrink-0 select-none">
+                    <div className="h-8 w-8 rounded-lg bg-secondary border border-border flex items-center justify-center text-xs font-bold text-foreground shrink-0 select-none">
                       {user.email.substring(0, 2).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <div className="font-semibold text-sm text-slate-900 truncate">{user.email}</div>
+                      <div className="font-semibold text-xs text-foreground truncate">{user.email}</div>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <RoleBadge role={user.role} />
                         {user.role === "seller" && user.store && (
-                          <span className="text-[11px] text-slate-400 truncate hidden sm:inline">{user.store.store_name}</span>
+                          <span className="text-[11px] text-muted-foreground truncate hidden sm:inline">{user.store.store_name}</span>
                         )}
                       </div>
                     </div>
                   </div>
 
                   {/* Phone */}
-                  <span className="text-xs text-slate-500 hidden sm:block truncate">{user.phone_number || "—"}</span>
+                  <span className="text-xs text-muted-foreground hidden sm:block truncate">{user.phone_number || "—"}</span>
 
                   {/* Joined */}
-                  <span className="text-xs text-slate-500">{formatDate(user.date_joined)}</span>
+                  <span className="text-xs text-muted-foreground">{formatDate(user.date_joined)}</span>
 
                   {/* Status */}
                   <span>
@@ -486,14 +487,14 @@ export default function AdminPage() {
                         <CheckCircle size={11} /> Active
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-400">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-destructive">
                         <XCircle size={11} /> Inactive
                       </span>
                     )}
                   </span>
 
                   {/* Arrow */}
-                  <ChevronRight size={14} className="text-slate-300" />
+                  <ChevronRight size={14} className="text-muted-foreground" />
                 </button>
               ))}
             </div>

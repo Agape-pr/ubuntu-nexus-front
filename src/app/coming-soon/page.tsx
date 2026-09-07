@@ -5,12 +5,14 @@ import {
   ArrowRight,
   ExternalLink,
   CheckCircle2,
-  Sparkles,
-  ShieldCheck,
-  Zap,
-  Store,
+  CheckCircle,
   Lock,
+  Package,
+  Store,
   Mail,
+  Globe,
+  ShoppingBag,
+  Star,
 } from "lucide-react";
 
 // ─── Constants ──────────────────────────────────────────────────────────────────
@@ -26,13 +28,13 @@ const FEATURES = [
     accent: "#B87800",
   },
   {
-    icon: ShieldCheck,
+    icon: Lock,
     title: "Escrow Protection",
     desc: "Every payment held safe until you confirm delivery. Zero risk.",
     accent: "#16A34A",
   },
   {
-    icon: Zap,
+    icon: Package,
     title: "2-Hour Delivery",
     desc: "Local sellers, lightning-fast fulfillment across Kigali.",
     accent: "#F0B800",
@@ -352,15 +354,14 @@ export default function ComingSoonPage() {
                 ref={addRevealRef}
                 className="reveal inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/8 text-xs font-medium text-[#888780] mb-6"
               >
-                <span className="text-sm">🌍</span>
+                <Globe size={14} />
                 <span>Made for Rwanda. Built for Africa.</span>
               </div>
 
               {/* Headline */}
               <h1
                 ref={addRevealRef}
-                className="reveal reveal-delay-1 text-[2.5rem] sm:text-5xl lg:text-[3.5rem] font-black leading-[1.08] tracking-tight mb-6"
-                style={{ fontFamily: "'Nunito', sans-serif" }}
+                className="font-display reveal reveal-delay-1 text-[2.5rem] sm:text-5xl lg:text-[3.5rem] font-black leading-[1.08] tracking-tight mb-6"
               >
                 The{" "}
                 <span className="text-gradient-gold">trust layer</span>{" "}
@@ -443,8 +444,8 @@ export default function ComingSoonPage() {
                 delay="0s"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#B87800]/30 to-[#F0B800]/10 flex items-center justify-center text-lg">
-                    👜
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-bright/30 to-gold-accent/10 flex items-center justify-center">
+                    <ShoppingBag size={18} className="text-gold-accent" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-[#FBF8F2]">
@@ -464,7 +465,7 @@ export default function ComingSoonPage() {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-                    <ShieldCheck size={18} />
+                    <Lock size={18} />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-[#FBF8F2]">
@@ -484,7 +485,7 @@ export default function ComingSoonPage() {
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-full bg-[#B87800]/10 flex items-center justify-center">
-                    <Sparkles size={14} className="text-[#F0B800]" />
+                    <Lock size={14} className="text-[#F0B800]" />
                   </div>
                   <div>
                     <p className="text-[11px] font-bold text-[#FBF8F2]">
@@ -492,9 +493,7 @@ export default function ComingSoonPage() {
                     </p>
                     <div className="flex gap-0.5 mt-0.5">
                       {[1, 2, 3, 4, 5].map((s) => (
-                        <span key={s} className="text-[8px] text-[#F0B800]">
-                          ★
-                        </span>
+                        <Star key={s} size={8} className="fill-gold-accent text-gold-accent" />
                       ))}
                     </div>
                   </div>
@@ -521,8 +520,7 @@ export default function ComingSoonPage() {
               What we&apos;re building
             </p>
             <h2
-              className="text-2xl sm:text-3xl font-black tracking-tight"
-              style={{ fontFamily: "'Nunito', sans-serif" }}
+              className="font-display text-2xl sm:text-3xl font-black tracking-tight"
             >
               Commerce infrastructure,{" "}
               <span className="text-[#888780]">reimagined.</span>
@@ -591,13 +589,12 @@ export default function ComingSoonPage() {
 
             <div className="relative z-10 max-w-lg">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#B87800]/10 border border-[#B87800]/20 text-xs font-bold text-[#B87800] mb-5">
-                <Sparkles size={12} />
+                <CheckCircle size={12} />
                 Help shape the platform
               </div>
 
               <h2
-                className="text-2xl sm:text-3xl font-black tracking-tight mb-3"
-                style={{ fontFamily: "'Nunito', sans-serif" }}
+                className="font-display text-2xl sm:text-3xl font-black tracking-tight mb-3"
               >
                 Are you a seller in Rwanda?
               </h2>
@@ -614,7 +611,7 @@ export default function ComingSoonPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-white/5 border border-white/10 text-[#FBF8F2] hover:bg-white/10 transition-all duration-200 font-bold text-sm group"
               >
-                <Sparkles
+                <CheckCircle
                   size={15}
                   className="text-[#B87800] group-hover:rotate-12 transition-transform"
                 />

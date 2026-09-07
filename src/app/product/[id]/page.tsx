@@ -1,20 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { BuyerDashboardShell } from "@/components/BuyerDashboardShell";
+import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { PaymentOptions } from "@/components/ui/PaymentOptions";
-import { useProduct } from "@/lib/api/hooks/useProducts";
+import { useProduct, useProducts } from "@/lib/api/hooks/useProducts";
 import { useCartStore } from "@/lib/store/cartStore";
+import { useWishlistStore } from "@/lib/store/wishlistStore";
+import { useAuthState } from "@/hooks/useAuthState";
+import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 import { CloudImage } from "@/components/ui/CloudImage";
+import { resolveCategoryName } from "@/lib/categories";
 import { toast } from "sonner";
-import { 
-  ArrowLeft, Star, Heart, Store, Truck, 
-  MapPin, Clock, Share2, Plus, Minus, CheckCircle, Info
+import {
+  ArrowLeft, Heart, Store, Truck, MapPin, Clock, Share2, Plus, Minus,
+  CheckCircle, XCircle, Mail, PackageSearch, ChevronLeft, ChevronRight, Lock,
+  ShoppingCart, Banknote, Landmark, ImageOff, Package, CreditCard,
 } from "lucide-react";
 
 // SEED DATA FALLBACK
@@ -27,38 +32,79 @@ const SEED_PRODUCTS = [
   { id: "seed-6", name: "Hand-Carved Wood Sculpture", price: 22000, category: "Art & Paintings", image: "/products/wood-carving.png", storeName: "Ubumuntu Arts", storeSlug: "ubumuntu-arts", inStock: true, description: "Solid mahogany wood carving depicting traditional Rwandan life. Hand-sanded and polished with natural beeswax. A stunning centerpiece standing at 12 inches tall." },
 ];
 
-export default function ProductPage() {
+const makeStoreSlug = (name?: string) =>
+  name ? name.toLowerCase().trim().replace(/\s+/g, "-") : "";
+
+function GallerySkeleton() {
+  return (
+    <div className="lg:col-span-5 flex flex-col gap-3">
+      <div className="rounded-2xl aspect-square bg-secondary animate-pulse" />
+      <div className="flex gap-2">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-16 w-16 rounded-xl bg-secondary animate-pulse" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProductChrome({
+  useShell,
+  children,
+}: {
+  useShell: boolean;
+  children: React.ReactNode;
+}) {
+  if (useShell) {
+    return <BuyerDashboardShell hideMobileBottomNav>{children}</BuyerDashboardShell>;
+  }
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <Navbar />
+      <main className="flex-1">{children}</main>
+    </div>
+  );
+}
+
+function ProductPageContent() {
   const params = useParams();
   const router = useRouter();
-  const idStr = String(params.id || '');
-  const isSeed = idStr.startsWith('seed-');
+  const idStr = String(params.id || "");
+  const isSeed = idStr.startsWith("seed-");
 
-  const { data: apiProduct, isLoading: isApiLoading } = useProduct(isSeed ? '' : idStr);
-  const addItem = useCartStore(state => state.addItem);
+  const { data: apiProduct, isLoading: isApiLoading } = useProduct(isSeed ? "" : idStr);
+  const { data: allProducts = [] } = useProducts();
+  const addItem = useCartStore((state) => state.addItem);
+  const cartCount = useCartStore((state) => state.getTotalItems());
+  const { isLoggedIn, userRole } = useAuthState();
+  const useShell = isLoggedIn && userRole !== "seller";
+  const { trackRef: relatedTrackRef, scrollByCard: scrollRelated } = useHorizontalScroll();
 
   const [quantity, setQuantity] = useState(1);
   const [mounted, setMounted] = useState(false);
   const [selectedVariations, setSelectedVariations] = useState<Record<string, string>>({});
+  const [activeImage, setActiveImage] = useState(0);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  useEffect(() => {
+    setActiveImage(0);
+  }, [idStr]);
 
   // Determine Product Data
   let product: any = null;
   let isLoading = false;
 
   if (isSeed) {
-    product = SEED_PRODUCTS.find(p => p.id === idStr);
+    product = SEED_PRODUCTS.find((p) => p.id === idStr);
     if (product) {
-      // adapt properties to match API visually
       product = {
         ...product,
         images: [{ image: product.image }],
         stock_quantity: 10,
-        store: { store_name: product.storeName, slug: product.storeSlug }
+        store: { store_name: product.storeName, slug: product.storeSlug },
       };
     }
   } else {
@@ -66,18 +112,33 @@ export default function ProductPage() {
     product = apiProduct;
   }
 
+  const relatedProducts = useMemo(() => {
+    if (!product || isSeed) return [];
+    const category = resolveCategoryName(product.category);
+    return allProducts
+      .filter((p) => resolveCategoryName(p.category) === category && String(p.id) !== String(product.id))
+      .slice(0, 6);
+  }, [allProducts, product, isSeed]);
+
+  const favoriteId = product ? (isSeed ? idStr : String(product.id)) : "";
+  const wishlisted = useWishlistStore((s) => s.isWishlisted(favoriteId));
+  const toggleWishlist = useWishlistStore((s) => s.toggleWishlist);
+  const cartItems = useCartStore((s) => s.items);
+
+  if (!mounted) return null;
+
   // Handle Loading State
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Navbar />
-        <main className="flex-1 container py-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div className="rounded-3xl h-[400px] md:h-[600px] bg-secondary animate-pulse" />
-            <div className="space-y-6">
+      <ProductChrome useShell={useShell}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14">
+            <GallerySkeleton />
+            <div className="lg:col-span-7 space-y-4">
               <div className="h-4 bg-secondary w-1/4 rounded animate-pulse" />
-              <div className="h-10 bg-secondary w-3/4 rounded animate-pulse" />
+              <div className="h-9 bg-secondary w-3/4 rounded animate-pulse" />
               <div className="h-8 bg-secondary w-1/3 rounded animate-pulse" />
+              <div className="h-14 bg-secondary w-full rounded-2xl animate-pulse mt-6" />
               <div className="space-y-2 pt-6">
                 <div className="h-3 bg-secondary w-full rounded animate-pulse" />
                 <div className="h-3 bg-secondary w-full rounded animate-pulse" />
@@ -85,48 +146,134 @@ export default function ProductPage() {
               </div>
             </div>
           </div>
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </ProductChrome>
     );
   }
 
   // Handle Not Found
   if (!product && !isLoading) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Navbar />
-        <main className="flex-1 container flex items-center justify-center flex-col py-20 text-center">
-          <div className="text-6xl mb-6">🏜️</div>
-          <h2 className="text-2xl font-bold text-foreground mb-3">Product not found</h2>
-          <p className="text-muted-foreground mb-8">This item no longer exists or might have been removed by the seller.</p>
-          <Button onClick={() => router.push('/marketplace')}>Browse Marketplace</Button>
-        </main>
-        <Footer />
-      </div>
+      <ProductChrome useShell={useShell}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-center flex-col py-24 text-center">
+          <div className="h-16 w-16 rounded-2xl bg-secondary flex items-center justify-center mb-5">
+            <PackageSearch size={28} className="text-muted-foreground" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Product not found</h2>
+          <p className="text-muted-foreground mb-8 max-w-sm">
+            This item no longer exists or might have been removed by the seller.
+          </p>
+          <Button onClick={() => router.push("/")}>Browse marketplace</Button>
+        </div>
+      </ProductChrome>
     );
   }
 
   // Product Data Extraction
+  const actualId = isSeed ? idStr : String(product.id);
   const name = product.name;
   const price = Number(product.price);
   const formattedPrice = new Intl.NumberFormat("en-RW").format(price);
   const stock = Number(product.stock_quantity);
+
+  const inCartQuantity = cartItems
+    .filter((item) => item.productId === actualId || item.id === actualId || item.id.startsWith(`${actualId}-`))
+    .reduce((sum, item) => sum + item.quantity, 0);
+
+  const availableStock = Math.max(0, stock - inCartQuantity);
+  const inStock = availableStock > 0;
   const description = product.description || "No description provided.";
-  const catName = isSeed ? product.category : product.category;
-  
-  const storeName = product.store?.store_name || product.store_name || "Unknown Store";
-  const storeSlug = product.store?.slug || product.storeSlug || "";
-  
-  const imageObj = product.images?.[0];
-  const coverImage = isSeed ? imageObj?.image : imageObj?.image;
+  const catName = resolveCategoryName(product.category);
+  const sellerHasStock: boolean | undefined = product.in_stock;
+
+  // The list endpoint (used for relatedProducts) reliably returns store_name;
+  // fall back to it if this product's own detail response omits the field.
+  // Some products' store_name genuinely comes back null from the API with no
+  // way to resolve it client-side — in that case we show a plain label instead
+  // of a link, rather than sending buyers to a /shop/[slug] that can't exist.
+  const listMatch = !isSeed
+    ? allProducts.find((p: any) => String(p.id) === String(product.id) || p.slug === idStr)
+    : undefined;
+
+  // Extract store ID regardless of whether store is an integer or an object
+  const targetStoreId: number | null =
+    typeof product.store === "number"
+      ? product.store
+      : typeof product.store === "object" && product.store !== null
+      ? (product.store as any).id
+      : (product as any).store_id || null;
+
+  // Find any product in allProducts matching the store ID that has a store_name
+  const sameStoreProduct = !isSeed && targetStoreId !== null
+    ? allProducts.find((p: any) => {
+        const pStoreId = typeof p.store === "number" ? p.store : typeof p.store === "object" && p.store !== null ? p.store.id : p.store_id;
+        const pStoreName = p.store_name || (typeof p.store === "object" ? p.store?.store_name : null);
+        return pStoreId && Number(pStoreId) === Number(targetStoreId) && Boolean(pStoreName);
+      })
+    : undefined;
+
+  const resolvedStoreName: string | null =
+    (typeof product.store === "object" && product.store !== null && product.store?.store_name) ||
+    product.store_name ||
+    (product as any).store_info?.store_name ||
+    (product as any).store_details?.name ||
+    listMatch?.store_name ||
+    (listMatch as any)?.store?.store_name ||
+    sameStoreProduct?.store_name ||
+    (sameStoreProduct as any)?.store?.store_name ||
+    null;
+
+  const storeName = resolvedStoreName || (targetStoreId ? `Store #${targetStoreId}` : "Ubuntu Seller");
+
+  const rawSlug =
+    (typeof product.store === "object" && product.store !== null && product.store?.slug) ||
+    product.storeSlug ||
+    (product as any).store_slug ||
+    (listMatch as any)?.store_slug ||
+    (listMatch as any)?.store?.slug ||
+    (sameStoreProduct as any)?.store_slug ||
+    (sameStoreProduct as any)?.store?.slug ||
+    (resolvedStoreName ? makeStoreSlug(resolvedStoreName) : null);
+
+  const storeSlug = rawSlug || makeStoreSlug(storeName) || (targetStoreId ? `store-${targetStoreId}` : "ubuntu-store");
+
+  const images: string[] = (product.images ?? [])
+    .map((img: any) => img?.image)
+    .filter(Boolean);
+  const coverImage = images[activeImage] ?? images[0];
+
+  const handleToggleFavorite = () => {
+    toggleWishlist({
+      id: favoriteId,
+      name,
+      price,
+      image: coverImage,
+      storeName: resolvedStoreName || undefined,
+      storeSlug: storeSlug || undefined,
+      slug: isSeed ? undefined : product.slug,
+    });
+  };
+
+  const renderImage = (src: string, alt: string, className: string) =>
+    isSeed ? (
+      <img src={src} alt={alt} className={className} />
+    ) : (
+      <CloudImage
+        publicId={src}
+        alt={alt}
+        crop="fill"
+        fallback={<div className="w-full h-full flex items-center justify-center bg-secondary/60"><ImageOff size={32} className="opacity-25" strokeWidth={1.5} /></div>}
+        className={className}
+      />
+    );
 
   const handleAddToCart = () => {
-    const actualId = isSeed ? idStr : String(product.id);
-    const cartItemId = Object.keys(selectedVariations).length > 0 
-      ? `${actualId}-${JSON.stringify(selectedVariations)}`
-      : actualId;
-      
+    if (!inStock) return;
+    const cartItemId =
+      Object.keys(selectedVariations).length > 0
+        ? `${actualId}-${JSON.stringify(selectedVariations)}`
+        : actualId;
+
     addItem({
       id: cartItemId,
       productId: actualId,
@@ -136,126 +283,251 @@ export default function ProductPage() {
       storeName,
       quantity,
       selected_variations: selectedVariations,
+      in_stock: sellerHasStock,
     });
     toast.success(`${name} added to cart!`);
   };
 
   const handleBuyNow = () => {
     handleAddToCart();
-    router.push('/cart'); // will implement later
+    router.push("/cart");
+  };
+
+  const handleShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title: name, text: `Check out ${name} on UbuntuNow`, url });
+      } catch {
+        // user cancelled — no-op
+      }
+      return;
+    }
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard");
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navbar />
-
-      <main className="flex-1">
-        {/* Breadcrumb Header */}
-        <div className="bg-secondary/30 border-b border-border/50">
-          <div className="container py-4 flex items-center gap-2 text-sm text-muted-foreground">
-            <Link href="/marketplace" className="hover:text-foreground transition-colors">Marketplace</Link>
-            <span className="text-border">/</span>
+    <ProductChrome useShell={useShell}>
+      <>
+        {/* Breadcrumb Header — desktop only; mobile shows the image immediately, back/cart float on it */}
+        <div className="hidden lg:block bg-secondary/30 border-b border-border/50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-2 text-sm text-muted-foreground overflow-x-auto no-scrollbar">
+            <Link href="/" className="hover:text-foreground transition-colors shrink-0">Marketplace</Link>
             {catName && (
               <>
-                <span className="text-foreground">{catName}</span>
-                <span className="text-border">/</span>
+                <span className="text-border shrink-0">/</span>
+                <span className="text-foreground shrink-0">{catName}</span>
               </>
             )}
-            <span className="text-foreground truncate max-w-[200px]">{name}</span>
+            <span className="text-border shrink-0">/</span>
+            <span className="text-foreground truncate">{name}</span>
           </div>
         </div>
 
-        <div className="container py-10 md:py-16">
-          <Button variant="ghost" onClick={() => router.back()} className="mb-6 -ml-4 gap-2 text-muted-foreground hover:text-foreground">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-36 md:pb-32 lg:pt-10">
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="mb-4 -ml-4 gap-2 text-muted-foreground hover:text-foreground hidden md:inline-flex"
+          >
             <ArrowLeft size={18} /> Back
           </Button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
-            
-            {/* LEFT: Image Gallery */}
-            <div className="lg:col-span-5 flex flex-col gap-4">
-              <div className="relative aspect-square md:aspect-[4/5] rounded-3xl overflow-hidden bg-secondary border border-border group shadow-sm">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-6 gap-y-0 lg:gap-14">
+
+            {/* LEFT: Image Gallery — full-bleed on mobile, padded card on desktop */}
+            <div className="lg:col-span-5 flex flex-col gap-3">
+              <div className="relative aspect-[4/5] overflow-hidden bg-secondary -mx-4 sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-border group">
                 {coverImage ? (
-                  isSeed ? (
-                    <img src={coverImage} alt={name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  ) : (
-                    <CloudImage publicId={coverImage} alt={name} crop="fill" fallback={<div className="w-full h-full flex items-center justify-center text-6xl bg-slate-50">🛍️</div>} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  renderImage(
+                    coverImage,
+                    name,
+                    "w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   )
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-6xl">🛍️</div>
+                  <div className="w-full h-full flex items-center justify-center"><ImageOff size={40} className="opacity-25" strokeWidth={1.5} /></div>
                 )}
-                
-                <button className="absolute top-4 right-4 h-12 w-12 rounded-full bg-card/80 backdrop-blur-md flex items-center justify-center text-muted-foreground hover:text-rose-500 hover:shadow-lg transition-all shadow-sm border border-border/50">
-                  <Heart size={20} />
+
+                {images.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Previous image"
+                      onClick={() => setActiveImage((i) => (i - 1 + images.length) % images.length)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-card/80 backdrop-blur-md border border-border/50 flex items-center justify-center text-foreground hover:bg-card transition-colors"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Next image"
+                      onClick={() => setActiveImage((i) => (i + 1) % images.length)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-card/80 backdrop-blur-md border border-border/50 flex items-center justify-center text-foreground hover:bg-card transition-colors"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                    <span className="absolute bottom-3 right-3 bg-background/70 backdrop-blur-md text-foreground text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {activeImage + 1}/{images.length}
+                    </span>
+                  </>
+                )}
+
+                {/* Back — floats on the image, mobile only (desktop uses the Back button above) */}
+                <button
+                  type="button"
+                  aria-label="Back"
+                  onClick={() => router.back()}
+                  className="lg:hidden absolute top-3 left-3 h-10 w-10 rounded-full bg-background/50 backdrop-blur-md flex items-center justify-center text-foreground z-10"
+                >
+                  <ChevronLeft size={22} />
                 </button>
+
+                {/* Cart — floats on the image, mobile only (desktop has it in the top navbar / sidebar) */}
+                <Link
+                  href="/cart"
+                  aria-label={cartCount > 0 ? `Cart, ${cartCount} item${cartCount !== 1 ? "s" : ""}` : "Cart"}
+                  className="lg:hidden absolute top-3 right-3 h-10 w-10 rounded-full bg-background/50 backdrop-blur-md flex items-center justify-center text-foreground z-10"
+                >
+                  <ShoppingCart size={19} />
+                  {cartCount > 0 && (
+                    <span className="absolute top-0.5 right-0.5 h-4 min-w-4 rounded-full bg-accent flex items-center justify-center px-1 text-[9px] font-bold text-near-black">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+
+                <button
+                  type="button"
+                  aria-label="Share product"
+                  onClick={handleShare}
+                  className="absolute top-3 right-16 lg:right-3 h-11 w-11 rounded-full bg-card/80 backdrop-blur-md flex items-center justify-center transition-all shadow-sm border border-border/50 text-muted-foreground hover:text-foreground"
+                >
+                  <Share2 size={20} />
+                </button>
+
+                {!inStock && (
+                  <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
+                    <span className="bg-card/95 text-foreground text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-widest border border-border/60">
+                      Out of stock
+                    </span>
+                  </div>
+                )}
               </div>
+
+              {images.length > 1 && (
+                <div className="hidden lg:flex gap-2 overflow-x-auto no-scrollbar">
+                  {images.map((img, i) => (
+                    <button
+                      type="button"
+                      key={i}
+                      onClick={() => setActiveImage(i)}
+                      aria-label={`View image ${i + 1} of ${images.length}`}
+                      aria-current={i === activeImage}
+                      className={`relative h-16 w-16 shrink-0 rounded-xl overflow-hidden border-2 transition-colors ${
+                        i === activeImage ? "border-primary" : "border-transparent hover:border-border"
+                      }`}
+                    >
+                      {renderImage(img, `${name} thumbnail ${i + 1}`, "w-full h-full object-cover")}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* RIGHT: Product Details */}
             <div className="lg:col-span-7 flex flex-col">
-              <div className="mb-6 border-b border-border/50 pb-6">
-                <Link href={`/shop/${storeSlug}`} className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold hover:underline mb-2">
-                  <Store size={14} /> {storeName}
-                </Link>
-                
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-[1.1] mb-4">
+              {/* Price ticket — sits flush under the image on mobile, no gap */}
+              <div className="-mx-4 sm:-mx-6 lg:mx-0 px-4 sm:px-6 lg:px-5 py-3 lg:py-4 bg-primary/5 border-b border-primary/15 lg:border lg:rounded-2xl lg:mb-5">
+                {isLoggedIn ? (
+                  <div className="flex items-end justify-between gap-3 flex-wrap">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-display text-3xl font-black text-accent tracking-tight">
+                        {formattedPrice}
+                      </span>
+                      <span className="text-xs text-muted-foreground font-semibold">RWF</span>
+                    </div>
+                    <div className="text-right shrink-0">
+                      {sellerHasStock === true && (
+                        <span className="inline-flex items-center gap-1 text-primary text-xs font-bold">Quick delivery</span>
+                      )}
+                      {sellerHasStock === false && (
+                        <span className="inline-flex items-center gap-1 text-accent text-xs font-bold"><Package size={12} /> Same-day delivery</span>
+                      )}
+                      {inStock && availableStock <= 5 ? (
+                        <p className="text-rose-500 font-semibold text-xs mt-0.5">Only {availableStock} left</p>
+                      ) : (
+                        <p className="text-muted-foreground text-xs mt-0.5">{availableStock} in stock</p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <Link href="/auth" className="flex items-center gap-2 text-primary font-semibold">
+                    <Lock size={16} /> Sign in to see the price
+                  </Link>
+                )}
+              </div>
+
+              <div className="mb-5 border-b border-border/50 pb-5 pt-5 lg:pt-0">
+                {storeSlug ? (
+                  <Link href={`/shop/${storeSlug}`} className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold hover:underline mb-2">
+                    <Store size={14} /> {storeName}
+                  </Link>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground font-semibold mb-2">
+                    <Store size={14} /> {storeName}
+                  </span>
+                )}
+
+                <h1 className="font-display text-2xl md:text-3xl lg:text-4xl text-foreground leading-[1.15] mb-3">
                   {name}
                 </h1>
 
-                <div className="flex flex-wrap items-center gap-4 text-sm">
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex items-center text-accent">
-                      {[1,2,3,4,5].map(i => <Star key={i} size={14} className={i === 5 ? "text-muted opacity-50" : "fill-current"} />)}
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap mb-3">
+                  {description}
+                </p>
+
+                <div className="flex flex-wrap items-center gap-3 text-sm">
+                  {inStock ? (
+                    <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-500/10 px-2.5 py-1 rounded-md">
+                      <CheckCircle size={14} /> In stock
                     </div>
-                    <span className="font-medium text-foreground ml-1">4.2</span>
-                    <span className="text-muted-foreground">(28 reviews)</span>
-                  </div>
-                  
-                  <div className="w-1 h-1 rounded-full bg-border md:block hidden" />
-                  
-                  <div className="flex items-center gap-1.5 text-emerald font-medium bg-emerald/10 px-2.5 py-1 rounded-md">
-                    <CheckCircle size={14} /> Available
-                  </div>
-                  
-                  <div className="w-1 h-1 rounded-full bg-border md:block hidden" />
-                  
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-rose-500 font-medium bg-rose-500/10 px-2.5 py-1 rounded-md">
+                      <XCircle size={14} /> Out of stock
+                    </div>
+                  )}
+
+                  <div className="w-1 h-1 rounded-full bg-border hidden sm:block" />
+
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <MapPin size={14} /> Ships from Kigali
                   </div>
                 </div>
               </div>
 
-              <div className="mb-8">
-                <div className="flex items-end gap-2 mb-2">
-                  <span className="text-4xl lg:text-5xl font-bold text-foreground tracking-tight">{formattedPrice}</span>
-                  <span className="text-xl text-muted-foreground mb-1 font-semibold">RWF</span>
-                </div>
-                {stock > 0 && stock <= 5 && (
-                  <p className="text-rose-500 font-medium text-sm flex items-center gap-1.5 mt-2">
-                    <Clock size={14} /> Only {stock} remaining in stock!
-                  </p>
-                )}
-              </div>
-
               {/* Variations */}
               {product.variations && Object.keys(product.variations).length > 0 && (
-                <div className="mb-8 space-y-6">
+                <div className="mb-6 space-y-5">
                   {Object.entries(product.variations).map(([variationName, options]: [string, any]) => {
                     const opts = Array.isArray(options) ? options : [];
                     if (opts.length === 0) return null;
                     return (
                       <div key={variationName}>
-                        <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">{variationName}</h3>
+                        <h3 className="text-xs font-bold text-foreground mb-2.5 uppercase tracking-wider">{variationName}</h3>
                         <div className="flex flex-wrap gap-2">
                           {opts.map((option: string) => {
                             const isSelected = selectedVariations[variationName] === option;
                             return (
                               <button
                                 key={option}
-                                onClick={() => setSelectedVariations(prev => ({ ...prev, [variationName]: option }))}
+                                type="button"
+                                onClick={() => setSelectedVariations((prev) => ({ ...prev, [variationName]: option }))}
                                 className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
-                                  isSelected 
-                                    ? "border-primary bg-primary/10 text-primary shadow-sm" 
+                                  isSelected
+                                    ? "border-primary bg-primary/10 text-primary shadow-sm"
                                     : "border-border bg-card text-foreground hover:border-primary/50"
                                 }`}
                               >
@@ -270,82 +542,190 @@ export default function ProductPage() {
                 </div>
               )}
 
-              {/* Add to Cart Actions */}
-              <div className="bg-secondary/30 rounded-3xl p-6 border border-border/50 mb-10 shadow-sm">
-                <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                  {/* Quantity */}
-                  <div className="flex items-center h-14 bg-card rounded-2xl border border-border shadow-sm p-1">
-                    <button 
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-12 h-full flex items-center justify-center text-foreground hover:bg-secondary rounded-xl transition-colors"
+              {/* Quantity selector (when logged in & in stock) */}
+              {isLoggedIn && inStock && (
+                <div className="flex items-center justify-between p-3.5 mb-5 rounded-xl bg-card border border-border/80 shadow-2xs">
+                  <span className="text-xs font-semibold text-foreground">Quantity</span>
+                  <div className="flex items-center h-8 bg-secondary rounded-lg border border-border overflow-hidden">
+                    <button
+                      type="button"
+                      aria-label="Decrease quantity"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      className="w-8 h-full flex items-center justify-center text-foreground hover:bg-muted transition-colors disabled:opacity-30"
                     >
-                      <Minus size={18} />
+                      <Minus size={13} />
                     </button>
-                    <div className="w-12 h-full flex items-center justify-center font-bold text-lg">
+                    <div className="w-8 h-full flex items-center justify-center font-bold text-xs tabular-nums">
                       {quantity}
                     </div>
-                    <button 
-                      onClick={() => setQuantity(Math.min(stock, quantity + 1))}
-                      className="w-12 h-full flex items-center justify-center text-foreground hover:bg-secondary rounded-xl transition-colors"
+                    <button
+                      type="button"
+                      aria-label="Increase quantity"
+                      onClick={() => setQuantity((q) => Math.min(availableStock, q + 1))}
+                      className="w-8 h-full flex items-center justify-center text-foreground hover:bg-muted transition-colors disabled:opacity-30"
                     >
-                      <Plus size={18} />
+                      <Plus size={13} />
                     </button>
                   </div>
-
-                  {/* Add To Cart */}
-                  <Button 
-                    onClick={handleAddToCart}
-                    disabled={stock < 1}
-                    size="lg" 
-                    variant="outline" 
-                    className="flex-1 h-14 rounded-2xl font-semibold text-base border-border bg-card hover:bg-secondary shadow-sm hover:shadow transition-all"
-                  >
-                    Add to order
-                  </Button>
                 </div>
-                
-                {/* Buy Now Mobile Money */}
-                <Button 
-                  onClick={handleBuyNow}
-                  disabled={stock < 1}
-                  size="lg" 
-                  className="w-full h-14 rounded-2xl font-bold text-lg gradient-amber text-primary shadow-amber border-0 hover:scale-[1.02] transition-transform"
-                >
-                  Buy now directly
-                </Button>
-                
-                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                  <Truck size={14} /> Order now, get it today via Kigali local delivery
-                </div>
-              </div>
+              )}
 
-              {/* Payment Badges Component */}
               <PaymentOptions />
 
-              {/* Description */}
-              <div className="mt-12">
-                <h3 className="text-xl font-bold text-foreground mb-4">Product Details</h3>
-                <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {description}
+              {/* Bottom Fixed Action Bar */}
+              <div className="fixed bottom-0 inset-x-0 z-50 bg-background/95 backdrop-blur-md border-t border-border p-2 sm:p-3 shadow-xl">
+                <div className="max-w-4xl mx-auto grid grid-cols-4 gap-1.5 sm:gap-2">
+                  {/* 1. Store */}
+                  {storeSlug ? (
+                    <Link
+                      href={`/shop/${storeSlug}`}
+                      className="flex items-center justify-center gap-1.5 h-12 px-2 rounded-xl border border-border bg-secondary text-foreground hover:bg-muted text-xs font-semibold transition-colors text-center shrink-0"
+                    >
+                      <Store size={16} className="shrink-0" />
+                      <span className="truncate hidden sm:inline">Store</span>
+                    </Link>
+                  ) : (
+                    <div className="flex items-center justify-center gap-1.5 h-12 px-2 rounded-xl border border-border/60 bg-secondary/50 text-xs font-semibold text-muted-foreground opacity-50 cursor-not-allowed text-center shrink-0">
+                      <Store size={16} className="shrink-0" />
+                      <span className="truncate hidden sm:inline">Store</span>
+                    </div>
+                  )}
+
+                  {/* 2. Wishlist */}
+                  <button
+                    type="button"
+                    aria-pressed={wishlisted}
+                    onClick={handleToggleFavorite}
+                    className={`flex items-center justify-center gap-1.5 h-12 px-2 rounded-xl border text-xs font-semibold transition-colors text-center shrink-0 ${
+                      wishlisted
+                        ? "border-rose-500/30 bg-rose-500/10 text-rose-600"
+                        : "border-border bg-secondary text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <Heart size={16} fill={wishlisted ? "currentColor" : "none"} className="shrink-0" />
+                    <span className="truncate hidden sm:inline">Wishlist</span>
+                  </button>
+
+                  {/* 3. Add to Cart */}
+                  {isLoggedIn ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddToCart}
+                      disabled={!inStock}
+                      className="h-12 py-1 px-1 sm:px-2 rounded-xl text-[10px] sm:text-xs font-bold flex flex-col items-center justify-center gap-0.5 border-primary/40 text-primary hover:bg-primary/10 text-center shrink-0"
+                    >
+                      <ShoppingCart size={14} className="shrink-0" />
+                      <span className="truncate leading-none">Add to Cart</span>
+                    </Button>
+                  ) : (
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="h-12 py-1 px-1 sm:px-2 rounded-xl text-[10px] sm:text-xs font-bold flex flex-col items-center justify-center gap-0.5 border-primary/40 text-primary hover:bg-primary/10 text-center shrink-0"
+                    >
+                      <Link href="/auth?tab=register">
+                        <Lock size={14} className="shrink-0" />
+                        <span className="truncate leading-none">Add to Cart</span>
+                      </Link>
+                    </Button>
+                  )}
+
+                  {/* 4. Buy Now with MTN, Airtel, Cards icons below text */}
+                  {isLoggedIn ? (
+                    <Button
+                      type="button"
+                      onClick={handleBuyNow}
+                      disabled={!inStock}
+                      className="h-12 py-1 px-1 sm:px-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 flex flex-col items-center justify-center text-center shrink-0"
+                    >
+                      <span className="text-[11px] sm:text-xs font-bold leading-none">{inStock ? "Buy Now" : "Sold Out"}</span>
+                      {inStock && (
+                        <div className="flex items-center gap-0.5 shrink-0 mt-0.5">
+                          <span className="w-3.5 h-3.5 rounded-full bg-amber-400 text-black text-[6px] font-black flex items-center justify-center leading-none" title="MTN Mobile Money">M</span>
+                          <span className="w-3.5 h-3.5 rounded-full bg-rose-600 text-white text-[6px] font-black flex items-center justify-center leading-none" title="Airtel Money">A</span>
+                          <CreditCard size={11} className="text-primary-foreground opacity-90" />
+                        </div>
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      asChild
+                      className="h-12 py-1 px-1 sm:px-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 flex flex-col items-center justify-center text-center shrink-0"
+                    >
+                      <Link href="/auth?tab=register" className="flex flex-col items-center justify-center gap-0.5 py-0.5">
+                        <span className="text-[11px] sm:text-xs font-bold leading-none">Buy Now</span>
+                        <div className="flex items-center gap-0.5 shrink-0 mt-0.5">
+                          <span className="w-3.5 h-3.5 rounded-full bg-amber-400 text-black text-[6px] font-black flex items-center justify-center leading-none" title="MTN Mobile Money">M</span>
+                          <span className="w-3.5 h-3.5 rounded-full bg-rose-600 text-white text-[6px] font-black flex items-center justify-center leading-none" title="Airtel Money">A</span>
+                          <CreditCard size={11} className="text-primary-foreground opacity-90" />
+                        </div>
+                      </Link>
+                    </Button>
+                  )}
                 </div>
               </div>
-
-              {/* Share & Report */}
-              <div className="mt-10 pt-6 border-t border-border flex items-center justify-between text-sm">
-                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-                  <Share2 size={16} /> Share item
-                </Button>
-                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-                  <Info size={16} /> Report issue
-                </Button>
-              </div>
-
             </div>
           </div>
-        </div>
-      </main>
 
-      <Footer />
-    </div>
+          {/* Related products */}
+          {relatedProducts.length > 0 && (
+            <section className="mt-14 md:mt-20 pt-8 border-t border-border/60">
+              <div className="flex items-end justify-between gap-4 mb-4">
+                <h2 className="text-lg md:text-xl font-bold text-foreground">You might also like</h2>
+                <div className="hidden sm:flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    aria-label="Scroll left"
+                    onClick={() => scrollRelated(-1)}
+                    className="h-9 w-9 rounded-xl border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Scroll right"
+                    onClick={() => scrollRelated(1)}
+                    className="h-9 w-9 rounded-xl border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+              <div
+                ref={relatedTrackRef}
+                className="flex overflow-x-auto touch-pan-x snap-x scroll-smooth no-scrollbar gap-3 sm:gap-4 pb-3 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0"
+              >
+                {relatedProducts.map((p) => (
+                  <div key={p.id} data-scroll-card className="w-[160px] sm:w-[190px] shrink-0 snap-start">
+                    <ProductCard
+                      id={String(p.id)}
+                      slug={p.slug || String(p.id)}
+                      name={p.name}
+                      price={Number(p.price)}
+                      image={p.images?.[0]?.image}
+                      storeName={p.store_name}
+                      storeSlug={p.store_name?.toLowerCase().trim().replace(/\s+/g, "-")}
+                      category={p.category}
+                      inStock={p.stock_quantity > 0}
+                      stockQuantity={p.stock_quantity}
+                      sellerHasStock={(p as any).in_stock}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      </>
+    </ProductChrome>
+  );
+}
+
+export default function ProductPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <ProductPageContent />
+    </Suspense>
   );
 }

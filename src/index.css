@@ -31,6 +31,9 @@
     --error:      0  72% 51%;   /* #DC2626 */
     --warning:   37  91% 45%;   /* #D97706 */
     --info:     221  83% 53%;   /* #2563EB */
+    /* Trust/escrow accent — used for security & delivery-confidence cues, distinct from --success */
+    --emerald:            160 84% 39%;
+    --emerald-foreground: 0 0% 100%;
 
     /* ── Shadcn Token Maps (light) ──────────────── */
     --background:          var(--cream);
@@ -53,7 +56,12 @@
     --ring:                var(--gold-bright);
     --radius:              0.5rem;
     --shadow-card:         0 2px 8px rgba(17, 17, 16, 0.06);
+    --shadow-md:           0 6px 20px rgba(17, 17, 16, 0.10);
+    --shadow-lg:           0 16px 40px rgba(17, 17, 16, 0.18);
     --shadow-amber:        0 4px 16px rgba(184, 120, 0, 0.22);
+    --gradient-amber:      linear-gradient(135deg, hsl(var(--gold-bright)), hsl(var(--gold-accent)));
+    --gradient-hero:       linear-gradient(180deg, hsl(var(--background)), hsl(var(--secondary)));
+    --gradient-card:       linear-gradient(160deg, hsl(var(--card)), hsl(var(--secondary)));
   }
 
   .dark {
@@ -202,5 +210,33 @@
   .no-scrollbar {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+  }
+
+  /* Smooth floating motion for hero cards */
+  @keyframes hero-float-slow {
+    0%, 100% { transform: translateY(0px) rotate(-3deg); }
+    50% { transform: translateY(-7px) rotate(-3deg); }
+  }
+
+  @keyframes hero-float-up {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes hero-float-down {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(7px); }
+  }
+
+  .animate-float-up {
+    animation: hero-float-up 4s ease-in-out infinite;
+  }
+
+  .animate-float-down {
+    animation: hero-float-down 5s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: hero-float-slow 6s ease-in-out infinite;
   }
 }

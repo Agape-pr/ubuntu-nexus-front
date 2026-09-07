@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, ShoppingCart, User, Package, LayoutDashboard, ClipboardList } from "lucide-react";
-import { useCartStore } from "@/lib/store/cartStore";
+import { Home, LayoutGrid, Package, LayoutDashboard } from "lucide-react";
 import { useSellerOrders } from "@/lib/api/hooks/useOrders";
 import { useEffect, useState } from "react";
 
@@ -26,12 +25,13 @@ const MobileNav = () => {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [lastSeenId, setLastSeenId] = useState(0);
-  const totalItems = useCartStore((state) => state.getTotalItems());
 
   useEffect(() => {
     const checkAuth = () => {
       setUserRole(localStorage.getItem("user_role"));
+      setIsLoggedIn(!!localStorage.getItem("access_token"));
       setLastSeenId(getLastSeenOrderId());
     };
     checkAuth();
@@ -53,56 +53,64 @@ const MobileNav = () => {
       (o: any) => o.id > lastSeenId && (o.status === "pending" || o.status === "confirmed")
     ).length ?? 0;
 
-  if (pathname.startsWith("/auth")) return null;
+  // Buyers get their navigation entirely from BuyerDashboardShell (Shop, My Orders,
+  // Cart, Overview, Profile — the single unified buyer nav). This bar now only
+  // serves signed-in sellers browsing outside their dashboard — /dashboard already
+  // has its own complete mobile tab bar, so a second one here would duplicate it.
+  if (!mounted || !isLoggedIn || !isSeller) return null;
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/product")) return null;
 
-  // ── Seller nav: Home · Categories · Orders · Dashboard ──────────────
-  // ── Buyer nav:  Home · Categories · My Orders · Cart · Profile ──────
-  const navItems = isSeller
-    ? [
-        { label: "Home",      icon: Home,           href: "/" },
-        { label: "Categories",icon: LayoutGrid,     href: "/" },
-        { label: "Orders",    icon: Package,        href: "/dashboard", badgeCount },
-        { label: "Dashboard", icon: LayoutDashboard,href: "/dashboard" },
-      ]
-    : [
-        { label: "Home",      icon: Home,           href: "/" },
-        { label: "Categories",icon: LayoutGrid,     href: "/" },
-        { label: "My Orders", icon: ClipboardList,  href: "/my-orders" },
-        { label: "Cart",      icon: ShoppingCart,   href: "/cart", badgeCount: totalItems },
-        { label: "Profile",   icon: User,           href: "/profile" },
-      ];
+  const navItems = [
+    { label: "Home",      icon: Home,           href: "/" },
+    { label: "Categories",icon: LayoutGrid,     href: "/#categories" },
+    { label: "Orders",    icon: Package,        href: "/dashboard", badgeCount },
+    { label: "Dashboard", icon: LayoutDashboard,href: "/dashboard" },
+  ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe z-50 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
-      <div className="flex items-center justify-around h-16">
-        {navItems.map((item) => {
-          const isActive =
-            pathname === item.href || pathname.startsWith(item.href + "/");
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1.5 transition-colors duration-200 ${
-                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <div className="relative">
-                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                {item.badgeCount !== undefined &&
-                  mounted &&
-                  item.badgeCount > 0 && (
-                    <span className="absolute -top-2 -right-2.5 bg-rose-500 text-white text-xs font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-card animate-pulse">
-                      {item.badgeCount > 9 ? '9+' : item.badgeCount}
-                    </span>
-                  )}
-              </div>
-              <span className="text-xs font-semibold">{item.label}</span>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
+    <>
+      {/* Reserves scroll space for the fixed bar below — only present when the bar is */}
+      <div aria-hidden className="md:hidden h-[calc(3.5rem+env(safe-area-inset-bottom))]" />
+
+      <nav
+        aria-label="Primary"
+        className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border/40 pb-[env(safe-area-inset-bottom)] z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.08)]"
+      >
+        <div className="flex items-center justify-around h-14">
+          {navItems.map((item) => {
+            const basePath = item.href.split("#")[0];
+            const isActive =
+              basePath !== "" &&
+              !item.href.includes("#") &&
+              (pathname === basePath || pathname.startsWith(basePath + "/"));
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                aria-label={item.label}
+                aria-current={isActive ? "page" : undefined}
+                className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <div className="relative">
+                  <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                  {item.badgeCount !== undefined &&
+                    mounted &&
+                    item.badgeCount > 0 && (
+                      <span className="absolute -top-1.5 -right-2 bg-rose-500 text-white text-[9px] font-bold h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full border-2 border-card">
+                        {item.badgeCount}
+                      </span>
+                    )}
+                </div>
+                <span className="text-[10px] font-medium leading-none">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </>
   );
 };
 

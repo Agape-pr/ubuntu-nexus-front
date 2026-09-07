@@ -2,14 +2,17 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, Timer } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Store, ShoppingBag, Mail, Timer, Lock, Truck, MapPin } from "lucide-react";
 import { useLogin, useRegister, useVerifyOTP, useResendOTP } from "@/lib/api/hooks/useAuth";
 import { toast } from "sonner";
+import { Logo } from "@/components/Logo";
+import conventionImage from "@/assets/kigali-convention.jpeg";
 
 // ── OTP_EXPIRY and RESEND_COOLDOWN match auth-service/apps/authentication/services/otp_service.py
 const OTP_EXPIRY_SECONDS = 5 * 60; // 5 minutes
@@ -224,49 +227,56 @@ const AuthContent = () => {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left panel — brand */}
-      <div className="hidden lg:flex w-1/2 gradient-hero relative flex-col justify-between p-12 overflow-hidden">
+      <div className="hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden">
+        <Image
+          src={conventionImage}
+          alt="Kigali landmark"
+          fill
+          priority
+          sizes="(min-width: 1024px) 50vw, 0px"
+          className="object-cover opacity-40 mix-blend-luminosity"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/75 to-background/95" />
         <div className="absolute top-0 right-0 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-emerald/10 blur-3xl" />
+        <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-emerald/15 blur-3xl" />
 
-        <Link href="/" className="flex items-center gap-2.5 z-10 relative">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground font-bold">
-            UN
-          </div>
-          <span className="font-bold text-xl text-primary-foreground">
-            Ubuntu<span className="text-accent">Now</span>
-          </span>
-        </Link>
+        <Logo href="/" size="lg" className="z-10 relative" />
 
         <div className="relative z-10">
-          <blockquote className="text-3xl font-bold text-primary-foreground leading-snug mb-6">
-            "I am because we are."
-          </blockquote>
-          <p className="text-primary-foreground/60 text-lg">
-            Join a community of entrepreneurs and shoppers building the future of African commerce together.
+          <h2 className="text-2xl font-bold text-foreground leading-snug mb-3">
+            Rwandan Local Commerce Platform
+          </h2>
+          <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
+            Empowering Rwandan sellers and buyers with direct marketplace storefronts and secure escrow payments.
           </p>
-          <div className="mt-10 flex gap-4">
-            {["🛍️ 18,000+ products", "🏪 2,400+ sellers", "🇷🇼 Made in Kigali"].map((item) => (
-              <div key={item} className="px-3 py-1.5 rounded-full bg-primary-foreground/10 text-primary-foreground text-xs font-medium border border-primary-foreground/20">
-                {item}
+          <div className="mt-8 flex flex-wrap gap-2.5">
+            {[
+              { icon: Lock, label: "Escrow-Protected" },
+              { icon: Truck, label: "Kigali Delivery" },
+              { icon: MapPin, label: "Verified Merchants" },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary text-foreground text-xs font-semibold border border-border/80">
+                <Icon size={13} className="shrink-0" />
+                {label}
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-primary-foreground/30 text-xs relative z-10">© 2025 UbuntuNow Ltd, Kigali</p>
+        <p className="text-muted-foreground text-xs relative z-10">© {new Date().getFullYear()} UbuntuNow Ltd. All rights reserved.</p>
       </div>
 
       {/* Right panel — form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-16 overflow-y-auto">
         <div className="max-w-md w-full mx-auto">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
-            <ArrowLeft size={15} />
-            Back to home
+          <Link href="/" className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground mb-8 transition-colors">
+            <ArrowLeft size={14} />
+            Back to Home
           </Link>
 
           {/* Tabs */}
           {registrationStep === "form" && (
-            <div className="flex bg-secondary rounded-xl p-1 mb-8 w-fit">
+            <div className="flex bg-secondary rounded-lg p-1 mb-8 w-fit border border-border/80">
               {(["login", "register"] as Tab[]).map((t) => (
                 <button
                   key={t}
@@ -275,31 +285,31 @@ const AuthContent = () => {
                     setRegistrationStep("form");
                     setOtp("");
                   }}
-                  className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${tab === t
-                    ? "bg-card shadow-card text-foreground"
+                  className={`px-5 py-2 rounded-md text-xs font-semibold transition-all capitalize ${tab === t
+                    ? "bg-card text-foreground shadow-2xs"
                     : "text-muted-foreground hover:text-foreground"
                     }`}
                 >
-                  {t === "login" ? "Sign in" : "Create account"}
+                  {t === "login" ? "Sign In" : "Create Account"}
                 </button>
               ))}
             </div>
           )}
 
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-foreground mb-1.5">
               {registrationStep === "otp"
-                ? "Verify your email"
+                ? "Verify Email Address"
                 : tab === "login"
-                  ? "Welcome back"
-                  : "Join UbuntuNow"}
+                  ? "Welcome Back"
+                  : "Create Account"}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               {registrationStep === "otp"
-                ? `We've sent a verification code to ${form.email}. Please check your inbox.`
+                ? `We sent a 6-digit code to ${form.email}. Enter it below to activate your account.`
                 : tab === "login"
-                  ? "Sign in to access your store and orders."
-                  : "Create your account and start in minutes."}
+                  ? "Sign in with your email address and password."
+                  : "Sign up to start buying or selling on UbuntuNow."}
             </p>
           </div>
 
@@ -308,11 +318,11 @@ const AuthContent = () => {
             <form onSubmit={handleOTPVerify} className="space-y-6">
               {/* Icon + email */}
               <div className="flex flex-col items-center gap-3">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                  <Mail className="h-8 w-8 text-primary" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary border border-border/80">
+                  <Mail className="h-7 w-7 text-foreground" />
                 </div>
-                <p className="text-sm text-muted-foreground text-center">
-                  Code sent to <span className="font-semibold text-foreground">{registrationData?.email}</span>
+                <p className="text-xs text-muted-foreground text-center">
+                  Verification code sent to <span className="font-semibold text-foreground">{registrationData?.email}</span>
                 </p>
               </div>
 
@@ -326,13 +336,13 @@ const AuthContent = () => {
                     <Timer size={12} />
                     Code expires in
                   </span>
-                  <span className={`font-mono font-semibold ${expiryCountdown < 60 ? "text-rose-500" : "text-foreground"}`}>
+                  <span className={`font-mono font-semibold ${expiryCountdown < 60 ? "text-destructive" : "text-foreground"}`}>
                     {fmtTime(expiryCountdown)}
                   </span>
                 </div>
                 <div className="h-1 rounded-full bg-border overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-1000 ${expiryCountdown < 60 ? "bg-rose-500" : "bg-primary"}`}
+                    className={`h-full rounded-full transition-all duration-1000 ${expiryCountdown < 60 ? "bg-destructive" : "bg-primary"}`}
                     style={{ width: `${(expiryCountdown / OTP_EXPIRY_SECONDS) * 100}%` }}
                   />
                 </div>
@@ -341,17 +351,17 @@ const AuthContent = () => {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full h-12 rounded-xl text-base font-semibold"
+                className="w-full h-11 rounded-lg text-sm font-semibold"
                 disabled={otp.length !== 6 || verifyOTPMutation.isPending || expiryCountdown === 0}
               >
-                {verifyOTPMutation.isPending ? "Verifying…" : expiryCountdown === 0 ? "Code expired" : "Verify & create account"}
+                {verifyOTPMutation.isPending ? "Verifying…" : expiryCountdown === 0 ? "Code Expired" : "Verify & Complete Setup"}
               </Button>
 
               <div className="flex items-center justify-between">
                 <button
                   type="button"
                   onClick={handleBackToForm}
-                  className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1.5"
+                  className="text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1.5"
                 >
                   <ArrowLeft size={14} /> Back
                 </button>
@@ -359,13 +369,13 @@ const AuthContent = () => {
                   type="button"
                   onClick={handleResendOTP}
                   disabled={resendCooldown > 0 || resendOTPMutation.isPending}
-                  className="text-sm text-accent hover:underline disabled:text-muted-foreground disabled:no-underline disabled:cursor-not-allowed"
+                  className="text-xs font-semibold text-primary hover:underline disabled:text-muted-foreground disabled:no-underline disabled:cursor-not-allowed"
                 >
                   {resendOTPMutation.isPending
                     ? "Sending…"
                     : resendCooldown > 0
-                      ? `Resend in ${resendCooldown}s`
-                      : "Resend code"}
+                      ? `Resend code in ${resendCooldown}s`
+                      : "Resend Code"}
                 </button>
               </div>
             </form>
@@ -375,26 +385,26 @@ const AuthContent = () => {
           {registrationStep === "form" && tab === "register" && (
             <>
               {/* Role selector */}
-              <div className="mb-6">
-                <Label className="text-sm font-medium text-foreground mb-3 block">I want to</Label>
+              <div className="mb-5">
+                <Label className="text-xs font-semibold text-foreground mb-2 block">Account Type</Label>
                 <div className="grid grid-cols-2 gap-3">
                   {(
                     [
-                      { value: "buyer", label: "Shop & buy", icon: ShoppingBag, desc: "Browse and purchase from local sellers" },
-                      { value: "seller", label: "Sell products", icon: Store, desc: "Create my store and reach customers" },
+                      { value: "buyer", label: "Buyer", icon: ShoppingBag, desc: "Purchase products securely" },
+                      { value: "seller", label: "Seller", icon: Store, desc: "Create storefront & list items" },
                     ] as { value: Role; label: string; icon: typeof Store; desc: string }[]
                   ).map(({ value, label, icon: Icon, desc }) => (
                     <button
                       key={value}
                       onClick={() => setRole(value)}
-                      className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${role === value
-                        ? "border-primary bg-secondary"
-                        : "border-border bg-card hover:border-border/80"
+                      className={`p-3.5 rounded-lg border text-left transition-all ${role === value
+                        ? "border-primary bg-secondary/80 shadow-2xs"
+                        : "border-border/80 bg-card hover:border-border"
                         }`}
                     >
-                      <Icon size={20} className={role === value ? "text-primary mb-2" : "text-muted-foreground mb-2"} />
-                      <div className="font-semibold text-sm text-foreground">{label}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{desc}</div>
+                      <Icon size={18} className={role === value ? "text-primary mb-1.5" : "text-muted-foreground mb-1.5"} />
+                      <div className="font-semibold text-xs text-foreground">{label}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5">{desc}</div>
                     </button>
                   ))}
                 </div>
@@ -510,9 +520,9 @@ const AuthContent = () => {
               <div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  <button type="button" className="text-xs text-accent hover:underline">
+                  <Link href="/contact" className="text-xs text-accent hover:underline">
                     Forgot password?
-                  </button>
+                  </Link>
                 </div>
                 <div className="relative mt-1.5">
                   <Input
@@ -562,9 +572,9 @@ const AuthContent = () => {
           )}
 
           <p className="text-center text-xs text-muted-foreground mt-4">
-            By continuing, you agree to UbuntuNow's{" "}
-            <a href="#" className="underline">Terms</a> &{" "}
-            <a href="#" className="underline">Privacy</a>
+            By continuing, you agree to UbuntuNow&apos;s{" "}
+            <Link href="/terms-of-service" className="underline">Terms</Link> &{" "}
+            <Link href="/privacy-policy" className="underline">Privacy</Link>
           </p>
         </div>
       </div>
@@ -574,7 +584,7 @@ const AuthContent = () => {
 
 const Auth = () => {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">Loading…</div>}>
       <AuthContent />
     </Suspense>
   );
