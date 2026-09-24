@@ -8,6 +8,7 @@ import { PaymentOptions } from "@/components/ui/PaymentOptions";
 import {
   Trash2, ShoppingBag, ArrowRight, Plus, Minus,
   Lock, Package, ChevronLeft, ImageOff, X, MapPin, Edit3,
+  CreditCard, Smartphone,
 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api/config";
 import { toast } from "sonner";
@@ -20,6 +21,11 @@ function CartContent() {
   const totalPrice = getTotalPrice();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentIframeUrl, setPaymentIframeUrl] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"pesapal" | "momo" | "airtel">("pesapal");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [momoPrompt, setMomoPrompt] = useState<string | null>(null);
+  const [momoPaymentId, setMomoPaymentId] = useState<number | null>(null);
+  const [momoStatus, setMomoStatus] = useState<"awaiting" | "failed" | null>(null);
   const router = useRouter();
   const { data: userProfile } = useCurrentUser();
   const updateProfileMutation = useUpdateProfile();
@@ -42,6 +48,7 @@ function CartContent() {
         country: userProfile.country || "Rwanda",
       });
       if (!userProfile.address_line1) setIsEditingAddress(true);
+      if (userProfile.phone_number && !phoneNumber) setPhoneNumber(userProfile.phone_number);
     }
   }, [userProfile]);
 
@@ -106,12 +113,19 @@ function CartContent() {
       const orders = isOrderJson ? await orderRes.json() : [];
       if (orders && orders.length > 0) {
         const orderId = orders[0].id;
-        // 2. Initiate Real Payment with Pesapal
-        const paymentPayload = {
+        // 2. Initiate payment with the selected method
+        if ((paymentMethod === 'momo' || paymentMethod === 'airtel') && !phoneNumber.trim()) {
+          throw new Error('Please enter the mobile money phone number.');
+        }
+
+        const paymentPayload: Record<string, unknown> = {
           order_id: orderId,
-          payment_method: 'pesapal'
+          payment_method: paymentMethod,
         };
-        
+        if (paymentMethod === 'momo' || paymentMethod === 'airtel') {
+          paymentPayload.phone_number = phoneNumber.trim();
+        }
+
         const paymentRes = await fetch(`${API_BASE_URL}/payments/payment/create`, {
           method: 'POST',
           headers: {
@@ -120,7 +134,7 @@ function CartContent() {
           },
           body: JSON.stringify(paymentPayload)
         });
-        
+
         const isPaymentJson = paymentRes.headers.get("content-type")?.includes("application/json");
         if (!paymentRes.ok) {
            if (isPaymentJson) {
@@ -130,14 +144,22 @@ function CartContent() {
              throw new Error(`Payment endpoint not found (Server returned ${paymentRes.status}). Railway backend needs to be deployed first!`);
            }
         }
-        
+
         const paymentData = await paymentRes.json();
-        
-        // 3. Open Pesapal iframe in a popup
-        if (paymentData.redirect_url) {
-           setPaymentIframeUrl(paymentData.redirect_url);
+
+        if (paymentMethod === 'pesapal') {
+          // 3a. Open Pesapal iframe in a popup
+          if (paymentData.redirect_url) {
+             setPaymentIframeUrl(paymentData.redirect_url);
+          } else {
+             throw new Error("No redirect URL returned from payment gateway");
+          }
         } else {
-           throw new Error("No redirect URL returned from payment gateway");
+          // 3b. Mobile money: no redirect - show the USSD prompt and poll
+          // /payment/status until the IntouchPay webhook resolves it.
+          setMomoStatus('awaiting');
+          setMomoPrompt(paymentData.prompt_message || 'Check your phone to approve the payment.');
+          setMomoPaymentId(paymentData.payment_id);
         }
       }
     } catch (error: any) {
@@ -166,6 +188,50 @@ function CartContent() {
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, [clearCart, router]);
+
+  // Poll for the mobile money result - IntouchPay only tells our backend
+  // the outcome asynchronously via webhook, there's no redirect to follow.
+  useEffect(() => {
+    if (!momoPaymentId) return;
+    const token = typeof window !== "undefined" ? localStorage.getItem("access_token")?.replace(/[\s\n\r\t\u200B"']/g, '') : null;
+    let attempts = 0;
+    const maxAttempts = 40; // ~3 minutes at 4.5s
+
+    const interval = setInterval(async () => {
+      attempts += 1;
+      try {
+        const res = await fetch(`${API_BASE_URL}/payments/payment/status/${momoPaymentId}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.payment_status === 'completed') {
+            clearInterval(interval);
+            setMomoPaymentId(null);
+            setMomoPrompt(null);
+            setMomoStatus(null);
+            clearCart();
+            toast.success('Payment completed successfully!');
+            router.push('/dashboard');
+            return;
+          }
+          if (data.payment_status === 'failed') {
+            clearInterval(interval);
+            setMomoStatus('failed');
+            return;
+          }
+        }
+      } catch {
+        // transient network error - keep polling
+      }
+      if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        setMomoStatus('failed');
+      }
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, [momoPaymentId, clearCart, router]);
 
   return (
     <BuyerDashboardShell>
@@ -439,6 +505,41 @@ function CartContent() {
                   )}
                 </div>
 
+                {/* Payment Method */}
+                <div className="mb-6 pb-6 border-b border-border/80">
+                  <span className="text-sm font-bold text-foreground mb-3 block">Payment Method</span>
+                  <div className="grid grid-cols-3 gap-2">
+                    {([
+                      { id: "pesapal", label: "Card", icon: CreditCard },
+                      { id: "momo", label: "MTN MoMo", icon: Smartphone },
+                      { id: "airtel", label: "Airtel Money", icon: Smartphone },
+                    ] as const).map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setPaymentMethod(opt.id)}
+                        className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border text-xs font-semibold transition-colors ${
+                          paymentMethod === opt.id
+                            ? "border-primary bg-primary/10 text-foreground"
+                            : "border-border bg-secondary text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <opt.icon size={16} />
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {(paymentMethod === "momo" || paymentMethod === "airtel") && (
+                    <input
+                      className="mt-3 w-full h-10 px-3 rounded-lg border border-border bg-secondary text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      placeholder="Mobile money phone number (e.g. 2507XXXXXXXX)"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                    />
+                  )}
+                </div>
+
                 {/* CTA */}
                 <div className="space-y-2.5">
                   <button
@@ -509,6 +610,33 @@ function CartContent() {
                 allow="payment"
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Money Approval Modal */}
+      {momoPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6">
+          <div className="bg-white rounded-3xl overflow-hidden w-full max-w-sm p-6 text-center relative shadow-2xl animate-fade-up">
+            <button
+              onClick={() => { setMomoPrompt(null); setMomoPaymentId(null); setMomoStatus(null); }}
+              className="absolute top-3 right-3 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+            >
+              <X size={14} />
+            </button>
+
+            {momoStatus === "failed" ? (
+              <>
+                <p className="text-red-600 font-bold mb-1">Payment failed or timed out</p>
+                <p className="text-sm text-gray-500">Close this and try again.</p>
+              </>
+            ) : (
+              <>
+                <div className="h-10 w-10 mx-auto mb-4 rounded-full border-4 border-gray-200 border-t-primary animate-spin" />
+                <p className="font-bold text-gray-800 mb-1">Approve on your phone</p>
+                <p className="text-sm text-gray-500">{momoPrompt}</p>
+              </>
+            )}
           </div>
         </div>
       )}
