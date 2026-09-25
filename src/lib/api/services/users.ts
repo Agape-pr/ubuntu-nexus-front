@@ -7,6 +7,7 @@ export interface UserStore {
     slug?: string;
     store_description?: string | null;
     store_logo?: string | null;
+    payout_phone_number?: string | null;
 }
 
 export interface UserProfile {
@@ -55,6 +56,7 @@ export interface UpdateStoreRequest {
     store_name?: string;
     store_description?: string;
     store_logo?: File | string | null;
+    payout_phone_number?: string;
 }
 
 /**
@@ -68,6 +70,9 @@ export const updateStore = async (data: UpdateStoreRequest): Promise<UserStore> 
     }
     if (data.store_logo instanceof File) {
         formData.append('store_logo', data.store_logo);
+    }
+    if (data.payout_phone_number !== undefined) {
+        formData.append('payout_phone_number', data.payout_phone_number);
     }
 
     return apiClient.patch<UserStore>(API_ENDPOINTS.USERS.STORE_UPDATE, formData);

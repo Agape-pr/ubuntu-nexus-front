@@ -8,11 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/lib/api/hooks/useUsers";
 import { useAdminUsers, useAdminUserDetail, useCreateAdminUser } from "@/lib/api/hooks/useAdmin";
+import { useReleasablePayments, useReleasePayment } from "@/lib/api/hooks/usePayments";
 import { AdminUser, AdminUserFilters, AdminUserCreatePayload } from "@/lib/api/services/admin";
+import { ReleasablePayment } from "@/lib/api/services/payments";
 import {
   Users, Store, ShoppingBag, Search, X, Shield,
   ChevronRight, Loader2, Mail, Phone, Calendar,
-  CheckCircle, XCircle, ExternalLink, ArrowLeft, Plus,
+  CheckCircle, XCircle, ExternalLink, ArrowLeft, Plus, Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -287,6 +289,79 @@ function AddUserDrawer({ onClose, user }: { onClose: () => void, user: any }) {
   );
 }
 
+// ── Payments panel (escrow release) ───────────────────────────────────────────
+
+function formatMoney(amount: string) {
+  const n = Number(amount);
+  return `${new Intl.NumberFormat("en-RW").format(isNaN(n) ? 0 : n)} RWF`;
+}
+
+function PaymentsPanel() {
+  const { data: payments = [], isLoading } = useReleasablePayments();
+  const releaseMutation = useReleasePayment();
+  const [releasingId, setReleasingId] = useState<number | null>(null);
+
+  const handleRelease = (payment: ReleasablePayment) => {
+    setReleasingId(payment.id);
+    releaseMutation.mutate(payment.id, {
+      onSuccess: () => toast.success(`Released payout for Order #${payment.order_id}`),
+      onError: (err: any) => toast.error(err?.message || "Failed to release payout"),
+      onSettled: () => setReleasingId(null),
+    });
+  };
+
+  return (
+    <div className="bg-card rounded-xl border border-border/80 shadow-2xs overflow-hidden">
+      <div className="px-5 py-3 border-b border-border/80 flex items-center gap-2 bg-secondary/30">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          {isLoading ? "Loading payments..." : `${payments.length} Payment${payments.length !== 1 ? "s" : ""} Held in Escrow`}
+        </span>
+      </div>
+
+      {isLoading ? (
+        <div className="py-16 flex flex-col items-center gap-3 text-muted-foreground">
+          <Loader2 size={24} className="animate-spin" />
+          <span className="text-xs">Loading releasable payments...</span>
+        </div>
+      ) : payments.length === 0 ? (
+        <div className="py-16 flex flex-col items-center text-center gap-2 text-muted-foreground">
+          <Wallet size={28} className="opacity-40" />
+          <p className="font-semibold text-foreground text-sm">Nothing to release</p>
+          <p className="text-xs">Payments held in escrow will show up here once a buyer's payment completes.</p>
+        </div>
+      ) : (
+        <div className="divide-y divide-border/60">
+          <div className="grid grid-cols-[5rem_1fr_6rem_7rem_8rem] gap-4 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground bg-secondary/20">
+            <span>Order</span>
+            <span>Method</span>
+            <span>Amount</span>
+            <span className="hidden sm:block">Date</span>
+            <span />
+          </div>
+
+          {payments.map((payment) => (
+            <div key={payment.id} className="grid grid-cols-[5rem_1fr_6rem_7rem_8rem] gap-4 px-5 py-3.5 items-center">
+              <span className="text-xs font-semibold text-foreground">#{payment.order_id}</span>
+              <span className="text-xs text-muted-foreground uppercase">{payment.payment_method}</span>
+              <span className="text-xs font-semibold text-foreground tabular-nums">{formatMoney(payment.payment_amount)}</span>
+              <span className="text-xs text-muted-foreground hidden sm:block">{formatDate(payment.payment_date)}</span>
+              <Button
+                size="sm"
+                onClick={() => handleRelease(payment)}
+                disabled={releasingId === payment.id}
+                className="h-8 rounded-lg text-xs font-semibold px-3 gap-1.5 justify-self-end"
+              >
+                {releasingId === payment.id ? <Loader2 size={13} className="animate-spin" /> : <Wallet size={13} />}
+                Release
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
@@ -297,6 +372,7 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"users" | "payments">("users");
 
   // Gate: redirect non-admins
   if (!meLoading && me && me.role !== "admin") {
@@ -335,11 +411,35 @@ export default function AdminPage() {
             <p className="text-muted-foreground text-xs sm:text-sm mt-1">Manage platform accounts, sellers, and system roles.</p>
           </div>
 
-          <Button onClick={() => setIsAddUserOpen(true)} className="h-10 rounded-lg font-semibold text-xs px-4 gap-2">
-            <Plus size={15} /> Add User
-          </Button>
+          {activeTab === "users" && (
+            <Button onClick={() => setIsAddUserOpen(true)} className="h-10 rounded-lg font-semibold text-xs px-4 gap-2">
+              <Plus size={15} /> Add User
+            </Button>
+          )}
         </div>
 
+        {/* Tab switcher */}
+        <div className="flex gap-1 mb-6 bg-card rounded-xl border border-border/80 shadow-2xs p-1 w-fit">
+          <button
+            onClick={() => setActiveTab("users")}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === "users" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+          >
+            <Users size={14} /> Users
+          </button>
+          {hasPermission(me, 'manage_sellers') && (
+            <button
+              onClick={() => setActiveTab("payments")}
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === "payments" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+            >
+              <Wallet size={14} /> Payments
+            </button>
+          )}
+        </div>
+
+        {activeTab === "payments" ? (
+          <PaymentsPanel />
+        ) : (
+        <>
         {/* Stat cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="bg-card rounded-xl p-5 border border-border/80 shadow-2xs flex items-center gap-4">
@@ -500,6 +600,8 @@ export default function AdminPage() {
             </div>
           )}
         </div>
+        </>
+        )}
       </div>
 
       {/* User detail drawer */}

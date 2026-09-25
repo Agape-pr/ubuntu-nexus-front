@@ -272,7 +272,7 @@ function SellerDashboardView() {
     in_stock: null as boolean | null,
     variations: [] as { name: string, options: string }[],
   });
-  const [storeForm, setStoreForm] = useState({ name: "", description: "" });
+  const [storeForm, setStoreForm] = useState({ name: "", description: "", payoutPhoneNumber: "" });
   const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [profileForm, setProfileForm] = useState({
     first_name: "", last_name: "", phone_number: "",
@@ -290,6 +290,7 @@ function SellerDashboardView() {
       setStoreForm({
         name: userProfile.store.store_name || "",
         description: userProfile.store.store_description || "",
+        payoutPhoneNumber: userProfile.store.payout_phone_number || "",
       });
     }
     if (userProfile) {
@@ -336,6 +337,7 @@ function SellerDashboardView() {
     updateStoreMutation.mutate({
       store_name: storeForm.name.trim(),
       store_description: storeForm.description.trim() || undefined,
+      payout_phone_number: storeForm.payoutPhoneNumber.trim(),
       ...(storeLogoFile && { store_logo: storeLogoFile }),
     }, {
       onSuccess: () => {
@@ -1420,6 +1422,16 @@ function SellerDashboardView() {
                   <Textarea value={storeForm.description} onChange={e => setStoreForm({ ...storeForm, description: e.target.value })}
                     placeholder="Tell buyers about your products, quality, and origin in Rwanda…"
                     className="rounded-xl border-border bg-background text-white resize-none" rows={4} />
+                </div>
+
+                {/* Payout Phone Number */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold text-muted-foreground">Payout Phone Number (MoMo/Airtel)</Label>
+                  <Input value={storeForm.payoutPhoneNumber}
+                    onChange={e => setStoreForm({ ...storeForm, payoutPhoneNumber: e.target.value })}
+                    placeholder="2507XXXXXXXX"
+                    className="rounded-xl h-11 border-border bg-background text-white font-semibold" />
+                  <p className="text-xs text-muted-foreground">Escrow payouts for completed orders are sent to this mobile money number.</p>
                 </div>
 
                 {/* Save Button */}

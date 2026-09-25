@@ -84,6 +84,12 @@ export const API_ENDPOINTS = {
     UPDATE_STATUS: (id: number | string) => `/orders/seller/orders/${id}/update-status/`,
     CONFIRM_RECEIPT: (id: number | string) => `/orders/orders/${id}/confirm-receipt/`,
   },
+
+  // Payments (admin escrow release)
+  PAYMENTS: {
+    RELEASABLE: '/payments/payment/releasable',
+    RELEASE: '/payments/payment/release',
+  },
 } as const;
 
 
