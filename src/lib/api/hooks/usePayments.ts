@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getReleasablePayments, releasePayment, ReleasablePayment, ReleasePaymentResult } from '../services/payments';
+import { getReleasablePayments, releasePayment, getIntouchBalance, ReleasablePayment, ReleasePaymentResult, IntouchBalance } from '../services/payments';
 
 export const useReleasablePayments = () => {
   return useQuery<ReleasablePayment[], Error>({
@@ -16,5 +16,13 @@ export const useReleasePayment = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'payments', 'releasable'] });
     },
+  });
+};
+
+export const useIntouchBalance = () => {
+  return useQuery<IntouchBalance, Error>({
+    queryKey: ['admin', 'payments', 'intouch-balance'],
+    queryFn: getIntouchBalance,
+    staleTime: 15_000,
   });
 };

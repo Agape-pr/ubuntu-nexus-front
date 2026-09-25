@@ -89,6 +89,7 @@ export const API_ENDPOINTS = {
   PAYMENTS: {
     RELEASABLE: '/payments/payment/releasable',
     RELEASE: '/payments/payment/release',
+    INTOUCH_BALANCE: '/payments/payment/intouch-balance',
   },
 } as const;
 

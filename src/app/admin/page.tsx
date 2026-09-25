@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/lib/api/hooks/useUsers";
 import { useAdminUsers, useAdminUserDetail, useCreateAdminUser } from "@/lib/api/hooks/useAdmin";
-import { useReleasablePayments, useReleasePayment } from "@/lib/api/hooks/usePayments";
+import { useReleasablePayments, useReleasePayment, useIntouchBalance } from "@/lib/api/hooks/usePayments";
 import { AdminUser, AdminUserFilters, AdminUserCreatePayload } from "@/lib/api/services/admin";
 import { ReleasablePayment } from "@/lib/api/services/payments";
 import {
@@ -298,6 +298,7 @@ function formatMoney(amount: string) {
 
 function PaymentsPanel() {
   const { data: payments = [], isLoading } = useReleasablePayments();
+  const { data: balanceData, isLoading: balanceLoading, isError: balanceError } = useIntouchBalance();
   const releaseMutation = useReleasePayment();
   const [releasingId, setReleasingId] = useState<number | null>(null);
 
@@ -311,6 +312,22 @@ function PaymentsPanel() {
   };
 
   return (
+    <div className="space-y-4">
+      {/* IntouchPay balance */}
+      <div className="bg-card rounded-xl p-5 border border-border/80 shadow-2xs flex items-center gap-4 w-fit">
+        <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center shrink-0 text-foreground">
+          <Wallet size={18} />
+        </div>
+        <div>
+          <div className="text-2xl font-bold text-foreground">
+            {balanceLoading ? "…" : balanceError ? "—" : formatMoney(balanceData?.balance ?? "0")}
+          </div>
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            {balanceError ? "Failed to load IntouchPay balance" : "IntouchPay Account Balance"}
+          </div>
+        </div>
+      </div>
+
     <div className="bg-card rounded-xl border border-border/80 shadow-2xs overflow-hidden">
       <div className="px-5 py-3 border-b border-border/80 flex items-center gap-2 bg-secondary/30">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -358,6 +375,7 @@ function PaymentsPanel() {
           ))}
         </div>
       )}
+    </div>
     </div>
   );
 }

@@ -25,3 +25,11 @@ export const getReleasablePayments = async (): Promise<ReleasablePayment[]> => {
 export const releasePayment = async (paymentId: number): Promise<ReleasePaymentResult> => {
   return apiClient.post<ReleasePaymentResult>(API_ENDPOINTS.PAYMENTS.RELEASE, { payment_id: paymentId });
 };
+
+export interface IntouchBalance {
+  balance: string;
+}
+
+export const getIntouchBalance = async (): Promise<IntouchBalance> => {
+  return apiClient.get<IntouchBalance>(API_ENDPOINTS.PAYMENTS.INTOUCH_BALANCE);
+};
