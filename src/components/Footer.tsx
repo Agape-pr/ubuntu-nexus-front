@@ -101,7 +101,7 @@ const Footer = () => {
   return (
     <footer className="relative overflow-hidden bg-near-black text-cream border-t border-border/20">
 
-      <div className="container relative py-12 md:py-16">
+      <div className="container relative py-10 md:py-16">
 
         {/* ══ TOP GRID: Brand + Nav ══════════════════════════════════════════ */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8">

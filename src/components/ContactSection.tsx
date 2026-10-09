@@ -32,9 +32,9 @@ export function ContactSection() {
   };
 
   return (
-    <section id="contact" className="scroll-mt-16 min-h-screen flex flex-col justify-center py-20 bg-background border-t border-border/60">
+    <section id="contact" className="scroll-mt-16 lg:min-h-screen flex flex-col justify-center py-12 md:py-20 bg-background border-t border-border/60">
       <div className="container max-w-5xl mx-auto px-4">
-        <Reveal className="text-center mb-12">
+        <Reveal className="text-center mb-8 md:mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Get in Touch</h2>
           <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto">
             Have questions about buying, selling, or escrow protection? Reach out and our support team will respond promptly.

@@ -37,7 +37,7 @@ const HomeContent = () => {
       <Navbar />
 
       {/* ══ LANDING HERO — first thing a visitor sees at "/" ══ */}
-      <section className="relative overflow-hidden min-h-[calc(100vh-4rem)] flex items-center py-12 lg:py-0">
+      <section className="relative overflow-hidden lg:min-h-[calc(100vh-4rem)] flex items-center pt-8 pb-10 sm:py-14 lg:py-0">
         <div className="absolute top-0 right-0 -m-20 h-[600px] w-[600px] rounded-full bg-primary/5 blur-3xl pointer-events-none" />
 
         <div className="container relative z-10 px-4 sm:px-6">
