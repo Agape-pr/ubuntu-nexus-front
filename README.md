@@ -3,7 +3,7 @@
 Welcome to the **UbuntuNow** frontend repository! This application serves as Kigali's premier social e-commerce platform, enabling sellers to easily create beautiful store profiles and customers to browse their products.
 
 ## Technology Stack
-- **Vite**
+- **Next.js** (App Router)
 - **React** (TypeScript)
 - **Tailwind CSS**
 - **shadcn-ui**
