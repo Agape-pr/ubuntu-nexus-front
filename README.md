@@ -26,3 +26,12 @@ To build for production:
 ```bash
 npm run build
 ```
+
+## Admin console (`admin.ubuntunow.rw`)
+
+The admin console lives in `src/app/admin` and is served **only** on the admin host. Public hosts return 404 for `/admin`; the admin host serves nothing else (see `src/middleware.ts`).
+
+- **Sign-in:** email + password, then a 6-digit code emailed to the admin. Sessions use `sessionStorage` (cleared when the tab closes), tokens last 10 minutes and refresh for up to 8 hours, and an idle tab signs out after 30 minutes.
+- **Access control:** the sidebar and pages follow each admin's permissions, but the real enforcement is on the backend. Only super admins see **Admins**, where they create admins and choose what each can access.
+- **Setup:** add `admin.ubuntunow.rw` as a domain on the Vercel project (and the DNS record it asks for). To use a different host, set `ADMIN_HOSTS` (comma-separated) in the environment.
+- **Local development:** `npm run dev`, then open `http://localhost:3000/admin/login` (localhost serves both the shop and the console).

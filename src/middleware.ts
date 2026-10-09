@@ -5,8 +5,27 @@ import type { NextRequest } from 'next/server';
 const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/reset-password'];
 const protectedPrefixes = ['/dashboard', '/checkout', '/orders', '/profile', '/seller'];
 
+// The admin console is served only on the admin host(s). Public hosts return 404 for
+// /admin, and admin hosts serve nothing else. localhost serves both for development.
+const adminHosts = (process.env.ADMIN_HOSTS || 'admin.ubuntunow.rw')
+  .split(',')
+  .map((h) => h.trim().toLowerCase())
+  .filter(Boolean);
+const devHosts = ['localhost', '127.0.0.1'];
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  const host = (request.headers.get('host') || '').split(':')[0].toLowerCase();
+  const isAdminPath = pathname === '/admin' || pathname.startsWith('/admin/');
+  if (adminHosts.includes(host)) {
+    if (isAdminPath) return NextResponse.next();
+    if (pathname === '/') return NextResponse.redirect(new URL('/admin', request.url));
+    return NextResponse.rewrite(new URL('/404', request.url), { status: 404 });
+  }
+  if (isAdminPath && !devHosts.includes(host)) {
+    return NextResponse.rewrite(new URL('/404', request.url), { status: 404 });
+  }
 
   // Shop pages are ALWAYS public
   // e.g. /shop/amara-fashion, /shop/amara-fashion/product/silk-blouse

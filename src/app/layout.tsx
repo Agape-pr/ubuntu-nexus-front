@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "UbuntuNow is Rwanda's trusted marketplace. Buy unique local products and sell online in minutes with escrow-protected payments.",
 };
 
-import MobileNav from "@/components/MobileNav";
+import MobileNavGate from "@/components/MobileNavGate";
 
 export default function RootLayout({
   children,
@@ -19,7 +19,7 @@ export default function RootLayout({
       <body className="font-sans antialiased" suppressHydrationWarning>
         <Providers>
           {children}
-          <MobileNav />
+          <MobileNavGate />
         </Providers>
       </body>
     </html>

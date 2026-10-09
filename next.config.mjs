@@ -11,6 +11,20 @@ const nextConfig = {
     // wiped. Keeping the cache in memory only avoids the on-disk writes entirely.
     turbopackFileSystemCacheForDev: false,
   },
+  async headers() {
+    return [
+      {
+        // The admin console must never be indexed, cached or framed.
+        source: '/admin/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+          { key: 'Cache-Control', value: 'no-store' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     const target = process.env.NEXT_PUBLIC_PROXY_TARGET || 'http://localhost:8000';
     // Clean trailing slash to prevent double-slash 404 errors when proxying to strict gateways

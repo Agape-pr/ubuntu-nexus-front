@@ -70,11 +70,6 @@ export const API_ENDPOINTS = {
     DELETE: (id: number) => `/products/categories/${id}/`,
   },
 
-  // Admin
-  ADMIN: {
-    USERS: '/users/admin/users/',
-    USER_DETAIL: (id: number) => `/users/admin/users/${id}/`,
-  },
 
   // Orders
   ORDERS: {
@@ -85,12 +80,6 @@ export const API_ENDPOINTS = {
     CONFIRM_RECEIPT: (id: number | string) => `/orders/orders/${id}/confirm-receipt/`,
   },
 
-  // Payments (admin escrow release)
-  PAYMENTS: {
-    RELEASABLE: '/payments/payment/releasable',
-    RELEASE: '/payments/payment/release',
-    INTOUCH_BALANCE: '/payments/payment/intouch-balance',
-  },
 } as const;
 
 
