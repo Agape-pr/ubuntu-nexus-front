@@ -28,3 +28,4 @@ Ubuntunow-now-BE/
 # Next.js
 .next
 .env*
+*.tsbuildinfo

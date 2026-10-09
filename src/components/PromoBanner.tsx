@@ -22,14 +22,10 @@ export function PromoBanner({
   slides: PromoSlide[];
   intervalMs?: number;
 }) {
-  if (slides.length === 0) return null;
-
   // Extended slides with clones at both ends for infinite circular looping
-  const extendedSlides = [
-    slides[slides.length - 1],
-    ...slides,
-    slides[0],
-  ];
+  // (hooks below must always run, so the empty case is handled just before rendering)
+  const extendedSlides =
+    slides.length === 0 ? [] : [slides[slides.length - 1], ...slides, slides[0]];
 
   const [currentIndex, setCurrentIndex] = useState(1); // 1 corresponds to original slide 0
   const [withTransition, setWithTransition] = useState(true);
@@ -140,6 +136,8 @@ export function PromoBanner({
       )}
     </div>
   );
+
+  if (slides.length === 0) return null;
 
   return (
     <div

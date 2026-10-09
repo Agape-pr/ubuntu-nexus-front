@@ -45,7 +45,7 @@ export const useUpdateStore = () => {
 export const useUpdateProfile = () => {
     const queryClient = useQueryClient();
 
-    return useMutation<UserProfile, Error, Partial<UserProfile>>({
+    return useMutation<UserProfile, Error, Partial<UserProfile>, { previousProfile?: UserProfile }>({
         mutationFn: updateProfile,
         onMutate: async (newProfile) => {
             // Cancel any outgoing refetches

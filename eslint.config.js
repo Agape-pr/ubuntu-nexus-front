@@ -1,24 +1,19 @@
-import js from "@eslint/js";
-import globals from "globals";
-import reactHooks from "eslint-plugin-react-hooks";
-import tseslint from "typescript-eslint";
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
 
-export default tseslint.config(
-  { ignores: ["dist", "Ubuntunow-now-BE", ".next"] },
+export default defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "Ubuntunow-now-BE/**", ".scratch*"]),
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ["**/*.{ts,tsx}"],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-    },
-    plugins: {
-      "react-hooks": reactHooks,
-    },
+    // Existing code predates these rules. They stay visible as warnings so the count can
+    // only go down, but they don't block builds. Real bugs (rules-of-hooks, etc.) stay errors.
     rules: {
-      ...reactHooks.configs.recommended.rules,
-      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/purity": "warn",
     },
-  }
-);
-
+  },
+]);

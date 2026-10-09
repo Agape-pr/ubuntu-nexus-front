@@ -65,6 +65,7 @@ export interface ProductCreateUpdate {
   price: string | number; // Can be string or number
   stock_quantity: number;
   is_active?: boolean;
+  in_stock?: boolean; // true = seller holds stock (quick delivery)
   variations?: Record<string, string[]>;
   uploaded_images?: (File | string)[]; // Array of Files for upload or string URLs
 }

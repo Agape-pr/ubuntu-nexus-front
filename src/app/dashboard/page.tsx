@@ -601,7 +601,7 @@ function SellerDashboardView() {
                 <div>
                   <p className="text-xs font-bold text-gold-accent tracking-wider uppercase mb-1">{getGreeting()}, {storeName}</p>
                   <h1 className="font-display text-2xl md:text-3xl text-white tracking-tight leading-tight">
-                    Here's your seller dashboard
+                    Here&apos;s your seller dashboard
                   </h1>
                   {pendingOrders > 0 ? (
                     <div className="flex items-center gap-2 mt-2 text-amber-400 text-xs font-bold bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-full w-fit">

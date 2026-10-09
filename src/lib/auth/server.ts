@@ -40,7 +40,9 @@ export function endSession(res: NextResponse): void {
   res.cookies.set({ name: SESSION_COOKIE, value: '', httpOnly: false, secure, sameSite: 'lax', path: '/', maxAge: 0 });
 }
 
-async function callBackend(path: string, body: unknown): Promise<{ status: number; data: any }> {
+type BackendBody = { access?: string; refresh?: string; detail?: string; [key: string]: unknown } | null;
+
+async function callBackend(path: string, body: unknown): Promise<{ status: number; data: BackendBody }> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20_000);
   try {
@@ -51,7 +53,7 @@ async function callBackend(path: string, body: unknown): Promise<{ status: numbe
       signal: controller.signal,
       cache: 'no-store',
     });
-    let data: unknown = null;
+    let data: BackendBody = null;
     try { data = await res.json(); } catch { /* non-JSON body */ }
     return { status: res.status, data };
   } finally {

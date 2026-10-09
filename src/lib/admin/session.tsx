@@ -36,6 +36,8 @@ export function AdminSessionProvider({ children }: { children: React.ReactNode }
 
   // Restore the session on page load.
   useEffect(() => {
+    // sessionStorage only exists in the browser, so the session can only be read after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!hasStoredSession()) { setStatus('anonymous'); return; }
     adminApi.me().then(adopt).catch(logout);
   }, [adopt, logout]);
