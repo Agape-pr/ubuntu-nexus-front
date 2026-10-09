@@ -69,12 +69,14 @@ const OtpBoxes = ({
           ref={(el) => { inputRefs.current[idx] = el; }}
           type="text"
           inputMode="numeric"
+          autoComplete={idx === 0 ? "one-time-code" : "off"}
+          aria-label={`Digit ${idx + 1} of 6`}
           maxLength={1}
           value={value[idx] ?? ""}
           onChange={(e) => handleChange(e, idx)}
           onKeyDown={(e) => handleKey(e, idx)}
           autoFocus={idx === 0}
-          className={`w-12 h-14 text-center text-xl font-bold rounded-xl border-2 bg-card text-foreground outline-none transition-all duration-150
+          className={`min-w-0 flex-1 max-w-[3.25rem] h-14 text-center text-xl font-bold rounded-xl border-2 bg-card text-foreground outline-none transition-all duration-150
             ${value[idx] ? "border-primary shadow-sm" : "border-border"}
             focus:border-primary focus:ring-2 focus:ring-primary/20
             caret-transparent`}
@@ -225,7 +227,7 @@ const AuthContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-[100dvh] bg-background flex">
       {/* Left panel — brand */}
       <div className="hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden">
         <Image
@@ -267,16 +269,52 @@ const AuthContent = () => {
       </div>
 
       {/* Right panel — form */}
-      <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-16 overflow-y-auto">
-        <div className="max-w-md w-full mx-auto">
-          <Link href="/" className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground mb-8 transition-colors">
+      <div className="relative flex-1 flex flex-col lg:justify-center px-4 sm:px-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] lg:px-16 lg:py-12 overflow-y-auto">
+        {/* Mobile-only ambience: soft brand glow behind the header */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-80 overflow-hidden lg:hidden">
+          <div className="absolute -top-28 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-accent/15 blur-3xl" />
+          <div className="absolute top-16 -right-12 h-44 w-44 rounded-full bg-emerald/10 blur-3xl" />
+        </div>
+
+        <div className="relative max-w-md w-full mx-auto my-auto">
+          {/* Mobile header: back, brand, trust cues (the brand panel is desktop-only) */}
+          <div className="lg:hidden mb-6">
+            <div className="flex items-center justify-between">
+              <Link
+                href="/"
+                aria-label="Back to home"
+                className="-ml-2 flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground transition-colors active:bg-secondary"
+              >
+                <ArrowLeft size={20} />
+              </Link>
+              <Logo href="/" size="lg" />
+              <span className="w-11" aria-hidden />
+            </div>
+            <div className="mt-4 flex flex-wrap justify-center gap-1">
+              {[
+                { icon: Lock, label: "Escrow-protected" },
+                { icon: Truck, label: "Kigali delivery" },
+                { icon: MapPin, label: "Verified merchants" },
+              ].map(({ icon: Icon, label }) => (
+                <span key={label} className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-secondary/70 px-2 py-1 text-[10px] font-semibold text-foreground">
+                  <Icon size={10} className="shrink-0 text-accent" />
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <Link href="/" className="hidden lg:inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground mb-8 transition-colors">
             <ArrowLeft size={14} />
             Back to Home
           </Link>
 
+          {/* On phones the form sits in a card; on desktop it stays flat */}
+          <div className="rounded-3xl border border-border/70 bg-card/70 p-5 shadow-lg backdrop-blur-sm sm:p-7 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+
           {/* Tabs */}
           {registrationStep === "form" && (
-            <div className="flex bg-secondary rounded-lg p-1 mb-8 w-fit border border-border/80">
+            <div className="mb-6 flex w-full rounded-xl border border-border/80 bg-secondary p-1 lg:mb-8 lg:w-fit lg:rounded-lg">
               {(["login", "register"] as Tab[]).map((t) => (
                 <button
                   key={t}
@@ -285,7 +323,7 @@ const AuthContent = () => {
                     setRegistrationStep("form");
                     setOtp("");
                   }}
-                  className={`px-5 py-2 rounded-md text-xs font-semibold transition-all capitalize ${tab === t
+                  className={`flex-1 lg:flex-none px-5 py-2.5 lg:py-2 rounded-lg lg:rounded-md text-sm lg:text-xs font-semibold transition-all capitalize ${tab === t
                     ? "bg-card text-foreground shadow-2xs"
                     : "text-muted-foreground hover:text-foreground"
                     }`}
@@ -297,14 +335,14 @@ const AuthContent = () => {
           )}
 
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-foreground mb-1.5">
+            <h1 className="text-[26px] leading-tight lg:text-2xl font-bold tracking-tight text-foreground mb-1.5">
               {registrationStep === "otp"
                 ? "Verify Email Address"
                 : tab === "login"
                   ? "Welcome Back"
                   : "Create Account"}
             </h1>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-sm lg:text-xs text-muted-foreground leading-relaxed">
               {registrationStep === "otp"
                 ? `We sent a 6-digit code to ${form.email}. Enter it below to activate your account.`
                 : tab === "login"
@@ -351,7 +389,7 @@ const AuthContent = () => {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full h-11 rounded-lg text-sm font-semibold"
+                className="w-full h-12 rounded-xl text-base font-semibold shadow-md"
                 disabled={otp.length !== 6 || verifyOTPMutation.isPending || expiryCountdown === 0}
               >
                 {verifyOTPMutation.isPending ? "Verifying…" : expiryCountdown === 0 ? "Code Expired" : "Verify & Complete Setup"}
@@ -396,9 +434,11 @@ const AuthContent = () => {
                   ).map(({ value, label, icon: Icon, desc }) => (
                     <button
                       key={value}
+                      type="button"
+                      aria-pressed={role === value}
                       onClick={() => setRole(value)}
-                      className={`p-3.5 rounded-lg border text-left transition-all ${role === value
-                        ? "border-primary bg-secondary/80 shadow-2xs"
+                      className={`p-3.5 rounded-xl border text-left transition-all active:scale-[0.98] ${role === value
+                        ? "border-primary bg-secondary/80 ring-1 ring-primary/40 shadow-2xs"
                         : "border-border/80 bg-card hover:border-border"
                         }`}
                     >
@@ -417,8 +457,9 @@ const AuthContent = () => {
                   </Label>
                   <Input
                     id="name"
+                    autoComplete={role === "seller" ? "organization" : "name"}
                     placeholder={role === 'seller' ? 'My Awesome Store' : 'Amina Uwase'}
-                    className="mt-1.5 h-11 rounded-xl"
+                    className="mt-1.5 h-12 lg:h-11 rounded-xl"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     required={role === 'seller'}
@@ -432,7 +473,7 @@ const AuthContent = () => {
                       <Textarea
                         id="store_description"
                         placeholder="Tell customers about what you sell..."
-                        className="mt-1.5 rounded-xl resize-none"
+                        className="mt-1.5 rounded-xl resize-none text-base md:text-sm"
                         rows={3}
                         value={form.store_description}
                         onChange={(e) => setForm({ ...form, store_description: e.target.value })}
@@ -448,8 +489,10 @@ const AuthContent = () => {
                   <Input
                     id="email"
                     type="email"
+                    autoComplete="email"
+                    inputMode="email"
                     placeholder="amina@example.com"
-                    className="mt-1.5 h-11 rounded-xl"
+                    className="mt-1.5 h-12 lg:h-11 rounded-xl"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     required
@@ -460,8 +503,10 @@ const AuthContent = () => {
                   <Label htmlFor="phone">Phone number (optional)</Label>
                   <Input
                     id="phone"
+                    type="tel"
+                    autoComplete="tel"
                     placeholder="+250 7XX XXX XXX"
-                    className="mt-1.5 h-11 rounded-xl"
+                    className="mt-1.5 h-12 lg:h-11 rounded-xl"
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   />
@@ -473,8 +518,9 @@ const AuthContent = () => {
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
                       placeholder="••••••••"
-                      className="h-11 rounded-xl pr-11"
+                      className="h-12 lg:h-11 rounded-xl pr-12"
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
                       required
@@ -482,7 +528,8 @@ const AuthContent = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -492,7 +539,7 @@ const AuthContent = () => {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full h-12 rounded-xl text-base font-semibold mt-2"
+                  className="w-full h-12 rounded-xl text-base font-semibold mt-2 shadow-md"
                   disabled={registerMutation.isPending}
                 >
                   {registerMutation.isPending ? "Creating account..." : "Continue"}
@@ -509,8 +556,10 @@ const AuthContent = () => {
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="email"
+                  inputMode="email"
                   placeholder="amina@example.com"
-                  className="mt-1.5 h-11 rounded-xl"
+                  className="mt-1.5 h-12 lg:h-11 rounded-xl"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
@@ -528,8 +577,9 @@ const AuthContent = () => {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
                     placeholder="••••••••"
-                    className="h-11 rounded-xl pr-11"
+                    className="h-12 lg:h-11 rounded-xl pr-12"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                     required
@@ -537,7 +587,8 @@ const AuthContent = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                      className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -547,7 +598,7 @@ const AuthContent = () => {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full h-12 rounded-xl text-base font-semibold mt-2"
+                className="w-full h-12 rounded-xl text-base font-semibold mt-2 shadow-md"
                 disabled={loginMutation.isPending}
               >
                 {loginMutation.isPending ? "Please wait..." : "Sign in"}
@@ -571,7 +622,9 @@ const AuthContent = () => {
             </p>
           )}
 
-          <p className="text-center text-xs text-muted-foreground mt-4">
+          </div>
+
+          <p className="text-center text-xs text-muted-foreground mt-5">
             By continuing, you agree to UbuntuNow&apos;s{" "}
             <Link href="/terms-of-service" className="underline">Terms</Link> &{" "}
             <Link href="/privacy-policy" className="underline">Privacy</Link>
