@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { SESSION_COOKIE } from '@/lib/auth/session-cookie';
 
 // Define public and protected routes
 const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/reset-password'];
-const protectedPrefixes = ['/dashboard', '/checkout', '/orders', '/profile', '/seller'];
+const protectedPrefixes = ['/dashboard', '/checkout', '/orders', '/my-orders', '/wishlist', '/profile', '/seller'];
 
 // The admin console is served only on the admin host(s). Public hosts return 404 for
 // /admin, and admin hosts serve nothing else. localhost serves both for development.
@@ -33,7 +34,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get('access_token')?.value;
+  // Convenience guard only: the cookie is a credential-free "signed in" marker. Real access
+  // control happens on the API, which verifies the token on every request.
+  // `access_token` is the pre-migration cookie: still accepted so people who are already
+  // signed in aren't bounced once; the client deletes it on their first page load.
+  const token = request.cookies.get(SESSION_COOKIE)?.value || request.cookies.get('access_token')?.value;
 
   const isPublicRoute = publicRoutes.includes(pathname);
   const isProtectedRoute = protectedPrefixes.some(prefix => pathname.startsWith(prefix));
@@ -41,8 +46,8 @@ export function middleware(request: NextRequest) {
   if (!token) {
     // If the route requires authentication, redirect to login with a next parameter
     if (isProtectedRoute) {
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('redirectTo', pathname);
+      const loginUrl = new URL('/auth', request.url);
+      loginUrl.searchParams.set('redirectTo', pathname + request.nextUrl.search);
       return NextResponse.redirect(loginUrl);
     }
   } else {

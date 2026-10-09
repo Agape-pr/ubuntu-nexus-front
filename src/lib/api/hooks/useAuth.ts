@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import * as authService from '../services/auth';
+import { safeRedirectPath } from '@/lib/auth/redirect';
 import type {
   LoginRequest,
   RegisterRequest,
@@ -72,7 +73,7 @@ export const useVerifyOTP = () => {
 
       // Redirect logic
       const searchParams = new URLSearchParams(window.location.search);
-      const redirectTo = searchParams.get('redirectTo');
+      const redirectTo = safeRedirectPath(searchParams.get('redirectTo'));
       if (redirectTo) {
         router.push(redirectTo);
       } else {
@@ -100,7 +101,7 @@ export const useLogin = () => {
       toast.success('Welcome back!');
       const role = response.user?.role || (typeof window !== 'undefined' ? localStorage.getItem('user_role') : null);
       const searchParams = new URLSearchParams(window.location.search);
-      const redirectTo = searchParams.get('redirectTo');
+      const redirectTo = safeRedirectPath(searchParams.get('redirectTo'));
       if (redirectTo) {
         router.push(redirectTo);
       } else {

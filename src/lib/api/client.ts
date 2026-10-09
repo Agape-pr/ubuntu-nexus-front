@@ -6,6 +6,8 @@
  */
 
 import { API_BASE_URL, API_ENDPOINTS, API_TIMEOUT } from './config';
+import { clearSessionMarker, setSessionMarker, syncSessionMarker } from '@/lib/auth/session-cookie';
+import { safeRedirectPath } from '@/lib/auth/redirect';
 
 export interface ApiError {
   message: string;
@@ -20,9 +22,15 @@ class ApiClient {
   private baseURL: string;
   private timeout: number;
 
+  private refreshPromise: Promise<boolean> | null = null;
+
   constructor(baseURL: string, timeout: number = API_TIMEOUT) {
     this.baseURL = baseURL;
     this.timeout = timeout;
+    // Drop credential cookies left by older versions and keep the route-guard marker in step.
+    if (typeof window !== 'undefined') {
+      syncSessionMarker(!!localStorage.getItem('access_token'));
+    }
   }
 
   /**
@@ -47,12 +55,11 @@ class ApiClient {
   setTokens(access: string, refresh?: string, role?: string): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem('access_token', access);
-      document.cookie = `access_token=${access}; path=/; max-age=2592000; SameSite=Lax`; // 30 days
-      
       if (refresh) {
         localStorage.setItem('refresh_token', refresh);
-        document.cookie = `refresh_token=${refresh}; path=/; max-age=2592000; SameSite=Lax`;
       }
+      // Credential-free flag for the route guard; tokens never go into cookies.
+      setSessionMarker();
       if (role) {
         localStorage.setItem('user_role', role);
       }
@@ -69,10 +76,8 @@ class ApiClient {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user_role');
-      
-      document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      
+      clearSessionMarker();
+
       // Notify same-tab listeners of logout
       window.dispatchEvent(new Event('auth-change'));
     }
@@ -172,7 +177,15 @@ class ApiClient {
   /**
    * Attempt to refresh the JWT Access Token
    */
-  private async refreshAccessToken(): Promise<boolean> {
+  private refreshAccessToken(): Promise<boolean> {
+    // Several requests can hit 401 at once; share a single refresh between them.
+    if (!this.refreshPromise) {
+      this.refreshPromise = this.performRefresh().finally(() => { this.refreshPromise = null; });
+    }
+    return this.refreshPromise;
+  }
+
+  private async performRefresh(): Promise<boolean> {
     const refresh = this.getRefreshToken();
     if (!refresh) return false;
 
@@ -249,7 +262,8 @@ class ApiClient {
           } else {
             // Token refresh failed or didn't exist, log user out
             this.removeTokens();
-            window.location.href = '/login'; // Force a visual redirect
+            const back = safeRedirectPath(window.location.pathname + window.location.search);
+            window.location.href = back && back !== '/' ? `/auth?redirectTo=${encodeURIComponent(back)}` : '/auth';
           }
         }
 
