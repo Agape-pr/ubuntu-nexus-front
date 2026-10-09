@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { useLogout } from "@/lib/api/hooks/useAuth";
 import { useCartStore } from "@/lib/store/cartStore";
+import { hasSessionMarker } from "@/lib/auth/session-cookie";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +26,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const checkAuth = () => {
-      setIsLoggedIn(!!localStorage.getItem("access_token"));
+      setIsLoggedIn(hasSessionMarker());
       setUserRole(localStorage.getItem("user_role"));
     };
     checkAuth();

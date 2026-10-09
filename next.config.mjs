@@ -14,6 +14,11 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Session routes carry credentials: never cache them.
+        source: '/session/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store' }],
+      },
+      {
         // The admin console must never be indexed, cached or framed.
         source: '/admin/:path*',
         headers: [

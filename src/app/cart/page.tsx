@@ -11,6 +11,7 @@ import {
   CreditCard, Smartphone,
 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api/config";
+import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
 import { Suspense, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -71,7 +72,7 @@ function CartContent() {
     }
     setIsProcessing(true);
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("access_token")?.replace(/[\s\n\r\t\u200B"']/g, '') : null;
+      const token = await apiClient.getValidAccessToken();
       if (!token) {
         toast.error("Please log in to proceed with checkout.");
         router.push("/auth");
@@ -193,13 +194,13 @@ function CartContent() {
   // the outcome asynchronously via webhook, there's no redirect to follow.
   useEffect(() => {
     if (!momoPaymentId) return;
-    const token = typeof window !== "undefined" ? localStorage.getItem("access_token")?.replace(/[\s\n\r\t\u200B"']/g, '') : null;
     let attempts = 0;
     const maxAttempts = 40; // ~3 minutes at 4.5s
 
     const interval = setInterval(async () => {
       attempts += 1;
       try {
+        const token = await apiClient.getValidAccessToken();
         const res = await fetch(`${API_BASE_URL}/payments/payment/status/${momoPaymentId}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });

@@ -148,7 +148,7 @@ export const useRegister = () => {
  */
 export const useRefreshToken = () => {
   return useMutation({
-    mutationFn: (refreshToken?: string) => authService.refreshToken(refreshToken),
+    mutationFn: () => authService.refreshToken(),
     onError: (error: { message?: string }) => {
       // If refresh fails, user needs to login again
       toast.error('Session expired. Please login again.');

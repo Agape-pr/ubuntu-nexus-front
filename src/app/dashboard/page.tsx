@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { CloudImage } from "@/components/ui/CloudImage";
 import { BuyerDashboard } from "@/components/BuyerDashboard";
 import { resolveCategoryName } from "@/lib/categories";
+import { hasSessionMarker } from "@/lib/auth/session-cookie";
 
 type DashView = "overview" | "products" | "orders" | "settings" | "profile-settings" | "store-settings";
 const SETTINGS_VIEWS: DashView[] = ["settings", "profile-settings", "store-settings"];
@@ -1498,7 +1499,7 @@ export default function DashboardPage() {
   const [role, setRole] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
-    if (!localStorage.getItem("access_token")) {
+    if (!hasSessionMarker()) {
       router.replace("/auth");
       return;
     }

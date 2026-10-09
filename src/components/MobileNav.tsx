@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Home, LayoutGrid, Package, LayoutDashboard } from "lucide-react";
 import { useSellerOrders } from "@/lib/api/hooks/useOrders";
 import { useEffect, useState } from "react";
+import { hasSessionMarker } from "@/lib/auth/session-cookie";
 
 // Store the highest order ID the seller has already seen on the Orders page
 const LAST_SEEN_ORDER_ID_KEY = "last_seen_order_id";
@@ -31,7 +32,7 @@ const MobileNav = () => {
   useEffect(() => {
     const checkAuth = () => {
       setUserRole(localStorage.getItem("user_role"));
-      setIsLoggedIn(!!localStorage.getItem("access_token"));
+      setIsLoggedIn(hasSessionMarker());
       setLastSeenId(getLastSeenOrderId());
     };
     checkAuth();

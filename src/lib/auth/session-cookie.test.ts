@@ -43,3 +43,13 @@ test('clear expires the marker and legacy cookies', () => {
   assert.equal(writes.length, 3);
   assert.ok(writes.every((w) => w.includes('1970')));
 });
+
+import { hasSessionMarker } from './session-cookie.ts';
+
+test('hasSessionMarker finds the marker among other cookies', () => {
+  assert.equal(hasSessionMarker(`a=1; ${SESSION_COOKIE}=1; b=2`), true);
+  assert.equal(hasSessionMarker(`${SESSION_COOKIE}=1`), true);
+  assert.equal(hasSessionMarker('a=1; b=2'), false);
+  assert.equal(hasSessionMarker(`x${SESSION_COOKIE}=1`), false);
+  assert.equal(hasSessionMarker(''), false);
+});

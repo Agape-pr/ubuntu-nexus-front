@@ -18,7 +18,6 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   access: string;
-  refresh: string;
   user?: {
     id: number;
     email: string;
@@ -104,17 +103,12 @@ export const resendOTP = async (data: ResendOTPRequest): Promise<ResendOTPRespon
 export interface VerifyOTPResponseWithTokens {
   message: string;
   access: string;
-  refresh: string;
   user: { id: number; email: string; role: string };
 }
 
 export const verifyOTP = async (data: VerifyOTPRequest): Promise<VerifyOTPResponseWithTokens> => {
-  const response = await apiClient.post<VerifyOTPResponseWithTokens>(API_ENDPOINTS.AUTH.OTP_VERIFY, data);
-  // Backend returns tokens on verify - store them
-  if (response.access && response.refresh) {
-    apiClient.setTokens(response.access, response.refresh, response.user?.role);
-  }
-  return response;
+  // The /session route keeps the refresh token in an HttpOnly cookie and returns only the access token.
+  return apiClient.signIn<VerifyOTPResponseWithTokens>('/session/verify-otp', data);
 };
 
 /**
@@ -122,17 +116,10 @@ export const verifyOTP = async (data: VerifyOTPRequest): Promise<VerifyOTPRespon
  * Returns access and refresh tokens
  */
 export const login = async (data: LoginRequest): Promise<LoginResponse> => {
-  const response = await apiClient.post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, {
+  return apiClient.signIn<LoginResponse>('/session/login', {
     username: data.username,
     password: data.password,
   });
-
-  // Store tokens after successful login
-  if (response.access && response.refresh) {
-    apiClient.setTokens(response.access, response.refresh, response.user?.role);
-  }
-
-  return response;
 };
 
 /**
@@ -175,27 +162,14 @@ export const register = async (data: RegisterRequest): Promise<RegisterResponse>
 };
 
 /**
- * Refresh access token using refresh token
+ * Refresh the access token. The refresh token is an HttpOnly cookie handled by the server.
  */
-export const refreshToken = async (refreshToken?: string): Promise<TokenRefreshResponse> => {
-  const refresh = refreshToken || (typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null);
-
-  if (!refresh) {
-    throw new Error('No refresh token available');
+export const refreshToken = async (): Promise<TokenRefreshResponse> => {
+  if (!(await apiClient.refreshSession())) {
+    throw new Error('Session expired');
   }
-
-  const response = await apiClient.post<TokenRefreshResponse>(
-    API_ENDPOINTS.AUTH.TOKEN_REFRESH,
-    { refresh }
-  );
-
-  // Update access token, preserving the existing role
-  if (response.access) {
-    const existingRole = typeof window !== 'undefined' ? localStorage.getItem('user_role') || undefined : undefined;
-    apiClient.setTokens(response.access, undefined, existingRole);
-  }
-
-  return response;
+  const access = await apiClient.getValidAccessToken();
+  return { access: access ?? '' };
 };
 
 /**

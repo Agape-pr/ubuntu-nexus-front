@@ -17,6 +17,11 @@ const MAX_AGE_SECONDS = 24 * 60 * 60;
 
 type CookieJar = { cookie: string };
 
+/** Is the credential-free "signed in" marker present? (Sync check for UI and route guard.) */
+export function hasSessionMarker(cookieString: string = typeof document !== 'undefined' ? document.cookie : ''): boolean {
+  return cookieString.split(';').some((part) => part.trim() === `${SESSION_COOKIE}=1`);
+}
+
 const isSecureContext = () => typeof location !== 'undefined' && location.protocol === 'https:';
 
 const expire = (name: string, secure: boolean) =>

@@ -6,7 +6,8 @@
  */
 
 import { API_BASE_URL, API_ENDPOINTS, API_TIMEOUT } from './config';
-import { clearSessionMarker, setSessionMarker, syncSessionMarker } from '@/lib/auth/session-cookie';
+import { clearSessionMarker, hasSessionMarker, removeLegacyTokenCookies } from '@/lib/auth/session-cookie';
+import { isExpiredOrExpiring } from '@/lib/auth/token-expiry';
 import { safeRedirectPath } from '@/lib/auth/redirect';
 
 export interface ApiError {
@@ -22,65 +23,102 @@ class ApiClient {
   private baseURL: string;
   private timeout: number;
 
-  private refreshPromise: Promise<boolean> | null = null;
+  // The access token lives in memory only. The refresh token is an HttpOnly cookie that
+  // page scripts cannot read; it is used by the /session/refresh route (see lib/auth/server.ts).
+  private accessToken: string | null = null;
+  private refreshPromise: Promise<'ok' | 'expired' | 'error'> | null = null;
 
   constructor(baseURL: string, timeout: number = API_TIMEOUT) {
     this.baseURL = baseURL;
     this.timeout = timeout;
-    // Drop credential cookies left by older versions and keep the route-guard marker in step.
-    if (typeof window !== 'undefined') {
-      syncSessionMarker(!!localStorage.getItem('access_token'));
+    if (typeof window !== 'undefined') this.migrateLegacySession();
+  }
+
+  /**
+   * Earlier versions kept both tokens in localStorage (and in cookies). Remove them and
+   * sign the person out once, so no long-lived credential stays readable by page scripts.
+   */
+  private migrateLegacySession(): void {
+    try {
+      const hadLegacyTokens = !!(localStorage.getItem('access_token') || localStorage.getItem('refresh_token'));
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      removeLegacyTokenCookies();
+      if (hadLegacyTokens) {
+        localStorage.removeItem('user_role');
+        clearSessionMarker();
+      }
+    } catch {
+      /* storage unavailable */
     }
   }
 
-  /**
-   * Get access token from localStorage
-   */
   private getAccessToken(): string | null {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('access_token');
+    return this.accessToken;
   }
 
   /**
-   * Get refresh token from localStorage
+   * A usable access token, refreshing it first when it is missing or about to expire.
+   * Returns null when nobody is signed in. Use this for any request made outside apiClient.
    */
-  private getRefreshToken(): string | null {
+  async getValidAccessToken(): Promise<string | null> {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('refresh_token');
+    if (!hasSessionMarker()) {
+      this.accessToken = null;
+      return null;
+    }
+    if (this.accessToken && !isExpiredOrExpiring(this.accessToken)) return this.accessToken;
+    return (await this.refreshAccessToken()) === 'ok' ? this.accessToken : null;
   }
 
-  /**
-   * Set authentication tokens in localStorage
-   */
-  setTokens(access: string, refresh?: string, role?: string): void {
+  /** Remember the access token and the (non-sensitive) role used to pick the right UI. */
+  setTokens(access: string, _refresh?: string, role?: string): void {
+    this.accessToken = access;
     if (typeof window !== 'undefined') {
-      localStorage.setItem('access_token', access);
-      if (refresh) {
-        localStorage.setItem('refresh_token', refresh);
-      }
-      // Credential-free flag for the route guard; tokens never go into cookies.
-      setSessionMarker();
       if (role) {
-        localStorage.setItem('user_role', role);
+        try { localStorage.setItem('user_role', role); } catch { /* storage unavailable */ }
       }
       // Notify same-tab listeners (Navbar, MobileNav) of auth state change
       window.dispatchEvent(new Event('auth-change'));
     }
   }
 
-  /**
-   * Remove authentication tokens from localStorage
-   */
+  /** Sign out locally and ask the server to clear the refresh cookie. */
   removeTokens(): void {
+    this.accessToken = null;
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user_role');
+      try { localStorage.removeItem('user_role'); } catch { /* storage unavailable */ }
       clearSessionMarker();
-
+      fetch('/session/logout', { method: 'POST', keepalive: true }).catch(() => {});
       // Notify same-tab listeners of logout
       window.dispatchEvent(new Event('auth-change'));
     }
+  }
+
+  /**
+   * Sign in through the Next.js /session routes. The server keeps the refresh token in its
+   * HttpOnly cookie and only returns the access token.
+   */
+  async signIn<T extends { access: string; user?: { role?: string } }>(path: string, body: unknown): Promise<T> {
+    let response: Response;
+    try {
+      response = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    } catch {
+      throw { message: 'Network error. Please check your connection.', status: 0 } as ApiError;
+    }
+    if (!response.ok) throw await this.handleError(response);
+    const data = (await response.json()) as T;
+    this.setTokens(data.access, undefined, data.user?.role);
+    return data;
+  }
+
+  /** Try to get a new access token from the refresh cookie. */
+  async refreshSession(): Promise<boolean> {
+    return (await this.refreshAccessToken()) === 'ok';
   }
 
   /**
@@ -175,38 +213,38 @@ class ApiClient {
   }
 
   /**
-   * Attempt to refresh the JWT Access Token
+   * Attempt to refresh the access token using the HttpOnly refresh cookie.
+   *   ok      - new access token is in memory
+   *   expired - the server rejected the session; the person must sign in again
+   *   error   - could not reach the server; keep the session and let the caller fail normally
    */
-  private refreshAccessToken(): Promise<boolean> {
-    // Several requests can hit 401 at once; share a single refresh between them.
+  private refreshAccessToken(): Promise<'ok' | 'expired' | 'error'> {
+    // Several requests can need a fresh token at once; share a single refresh between them.
     if (!this.refreshPromise) {
       this.refreshPromise = this.performRefresh().finally(() => { this.refreshPromise = null; });
     }
     return this.refreshPromise;
   }
 
-  private async performRefresh(): Promise<boolean> {
-    const refresh = this.getRefreshToken();
-    if (!refresh) return false;
-
+  private async performRefresh(): Promise<'ok' | 'expired' | 'error'> {
     try {
-      const response = await fetch(`${this.baseURL}${API_ENDPOINTS.AUTH.TOKEN_REFRESH}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh }),
-      });
-
+      const response = await fetch('/session/refresh', { method: 'POST' });
       if (response.ok) {
         const data = await response.json();
         if (data.access) {
-          // Keep the existing refresh token, just update the access token
-          this.setTokens(data.access, refresh, typeof window !== 'undefined' ? (localStorage.getItem('user_role') || undefined) : undefined);
-          return true;
+          this.accessToken = data.access;
+          return 'ok';
         }
+        return 'error';
       }
-      return false;
+      if (response.status === 401) {
+        this.accessToken = null;
+        if (typeof window !== 'undefined') window.dispatchEvent(new Event('auth-change'));
+        return 'expired';
+      }
+      return 'error';
     } catch {
-      return false;
+      return 'error';
     }
   }
 
@@ -224,6 +262,7 @@ class ApiClient {
     const isFormData = options.body instanceof FormData;
 
     try {
+      await this.getValidAccessToken();
       const response = await fetch(url, {
         ...options,
         headers: this.getHeaders(options.headers as Record<string, string>, isFormData),
@@ -240,7 +279,7 @@ class ApiClient {
           endpoint !== API_ENDPOINTS.AUTH.TOKEN_REFRESH
         ) {
           const refreshed = await this.refreshAccessToken();
-          if (refreshed) {
+          if (refreshed === 'ok') {
             // Retry the exact identical request with the new headers
             const retryResponse = await fetch(url, {
               ...options,
@@ -259,8 +298,8 @@ class ApiClient {
               return null as T;
             }
             return (await retryResponse.json()) as T;
-          } else {
-            // Token refresh failed or didn't exist, log user out
+          } else if (refreshed === 'expired') {
+            // The session is over: log the user out
             this.removeTokens();
             const back = safeRedirectPath(window.location.pathname + window.location.search);
             window.location.href = back && back !== '/' ? `/auth?redirectTo=${encodeURIComponent(back)}` : '/auth';

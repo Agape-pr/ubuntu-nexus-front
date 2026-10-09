@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { hasSessionMarker } from "@/lib/auth/session-cookie";
 
 /**
  * Tracks whether a buyer/seller is signed in, mirroring the check Navbar/MobileNav
  * already use. `mounted` stays false during SSR/hydration so callers can avoid
- * flashing gated content before localStorage is readable.
+ * flashing gated content before cookies are readable.
  */
 export function useAuthState() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -14,7 +15,7 @@ export function useAuthState() {
 
   useEffect(() => {
     const checkAuth = () => {
-      setIsLoggedIn(!!localStorage.getItem("access_token"));
+      setIsLoggedIn(hasSessionMarker());
       setUserRole(localStorage.getItem("user_role"));
     };
     checkAuth();
